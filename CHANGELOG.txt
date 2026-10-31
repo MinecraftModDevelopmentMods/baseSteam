@@ -7,11 +7,13 @@ Steam Advantage 2.2.9.117011 (local 1.17.1 port candidate)
 - Keep shared machine tick ordering and add the native drill-bit helper ticker.
 - Port render buffers, renderer registration, model predicates, config events and native source-fluid pickup.
 - Add native pickaxe tags without new tool tiers, and retain self-drops and recipe unlocks.
+- Use the 1.17 ingredient-predicate format so unrelated items do not unlock recipes.
 - Stop musket terrain rays at unloaded chunk boundaries; retain loaded-player sounds and last-cartridge firing.
 - Read native lava temperature without changing vanilla heat input or machine ratios.
 - Use the published Base Metals raw-metal crushing recipes without overriding their quantities.
 - Retain all 1.16 regression coverage and add native factory, position, helper-ticker and chunk-boundary tests.
-- Pin the coordinated local Power source/API checkpoint and pass 191 Java tests, release/resource audits, Javadoc and Eclipse configuration checks.
+- Pin the coordinated local Power source/API checkpoint and pass 195 Java tests, release/resource audits, Javadoc and Eclipse configuration checks.
+- Use Power's shared machine-persistence checkpoint; Steam's machine Java is unchanged and full runtime qualification remains pending.
 - Rebuild offline with all tasks forced and retain identical production, sources, Javadoc and development jar bytes.
 - Retain failed receipts separately; packaged runtime and client-launch acceptance remain open, and no historical pass qualifies this port.
 - Keep manual gameplay, multiplayer, migration acceptance and publication approval as separate gates.

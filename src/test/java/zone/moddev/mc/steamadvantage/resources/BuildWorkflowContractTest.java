@@ -18,8 +18,8 @@ public class BuildWorkflowContractTest {
             assertEquals("PENDING_PARENT_POWER_COMMIT", powerSource);
             assertEquals("5D0B363F38A44FCEDC829DF3CC33CC5AD3D8595A2341B256C6F3FDA7BED7EBD6", powerHash);
         } else {
-            assertEquals("28247f936ac99e7a417da1bc1c89bc8394773a26", powerSource);
-            assertEquals("7B2B2676CDB9A0B933DA04CC743787803C68E1466FD44E2EFBAEFB3ED47ABB3D", powerHash);
+            assertEquals("fc4c47f2ed8cfebbaa010e6a0e807137a3329f95", powerSource);
+            assertEquals("BDF486E16C1FE3B4CE2FE1ED78670AABA594063BCD2D4251265124B17FA9E767", powerHash);
         }
         assertTrue("Coordinated native API hash is required", powerHash.matches("[A-F0-9]{64}"));
         String properties = new String(Files.readAllBytes(Paths.get("gradle.properties")),

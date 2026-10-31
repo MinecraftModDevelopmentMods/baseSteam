@@ -19,8 +19,8 @@ registry names, assets, saved NBT keys and provider IDs remain `steamadvantage`.
 The existing `cyano.poweradvantage.api` names remain in use.
 
 Power Advantage 2.4.8.117011 is required. The coordinated local source checkpoint is
-`28247f936ac99e7a417da1bc1c89bc8394773a26`, with development jar SHA-256
-`7B2B2676CDB9A0B933DA04CC743787803C68E1466FD44E2EFBAEFB3ED47ABB3D`.
+`fc4c47f2ed8cfebbaa010e6a0e807137a3329f95`, with development jar SHA-256
+`BDF486E16C1FE3B4CE2FE1ED78670AABA594063BCD2D4251265124B17FA9E767`.
 This pin is not final runtime acceptance. The build must not use a 1.16
 dependency or silently replace these exact inputs.
 
@@ -46,7 +46,7 @@ bootstrap jar through `-PforgeCapabilityBootstrapJar`; it is never embedded or
 added to the production runtime.
 
 With the exact dependency pins supplied, the required tasks are
-`check build javadoc verifyReleaseDependencies verifyReleaseArtifacts
+`check build deobfJar javadoc verifyReleaseDependencies verifyReleaseArtifacts
 writeReleaseChecksums verifyEclipseProductionClasspath`.
 The public artifact family remains `SteamAdvantage-2.2.9.117011.jar`,
 `-sources.jar` and `-javadoc.jar`; the development jar stays under
@@ -57,9 +57,12 @@ The Java tests, release audits, Eclipse audit, packaged runtime, migration and
 reproducibility gates must be run against the exact pinned candidate.
 CI is prepared for 1.17.1 but has not been run hosted.
 
-The current local checkpoint passed 191 executed tests, release/resource audits,
-Javadoc and Eclipse configuration checks. A forced offline repeat build produced
-identical production, sources, Javadoc and development jars. The
+The current Power checkpoint and native advancement correction passed 195
+executed tests, release/resource audits, Javadoc and Eclipse configuration checks.
+Two forced offline runs executed all 32 tasks and produced identical production,
+sources, Javadoc and development jars. All four remain byte-identical to the
+previous advancement-fix candidate; full packaged runtime qualification with
+the new shared-persistence Power pin remains pending. The
 [local test record](docs/PORT117-STATUS.md) identifies the exact inputs, retained
 failed runs and remaining runtime and client-launch gaps. These automated checks
 are not manual gameplay or visual acceptance.
@@ -82,7 +85,9 @@ uses loaded server players.
 Native pickaxe tags cover the metal machines and helpers without introducing
 new minimum tool tiers or changing drop requirements. Ordinary blocks retain
 their self-drop tables; hidden helpers still have no item form or drops.
-Recipes, recipe-book unlocks, processing costs and quantities are unchanged.
+Recipe ingredients, processing costs and quantities are unchanged. Recipe-book
+advancements use native singleton `items` predicates; the ignored legacy `item`
+field must not turn an ingredient discovery into an unrestricted predicate.
 
 Steam reads the real Base Metals crushing recipes. In the pinned 1.17 release,
 raw copper crushes into one powder and copper ore into two. This follows Base

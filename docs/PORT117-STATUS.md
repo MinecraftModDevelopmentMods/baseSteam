@@ -4,9 +4,12 @@ Local source candidate: `2.2.9.117011`, branch
 `feature/steamadvantage-1.17.1-port`, baseline
 `ed808f9fe9a2398d2334c0cadb1546284a02a22e`.
 
-No commit, push, PR, merge, tag or publication has been made for this port.
-The parent must approve a frozen module commit separately. Manual testing is
-required before any port push or publication action.
+The parent locally committed the original source checkpoint as
+`e5dd65cd59b14cba4d072d2a141cc4d89f224eef`. This update records the coordinated
+advancement correction, regression tests and shared-persistence Power repin.
+The user approved a local-only Steam commit after the new full gates pass,
+excluding the local agent file list. No port code push, PR, merge, tag or
+publication is authorized before manual testing and separate approval.
 
 ## Completed Source Work
 
@@ -52,12 +55,20 @@ campaign API source paths. Public runtime hashes remain separate in
 `gradle.properties`. No dependency is embedded.
 
 Power 2.4.8.117011 is pinned to the parent's local checkpoint
-`28247f936ac99e7a417da1bc1c89bc8394773a26`, API jar SHA-256
-`7B2B2676CDB9A0B933DA04CC743787803C68E1466FD44E2EFBAEFB3ED47ABB3D`.
+`fc4c47f2ed8cfebbaa010e6a0e807137a3329f95`, API jar SHA-256
+`BDF486E16C1FE3B4CE2FE1ED78670AABA594063BCD2D4251265124B17FA9E767`.
+The corresponding Power production jar SHA-256 is
+`04C7C26BA3EB3807A1B80CBD7F238DFF257B29757A8E3A7D0607AC4D3FE29D1C`.
+The parent's HEAD and both actual jar hashes were independently verified before
+this explicit repin. The new API input is
+`evidence/inputs/PowerAdvantage-2.4.8.117011-api-checkpoint-BDF486E1.jar`.
 The verified input is copied under `evidence/inputs` so later parent builds
 cannot silently change the bytes used by Steam. This is a local checkpoint,
 not final runtime acceptance. No old-target Power jar has been used, and no
 extra shared API or constructor workaround was needed.
+This Power checkpoint marks loaded chunks unsaved when persistent machine state
+changes through server ticking or energy updates. Its 199-test parent build is
+not a full packaged runtime pass. Steam has no local timer or weapon-code fix.
 
 Plain JUnit uses Power's verified test-only native capability bootstrap, SHA-256
 `0F75844C30D3E0B4FAF43EE0905FABE5553D9CC32177FF0BB3A690088208701A`.
@@ -73,13 +84,16 @@ exclusive `gradle-shared.lease` and `D:/GradleCaches/advantage-117-20261031`.
   63 production Java files, 12 factories and 17 harvest entries.
 - `node tools/generate-recipe-unlocks.js --check`: 24 unlocks verified.
 - Baseline comparison: all 24 original test classes retain their 111 declared
-  test methods. Nine new methods bring the declared total to 120. This is not
+  test methods. Thirteen new methods bring the declared total to 124. This is not
   an executed-test count and does not expand parameterized cases.
 - Literal-key comparison: all 99 NBT/key accesses across the 63 production
   Java files retain their original names.
-- All 72 tracked recipe, advancement and loot files are byte-for-byte unchanged.
+- The parent corrected 21 ingredient predicates in 17 advancement files from
+  ignored singular `item` fields to native singleton `items` arrays. Recipe
+  ingredients, processing quantities and loot were not changed. Four new unlock
+  tests reject the old shape, broad or malformed arrays, and native ANY matching.
 - `git diff --check`: pass.
-- Checkpoint run `steam-checkpoint-build-f`: `check build javadoc
+- Historical checkpoint run `steam-checkpoint-build-f`: `check build javadoc
   verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums
   verifyEclipseProductionClasspath` passed against the exact checkpoint inputs.
   All 191 executed tests in 27 suites passed, with zero failures, errors or skips.
@@ -92,8 +106,84 @@ exclusive `gradle-shared.lease` and `D:/GradleCaches/advantage-117-20261031`.
 - Eclipse configuration checks passed for Java 16 source, target, compliance
   and JRE, test-code exclusion, native Forge 37 bootstrap and module access.
   This is not an Eclipse client-launch or visual acceptance result.
+- Previous coordinated runs `steam-advancement-repin-h` and
+  `steam-advancement-repro-i` each passed the same full task list with
+  `--offline --rerun-tasks`: 32 tasks executed, 195 tests in 27 suites, zero
+  failures, errors or skips. These results use the earlier Power source/API pin
+  `5aaae99596c0891def8072192e0addb73c278fce`, not the shared-persistence pin.
+  The four jars are identical across H and I; all 322 frozen build/source inputs
+  were rechecked unchanged. This is not an empty-cache qualification.
+- The packaged-content delta from the retained F production jar contains
+  exactly the 17 parent-corrected advancement JSON entries, with no added or
+  removed entries. All 71 production class entries, including weapon code,
+  are byte-identical. Javadoc remains identical too.
+- Latest runs `steam-power-fc4c47f-j` and `steam-power-fc4c47f-repro-k` each
+  passed `check build deobfJar javadoc verifyReleaseDependencies
+  verifyReleaseArtifacts writeReleaseChecksums verifyEclipseProductionClasspath`
+  with `--offline --rerun-tasks`, using the exact `fc4c47f2` Power source/API pin.
+  Each executed all 32 tasks and all 195 tests in 27 suites with zero failures,
+  errors or skips. All 322 frozen build/source inputs stayed unchanged.
+  Production, development, sources and Javadoc jars are identical across J/K
+  and to the preceding H/I advancement-fix candidate. Steam production Java,
+  recipes and loot remain unchanged from `e5dd65c`.
 
-## Archived Candidate
+## Current Archived Candidate
+
+Full evidence for the shared-persistence Power pin is retained in
+`evidence/steam-power-fc4c47f-j`; the independent forced offline repeat is in
+`evidence/steam-power-fc4c47f-repro-k`. The frozen archive is
+`evidence/steam-power-fc4c47f-j.zip`, with a separate SHA-256 report alongside it.
+The committed source checkpoint and input pins are recorded in `candidate.json`.
+The local agent file list is excluded from both the source snapshot and commit.
+
+Artifact SHA-256 values:
+
+- Production `artifacts/SteamAdvantage-2.2.9.117011.jar`:
+  `A07B14C1442D6A9B2FEF86C1892564BBBD94561D4E9711539A992CB56D7BE2C6`.
+- Development `SteamAdvantage-2.2.9.117011-deobf.jar`:
+  `F352BC0400E27742652073ABB5A49A621E5A6892CEA7D82254216AE54F8629A7`.
+- Sources `artifacts/SteamAdvantage-2.2.9.117011-sources.jar`:
+  `3A5CF1296418A6A4F03B1AB7ABE5191A5819EB38CC3F072A6734512FABEDCD85`.
+- Javadoc `artifacts/SteamAdvantage-2.2.9.117011-javadoc.jar`:
+  `122F466637427788D3EB3FC52990F7E930546AD3EFFCFE9C45F842C79F4316DB`.
+
+The archive binds the local source commit, exact Power API/bootstrap inputs,
+Base Metals/OreSpawn APIs, configuration/source snapshots, artifact comparisons,
+JUnit XML/HTML, Gradle command receipts and generated Eclipse files. These are
+local build and reproducibility results, not runtime or publication acceptance.
+
+## Advancement-Fix Archived Candidate
+
+This candidate used Power `5aaae99596c0891def8072192e0addb73c278fce`, API
+SHA-256 `38162B8B1D3B5117E9764A29F04C5A2482FD016D5700D728F9DC12ECCAEB0963`.
+It does not qualify the new shared-persistence Power pin. Full evidence is retained in
+`evidence/steam-advancement-repin-h`; the independent repeat is retained in
+`evidence/steam-advancement-repro-i`. The frozen candidate archive is
+`evidence/steam-advancement-repin-h.zip`, with its SHA-256 recorded separately
+alongside it. No publication or runtime acceptance is implied by this archive.
+
+Artifact SHA-256 values:
+
+- Production `artifacts/SteamAdvantage-2.2.9.117011.jar`:
+  `A07B14C1442D6A9B2FEF86C1892564BBBD94561D4E9711539A992CB56D7BE2C6`.
+- Development `SteamAdvantage-2.2.9.117011-deobf.jar`:
+  `F352BC0400E27742652073ABB5A49A621E5A6892CEA7D82254216AE54F8629A7`.
+- Sources `artifacts/SteamAdvantage-2.2.9.117011-sources.jar`:
+  `3A5CF1296418A6A4F03B1AB7ABE5191A5819EB38CC3F072A6734512FABEDCD85`.
+- Javadoc `artifacts/SteamAdvantage-2.2.9.117011-javadoc.jar`:
+  `122F466637427788D3EB3FC52990F7E930546AD3EFFCFE9C45F842C79F4316DB`.
+
+The archive includes exact API/bootstrap inputs, source and configuration
+snapshots, the uncommitted patch/change list, hashes, JUnit XML/HTML, Gradle
+command receipts and generated Eclipse files. `candidate.json` and
+`artifact-delta.json` record the input pins and packaged-content boundary.
+
+## Earlier Archived Candidate
+
+This retained F/G candidate used Power checkpoint
+`28247f936ac99e7a417da1bc1c89bc8394773a26`, API SHA-256
+`7B2B2676CDB9A0B933DA04CC743787803C68E1466FD44E2EFBAEFB3ED47ABB3D`.
+It does not qualify the coordinated advancement correction or the new Power pin.
 
 Production jar:
 `evidence/steam-checkpoint-build-f/artifacts/SteamAdvantage-2.2.9.117011.jar`
@@ -135,7 +225,8 @@ ratios. This is a dependency-version distinction, not a Steam balance adjustment
 
 ## Required Next Gates
 
-No main/test compilation or JUnit errors remain against the pinned checkpoint.
+The shared-persistence Power pin passed fresh Steam build, JUnit, resource,
+release, reproducibility and Eclipse configuration gates for its local commit.
 Any later Power change requires an explicit coordinated repin and fresh
 qualification; the existing F/G results apply only to their recorded inputs.
 Preserve all failed receipts and use a new evidence label for each run.
@@ -144,6 +235,12 @@ The parent's shared packaged runtime and migration rig must qualify the exact
 Steam jar with the exact public Base Metals/OreSpawn runtime bytes. Automated
 proof, fresh/reload lifecycle, gameplay and visual acceptance remain separate.
 No packaged runtime pass is claimed by this module's build and unit-test proof.
+The initial combined machine-operation failures remain preserved. Operating E
+passed 132 natural-operation cases but failed restart persistence. G remains
+diagnostic-only because its finite-Float32 protocol changed during the restart
+phase; its pre-existing raw-save receipt remains red and unchanged. Full H must
+qualify the new shared persistence fix with a frozen final protocol. No complete
+runtime pass is claimed here; exact damage, ammunition and persistence checks remain.
 
 The generated client tokens are expected launcher inputs, not a confirmed
 generator defect: bytecode inspection of the pinned Slime Launcher 0.2.2 shows
@@ -174,7 +271,9 @@ Use disposable copied worlds only.
 - `build.gradle`, `gradle.properties`, the three build/analysis workflows,
   `tools/verify-native-port.js`, `README.md`, `CHANGELOG.txt` and this record.
 
-The complete current edit list is in [PORT117-FILES.txt](PORT117-FILES.txt).
-All Steam-owned build sessions have finished. No world was opened or modified.
+The current candidate's tracked changes from `e5dd65c` are archived separately
+as `tracked-change-list.txt`. The local agent file list is not part of the commit.
+All Steam-owned build sessions have finished.
+This module qualification did not open or modify a world.
 
 Native ticker reference: [Forge 1.17 block entities](https://docs.minecraftforge.net/en/1.17.x/blockentities/blockentity/).

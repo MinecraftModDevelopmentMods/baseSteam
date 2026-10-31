@@ -6,7 +6,9 @@
       "conditions": {
         "items": [
           {
-            "item": "steamadvantage:steam_drill_bit"
+            "items": [
+              "steamadvantage:steam_drill_bit"
+            ]
           }
         ]
       }

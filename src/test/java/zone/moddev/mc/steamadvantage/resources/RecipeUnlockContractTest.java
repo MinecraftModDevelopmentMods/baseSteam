@@ -17,6 +17,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -25,6 +29,10 @@ public class RecipeUnlockContractTest {
     private static final Path DATA = Paths.get("src/main/resources/data", MOD);
     private static final Set<String> IGNORED = new LinkedHashSet<>(java.util.Arrays.asList(
             "item:minecraft:stick", "item:minecraft:string", "item:minecraft:feather", "tag:forge:rods/wooden"));
+
+    @BeforeClass public static void bootstrapNativeRegistries() {
+        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+    }
 
     @Test public void everyCraftingRecipeHasExactlyOneUnlockAndProcessingHasNone() throws IOException {
         Set<String> expected = new LinkedHashSet<>();
@@ -61,9 +69,9 @@ public class RecipeUnlockContractTest {
                 for (Map.Entry<String, JsonElement> entry : recipe.getAsJsonObject("key").entrySet())
                     collect(entry.getValue(), choices);
             } else collect(recipe.has("ingredients") ? recipe.get("ingredients") : recipe.get("ingredient"), choices);
-            Set<String> expected = choices.stream().map(RecipeUnlockContractTest::predicateKey)
+            Set<String> expected = choices.stream().map(RecipeUnlockContractTest::ingredientKey)
                     .filter(key -> !IGNORED.contains(key)).collect(Collectors.toCollection(LinkedHashSet::new));
-            if (expected.isEmpty()) for (JsonObject choice : choices) expected.add(predicateKey(choice));
+            if (expected.isEmpty()) for (JsonObject choice : choices) expected.add(ingredientKey(choice));
             assertEquals("Trigger must correspond to a relevant recipe ingredient: " + file, expected, actual);
             JsonArray requirements = unlock.getAsJsonArray("requirements");
             assertEquals("All criteria must form one OR group", 1, requirements.size());
@@ -100,6 +108,52 @@ public class RecipeUnlockContractTest {
         }
     }
 
+    @Test public void nativeSingletonPredicatesKeepRecipeIngredientSemantics() {
+        JsonObject ingredient = new JsonParser().parse("{\"item\":\"minecraft:string\"}").getAsJsonObject();
+        JsonObject predicate = new JsonParser().parse("{\"items\":[\"minecraft:string\"]}").getAsJsonObject();
+        assertEquals("item:minecraft:string", predicateKey(predicate));
+        assertEquals(ingredientKey(ingredient), predicateKey(predicate));
+        JsonObject tag = new JsonParser().parse("{\"tag\":\"minecraft:planks\"}").getAsJsonObject();
+        assertEquals("tag:minecraft:planks", predicateKey(tag));
+        assertEquals(ingredientKey(tag), predicateKey(tag));
+        assertThrows("Legacy item predicates must not compare equal to native predicates",
+                AssertionError.class, () -> predicateKey(ingredient));
+    }
+
+    @Test public void malformedOrBroadItemPredicatesAreRejected() {
+        for (String json : new String[]{"{}", "{\"items\":[]}",
+                "{\"items\":[\"minecraft:string\",\"minecraft:stone\"]}",
+                "{\"items\":\"minecraft:string\"}", "{\"items\":[1]}", "{\"items\":[null]}",
+                "{\"tag\":[\"minecraft:planks\"]}",
+                "{\"items\":[\"minecraft:string\"],\"item\":\"minecraft:stone\"}",
+                "{\"items\":[\"minecraft:string\"],\"tag\":\"minecraft:planks\"}"}) {
+            JsonObject predicate = new JsonParser().parse(json).getAsJsonObject();
+            assertThrows(json, AssertionError.class, () -> predicateKey(predicate));
+        }
+    }
+
+    @Test public void nativeMusketUnlockPredicateRejectsUnrelatedInventory() throws IOException {
+        JsonObject unlock = read(DATA.resolve("advancements/recipes/musket_right_normal.json"));
+        JsonObject predicate = unlock.getAsJsonObject("criteria").getAsJsonObject("has_ingredient_1")
+                .getAsJsonObject("conditions").getAsJsonArray("items").get(0).getAsJsonObject();
+        assertEquals("item:minecraft:flint_and_steel", predicateKey(predicate));
+        ItemPredicate nativePredicate = ItemPredicate.fromJson(predicate);
+        assertTrue(nativePredicate.matches(new ItemStack(Items.FLINT_AND_STEEL)));
+        assertFalse("String alone must not unlock a musket", nativePredicate.matches(new ItemStack(Items.STRING)));
+        assertFalse("Unrelated inventory must not act as an ANY predicate", nativePredicate.matches(new ItemStack(Items.STONE)));
+    }
+
+    @Test public void nativeParserNegativeControlExposesIgnoredLegacyItemField() {
+        JsonObject legacy = new JsonParser().parse("{\"item\":\"minecraft:string\"}").getAsJsonObject();
+        ItemPredicate unrestricted = ItemPredicate.fromJson(legacy);
+        assertTrue("The old field is ignored by the native parser", unrestricted.matches(new ItemStack(Items.STONE)));
+        assertThrows(AssertionError.class, () -> predicateKey(legacy));
+        JsonObject singleton = new JsonParser().parse("{\"items\":[\"minecraft:string\"]}").getAsJsonObject();
+        ItemPredicate restricted = ItemPredicate.fromJson(singleton);
+        assertTrue(restricted.matches(new ItemStack(Items.STRING)));
+        assertFalse("Native singleton must not become ANY", restricted.matches(new ItemStack(Items.STONE)));
+    }
+
     private static boolean crafting(JsonObject recipe) {
         String type = recipe.get("type").getAsString();
         return type.equals("minecraft:crafting_shaped") || type.equals("minecraft:crafting_shapeless")
@@ -107,8 +161,28 @@ public class RecipeUnlockContractTest {
     }
 
     private static String predicateKey(JsonObject predicate) {
-        String type = predicate.has("tag") ? "tag" : "item";
-        return type + ":" + predicate.get(type).getAsString();
+        assertEquals("Only one native item or tag predicate is expected", 1, predicate.size());
+        assertFalse("Native advancement predicates must not use the ignored legacy item field", predicate.has("item"));
+        if (predicate.has("tag")) {
+            JsonElement tag = predicate.get("tag");
+            assertTrue("Tag predicate must contain a string", tag.isJsonPrimitive() && tag.getAsJsonPrimitive().isString());
+            return "tag:" + tag.getAsString();
+        }
+        assertTrue("Native item predicate requires an items array", predicate.has("items") && predicate.get("items").isJsonArray());
+        JsonArray items = predicate.getAsJsonArray("items");
+        assertEquals("Discovery must identify exactly one recipe ingredient", 1, items.size());
+        JsonElement item = items.get(0);
+        assertTrue("Item predicate must contain a string ID", item.isJsonPrimitive() && item.getAsJsonPrimitive().isString());
+        return "item:" + item.getAsString();
+    }
+
+    private static String ingredientKey(JsonObject ingredient) {
+        assertEquals("Only one recipe item or tag ingredient is expected", 1, ingredient.size());
+        String type = ingredient.has("tag") ? "tag" : "item";
+        assertTrue("Recipe ingredients retain singular item or tag syntax", ingredient.has(type));
+        JsonElement value = ingredient.get(type);
+        assertTrue("Recipe ingredient must contain a string ID", value.isJsonPrimitive() && value.getAsJsonPrimitive().isString());
+        return type + ":" + value.getAsString();
     }
 
     private static void collect(JsonElement element, List<JsonObject> result) {

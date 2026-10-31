@@ -6,7 +6,9 @@
       "conditions": {
         "items": [
           {
-            "item": "steamadvantage:steam_pipe"
+            "items": [
+              "steamadvantage:steam_pipe"
+            ]
           }
         ]
       }
@@ -16,7 +18,9 @@
       "conditions": {
         "items": [
           {
-            "item": "poweradvantage:steel_frame"
+            "items": [
+              "poweradvantage:steel_frame"
+            ]
           }
         ]
       }
