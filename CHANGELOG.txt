@@ -13,7 +13,8 @@ Steam Advantage 2.2.9.117011 (local 1.17.1 port candidate)
 - Read native lava temperature without changing vanilla heat input or machine ratios.
 - Use the published Base Metals raw-metal crushing recipes without overriding their quantities.
 - Retain all 1.16 regression coverage and add native factory, position, helper-ticker and chunk-boundary tests.
-- Pin the coordinated local Power source/API checkpoint and pass 195 Java tests, release/resource audits, Javadoc and Eclipse configuration checks.
+- Pin the coordinated local Power source/API checkpoint and pass 199 Java tests, release/resource audits, Javadoc and Eclipse configuration checks.
+- Track combined Power, Steam and Electric status in Power Advantage's docs/1.17/CURRENT-QUALIFICATION.md; overall qualification remains open.
 - Use Power's shared machine-persistence checkpoint; Steam's machine Java is unchanged and full runtime qualification remains pending.
 - Pin Power's native registry-alias correction without changing Steam's production Java or public identities.
 - Rebuild offline with all tasks forced and retain identical production, sources, Javadoc and development jar bytes.
