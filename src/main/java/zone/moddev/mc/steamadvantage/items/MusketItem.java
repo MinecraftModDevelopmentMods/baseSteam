@@ -12,50 +12,50 @@ import com.google.common.collect.Multimap;
 import zone.moddev.mc.steamadvantage.SteamAdvantage;
 import zone.moddev.mc.steamadvantage.init.Enchantments;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.block.TNTBlock;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.BlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.UseAction;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.play.server.SEntityVelocityPacket;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.tags.ItemTags;
 
 @SuppressWarnings("deprecation")
-public class MusketItem extends net.minecraft.item.Item{
+public class MusketItem extends net.minecraft.world.item.Item{
 	
 	
 	public static final String NBT_DATA_KEY_LOADED = "loaded";
@@ -86,29 +86,29 @@ public class MusketItem extends net.minecraft.item.Item{
 	}
 	
 	@Override
-	public UseAction getUseAnimation(ItemStack stack){
+	public UseAnim getUseAnimation(ItemStack stack){
 		if(isLoaded(stack)){
-			return UseAction.BOW;
+			return UseAnim.BOW;
 		} else {
-			return UseAction.BLOCK;
+			return UseAnim.BLOCK;
 		}
 	}
 	
 	@Override
-	public ActionResult<ItemStack> use(World world, PlayerEntity playerEntity, Hand hand){
+	public InteractionResultHolder<ItemStack> use(Level world, Player playerEntity, InteractionHand hand){
 		ItemStack srcItemStack = playerEntity.getItemInHand(hand);
-		if(hand != Hand.MAIN_HAND) return ActionResult.pass(srcItemStack);
-		if(isNotLoaded(srcItemStack) && !hasAmmo(playerEntity, srcItemStack)) return ActionResult.fail(srcItemStack);
+		if(hand != InteractionHand.MAIN_HAND) return InteractionResultHolder.pass(srcItemStack);
+		if(isNotLoaded(srcItemStack) && !hasAmmo(playerEntity, srcItemStack)) return InteractionResultHolder.fail(srcItemStack);
 		if(isNotLoaded(srcItemStack) && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.rapid_reload, srcItemStack) > 0){
 			// instant reload
 			decrementAmmo(playerEntity,srcItemStack);
 			startLoad(srcItemStack);
 			playSound(SoundEvents.LEVER_CLICK,world,playerEntity);
 			finishLoad(srcItemStack);
-			return ActionResult.success(srcItemStack);
+			return InteractionResultHolder.success(srcItemStack);
 		}
 		playerEntity.startUsingItem(hand);
-		return ActionResult.success(srcItemStack);
+		return InteractionResultHolder.success(srcItemStack);
 	}
 	
 	@Override
@@ -123,7 +123,7 @@ public class MusketItem extends net.minecraft.item.Item{
 	 * provided to the PlayerEntity.setItemInUse(stack, duration).
 	 */
 	@Override
-	public ItemStack finishUsingItem (ItemStack srcItemStack, World world, LivingEntity playerEntity)
+	public ItemStack finishUsingItem (ItemStack srcItemStack, Level world, LivingEntity playerEntity)
 	{ // 
 		if(isNotLoaded(srcItemStack) && hasAmmo(playerEntity,srcItemStack)){
 			decrementAmmo(playerEntity,srcItemStack);
@@ -134,7 +134,7 @@ public class MusketItem extends net.minecraft.item.Item{
 	}
 	
 	@Override
-	public void releaseUsing(ItemStack stack, World worldIn, LivingEntity playerIn, int timeLeft) {
+	public void releaseUsing(ItemStack stack, Level worldIn, LivingEntity playerIn, int timeLeft) {
 		if(isAlmostLoaded(stack)){
 			finishLoad(stack);
 		} else if(isLoaded(stack)){
@@ -143,62 +143,62 @@ public class MusketItem extends net.minecraft.item.Item{
 	}
 	
 	protected void fire(ItemStack srcItemStack, LivingEntity playerEntity,
-			World world) {
-		final boolean isPlayer = playerEntity instanceof PlayerEntity;
+			Level world) {
+		final boolean isPlayer = playerEntity instanceof Player;
 		unload(srcItemStack);
-		if(isPlayer && !((PlayerEntity)playerEntity).isCreative()){
-			srcItemStack.hurtAndBreak(1, playerEntity, entity -> entity.broadcastBreakEvent(EquipmentSlotType.MAINHAND));
+		if(isPlayer && !((Player)playerEntity).isCreative()){
+			srcItemStack.hurtAndBreak(1, playerEntity, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
 		}
-		Vector3d lookVector = playerEntity.getLookAngle();
+		Vec3 lookVector = playerEntity.getLookAngle();
 		spawnParticle(ParticleTypes.EXPLOSION_EMITTER, world,
 				playerEntity.getX()+lookVector.x, playerEntity.getY()+playerEntity.getEyeHeight()+lookVector.y, playerEntity.getZ() + lookVector.z);
 		if(world.isClientSide){
-			playerEntity.xRot -= 15;
+			playerEntity.setXRot(playerEntity.getXRot() - 15);
 			return;
 		}
 		playSound(SoundEvents.FLINTANDSTEEL_USE,world,playerEntity);
-		playBigSoundAtPosition(playerEntity.getX(),playerEntity.getY(),playerEntity.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST,SoundCategory.PLAYERS,2F,0.5F,world);
+		playBigSoundAtPosition(playerEntity.getX(),playerEntity.getY(),playerEntity.getZ(), SoundEvents.FIREWORK_ROCKET_BLAST,SoundSource.PLAYERS,2F,0.5F,world);
 		
-		Vector3d start = new Vector3d(playerEntity.getX(), playerEntity.getY()+playerEntity.getEyeHeight(),playerEntity.getZ());
+		Vec3 start = new Vec3(playerEntity.getX(), playerEntity.getY()+playerEntity.getEyeHeight(),playerEntity.getZ());
 		start.add(MAX_RANGE * lookVector.x, MAX_RANGE * lookVector.y, MAX_RANGE * lookVector.z);
-		RayTraceResult rayTrace = rayTraceBlocksAndEntities(world,MAX_RANGE,playerEntity);
+		HitResult rayTrace = rayTraceBlocksAndEntities(world,MAX_RANGE,playerEntity);
 		if(rayTrace == null){
 			// no collisions
 			return;
 		}
 		final float explodeFactor = 0.75f;
-		if(rayTrace instanceof EntityRayTraceResult){
-			Entity e = ((EntityRayTraceResult) rayTrace).getEntity();
+		if(rayTrace instanceof EntityHitResult){
+			Entity e = ((EntityHitResult) rayTrace).getEntity();
 			e.hurt(Power.musket_damage, getShotDamage());
 			if(EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack) > 0){
 				int lvl = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
 				world.explode(playerEntity, e.getX(), e.getY()+0.5, e.getZ(),
 						explodeFactor * lvl, 
-						Explosion.Mode.BREAK);
-				AxisAlignedBB fireArea = new AxisAlignedBB(e.getX()-lvl, e.getY()-lvl, e.getZ()-lvl,
+						Explosion.BlockInteraction.BREAK);
+				AABB fireArea = new AABB(e.getX()-lvl, e.getY()-lvl, e.getZ()-lvl,
 						e.getX()+lvl, e.getY()+lvl, e.getZ()+lvl);
 				List<LivingEntity> collateralDamage = world.getEntitiesOfClass(LivingEntity.class, fireArea);
 				for(LivingEntity victim : collateralDamage){
 					victim.setSecondsOnFire(lvl);
 				}
 			}
-		} else if(rayTrace.getType() == RayTraceResult.Type.BLOCK){
+		} else if(rayTrace.getType() == HitResult.Type.BLOCK){
 			playSoundAtPosition(rayTrace.getLocation().x, rayTrace.getLocation().y, rayTrace.getLocation().z,
-					SoundEvents.GRAVEL_HIT, SoundCategory.BLOCKS, 1f, 1f, world);
-			BlockPos coord = ((BlockRayTraceResult) rayTrace).getBlockPos();
-			if(coord.getY()>= 0 && coord.getY() <= 255 && !world.isEmptyBlock(coord)){
+					SoundEvents.GRAVEL_HIT, SoundSource.BLOCKS, 1f, 1f, world);
+			BlockPos coord = ((BlockHitResult) rayTrace).getBlockPos();
+			if(!world.isOutsideBuildHeight(coord) && world.hasChunkAt(coord) && !world.isEmptyBlock(coord)){
 				BlockState bs = world.getBlockState(coord);
 				Material blockMat = bs.getMaterial();
-				if(blockMat == net.minecraft.block.material.Material.GLASS
-						|| blockMat == net.minecraft.block.material.Material.LEAVES
-						|| blockMat == net.minecraft.block.material.Material.DECORATION
-						|| blockMat == net.minecraft.block.material.Material.PLANT
-						|| blockMat == net.minecraft.block.material.Material.REPLACEABLE_PLANT
-						|| blockMat == net.minecraft.block.material.Material.WEB){
+				if(blockMat == net.minecraft.world.level.material.Material.GLASS
+						|| blockMat == net.minecraft.world.level.material.Material.LEAVES
+						|| blockMat == net.minecraft.world.level.material.Material.DECORATION
+						|| blockMat == net.minecraft.world.level.material.Material.PLANT
+						|| blockMat == net.minecraft.world.level.material.Material.REPLACEABLE_PLANT
+						|| blockMat == net.minecraft.world.level.material.Material.WEB){
 					world.destroyBlock(coord, true);
-				} else if (blockMat == net.minecraft.block.material.Material.EXPLOSIVE){
-					if(world.getBlockState(coord).getBlock() instanceof TNTBlock){
-						TNTBlock.explode(world, coord);
+				} else if (blockMat == net.minecraft.world.level.material.Material.EXPLOSIVE){
+					if(world.getBlockState(coord).getBlock() instanceof TntBlock){
+						TntBlock.explode(world, coord);
 						world.removeBlock(coord, false);
 					}
 				}
@@ -207,8 +207,8 @@ public class MusketItem extends net.minecraft.item.Item{
 				int lvl = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
 				world.explode(playerEntity, rayTrace.getLocation().x, rayTrace.getLocation().y, rayTrace.getLocation().z,
 						explodeFactor * lvl, 
-						Explosion.Mode.BREAK);
-				AxisAlignedBB fireArea = new AxisAlignedBB(rayTrace.getLocation().x-lvl, rayTrace.getLocation().y-lvl, rayTrace.getLocation().z-lvl,
+						Explosion.BlockInteraction.BREAK);
+				AABB fireArea = new AABB(rayTrace.getLocation().x-lvl, rayTrace.getLocation().y-lvl, rayTrace.getLocation().z-lvl,
 						rayTrace.getLocation().x+lvl, rayTrace.getLocation().y+lvl, rayTrace.getLocation().z+lvl);
 				List<LivingEntity> collateralDamage = world.getEntitiesOfClass(LivingEntity.class, fireArea);
 				for(LivingEntity victim : collateralDamage){
@@ -216,7 +216,7 @@ public class MusketItem extends net.minecraft.item.Item{
 				}
 			}
 		}
-		if(rayTrace.getType() != RayTraceResult.Type.MISS){
+		if(rayTrace.getType() != HitResult.Type.MISS){
 			spawnParticle(ParticleTypes.LARGE_SMOKE, world,
 					rayTrace.getLocation().x, rayTrace.getLocation().y, rayTrace.getLocation().z);
 			spawnParticle(ParticleTypes.EXPLOSION, world,
@@ -231,17 +231,17 @@ public class MusketItem extends net.minecraft.item.Item{
 			playerEntity.push(c * recoil * lookVector.x * lateral,
 					c * recoil * lookVector.y, 
 					c * recoil * lookVector.z * lateral);
-			if(playerEntity instanceof ServerPlayerEntity){
+			if(playerEntity instanceof ServerPlayer){
 				// send update packet from server
-				((ServerPlayerEntity) playerEntity).connection.send(new SEntityVelocityPacket(playerEntity));
+				((ServerPlayer) playerEntity).connection.send(new ClientboundSetEntityMotionPacket(playerEntity));
 			}
 		}
 	}
 
 
-	private void spawnParticle(IParticleData p, World w, double x, double y, double z) {
-		if(w instanceof ServerWorld) {
-			((ServerWorld) w).sendParticles(p, x, y, z, 1, 0, 0, 0, 0);
+	private void spawnParticle(ParticleOptions p, Level w, double x, double y, double z) {
+		if(w instanceof ServerLevel) {
+			((ServerLevel) w).sendParticles(p, x, y, z, 1, 0, 0, 0, 0);
 		} else {
 			w.addParticle(p, x, y, z, 0, 0, 0);
 		}
@@ -250,65 +250,65 @@ public class MusketItem extends net.minecraft.item.Item{
 	@Override
 	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker)
 	{
-		stack.hurtAndBreak(1, attacker, entity -> entity.broadcastBreakEvent(EquipmentSlotType.MAINHAND));
+		stack.hurtAndBreak(1, attacker, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
 		return true;
 	}
 	
 	/** plays a sound at the player location */
-	protected void playSound(SoundEvent sound, World world, Entity e){
+	protected void playSound(SoundEvent sound, Level world, Entity e){
 		if (!world.isClientSide)
 		{
-			playSoundAtPosition(e.getX(), e.getY(), e.getZ(), sound,SoundCategory.PLAYERS,1F,1F,world);
+			playSoundAtPosition(e.getX(), e.getY(), e.getZ(), sound,SoundSource.PLAYERS,1F,1F,world);
 		}
 	}
 	
 	public static void startLoad(ItemStack musket){
-		CompoundNBT data;
+		CompoundTag data;
 		if(musket.hasTag()){
 			data = musket.getTag();
 		} else {
-			data = new CompoundNBT();
+			data = new CompoundTag();
 		}
 		data.putByte(NBT_DATA_KEY_LOADED, (byte)2);
 		musket.setTag(data);
 	}
 	
 	public static void finishLoad(ItemStack musket){
-		CompoundNBT data;
+		CompoundTag data;
 		if(musket.hasTag()){
 			data = musket.getTag();
 		} else {
-			data = new CompoundNBT();
+			data = new CompoundTag();
 		}
 		data.putByte(NBT_DATA_KEY_LOADED, (byte)1);
 		musket.setTag(data);
 	}
 	
 	public static void unload(ItemStack musket){
-		CompoundNBT data;
+		CompoundTag data;
 		if(musket.hasTag()){
 			data = musket.getTag();
 		} else {
-			data = new CompoundNBT();
+			data = new CompoundTag();
 		}
 		data.putByte(NBT_DATA_KEY_LOADED, (byte)0);
 		musket.setTag(data);
 	}
 	
 	public static boolean isLoaded(ItemStack musket){
-		CompoundNBT data = musket.getTag();
+		CompoundTag data = musket.getTag();
 		if(data == null) return false;
 		return data.contains(NBT_DATA_KEY_LOADED) && data.getByte(NBT_DATA_KEY_LOADED) == 1;
 	}
 	
 	public static boolean isNotLoaded(ItemStack musket){
-		CompoundNBT data = musket.getTag();
+		CompoundTag data = musket.getTag();
 		if(data == null || !data.contains(NBT_DATA_KEY_LOADED)) return true;
 		return data.contains(NBT_DATA_KEY_LOADED) && data.getByte(NBT_DATA_KEY_LOADED) == 0;
 	}
 	
 	public static boolean isAlmostLoaded(ItemStack musket){
-		CompoundNBT data = musket.getTag();
+		CompoundTag data = musket.getTag();
 		if(data == null) return false;
 		return data.contains(NBT_DATA_KEY_LOADED) && data.getByte(NBT_DATA_KEY_LOADED) == 2;
 	}
@@ -316,13 +316,13 @@ public class MusketItem extends net.minecraft.item.Item{
 
 	
 	public static boolean hasAmmo(LivingEntity e, ItemStack musket) {
-		if(e instanceof PlayerEntity) {
-			PlayerEntity playerEntity = (PlayerEntity) e;
+		if(e instanceof Player) {
+			Player playerEntity = (Player) e;
 			if (playerEntity.isCreative()
-					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.enchantment.Enchantments.INFINITY_ARROWS, musket) > 0
+					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS, musket) > 0
 					|| EnchantmentHelper.getItemEnchantmentLevel(Enchantments.powderless, musket) > 0) return true;
-			for (int i = 0; i < playerEntity.inventory.items.size(); i++) {
-				ItemStack inventoryStack = playerEntity.inventory.items.get(i);
+			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
+				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
 				if (inventoryStack.isEmpty()) continue;
 				if (ItemTags.getAllTags().getTagOrEmpty(BLACKPOWDER_AMMO_TAG).contains(inventoryStack.getItem())) return true;
 			}
@@ -332,17 +332,17 @@ public class MusketItem extends net.minecraft.item.Item{
 	
 
 	public static void decrementAmmo(LivingEntity e, ItemStack musket) {
-		if(e instanceof PlayerEntity) {
-			PlayerEntity playerEntity = (PlayerEntity) e;
+		if(e instanceof Player) {
+			Player playerEntity = (Player) e;
 			if (playerEntity.isCreative()
-					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.enchantment.Enchantments.INFINITY_ARROWS, musket) > 0
+					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS, musket) > 0
 					|| EnchantmentHelper.getItemEnchantmentLevel(Enchantments.powderless, musket) > 0) return;
-			for (int i = 0; i < playerEntity.inventory.items.size(); i++) {
-				ItemStack inventoryStack = playerEntity.inventory.items.get(i);
+			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
+				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
 				if (inventoryStack.isEmpty()) continue;
 				if (ItemTags.getAllTags().getTagOrEmpty(BLACKPOWDER_AMMO_TAG).contains(inventoryStack.getItem())) {
 					inventoryStack.shrink(1);
-					if (inventoryStack.isEmpty()) playerEntity.inventory.items.set(i, ItemStack.EMPTY);
+					if (inventoryStack.isEmpty()) playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
 					return;
 				}
 			}
@@ -350,21 +350,24 @@ public class MusketItem extends net.minecraft.item.Item{
 	}
 	
 	
-	public static RayTraceResult rayTraceBlocksAndEntities(World w, double maxRange, LivingEntity source){
-		Vector3d rayOrigin = new Vector3d(source.getX(), source.getY() + source.getEyeHeight(), source.getZ());
-		Vector3d rayDirection = source.getLookAngle();
-		BlockRayTraceResult terrainHit = w.clip(new RayTraceContext(rayOrigin, rayOrigin.add(rayDirection.scale(maxRange)),
-				RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.SOURCE_ONLY, source));
-		Vector3d rayEnd = terrainHit.getLocation();
-		AxisAlignedBB aoi = new AxisAlignedBB(rayOrigin, rayEnd).inflate(1.0D);
+	public static HitResult rayTraceBlocksAndEntities(Level w, double maxRange, LivingEntity source){
+		Vec3 rayOrigin = new Vec3(source.getX(), source.getY() + source.getEyeHeight(), source.getZ());
+		Vec3 rayDirection = source.getLookAngle();
+		Vec3 loadedEnd = loadedRayEnd(rayOrigin, rayOrigin.add(rayDirection.scale(maxRange)), w::hasChunkAt);
+		if(loadedEnd.equals(rayOrigin)) return BlockHitResult.miss(rayOrigin,
+				net.minecraft.core.Direction.getNearest(rayDirection.x, rayDirection.y, rayDirection.z), new BlockPos(rayOrigin));
+		BlockHitResult terrainHit = w.clip(new ClipContext(rayOrigin, loadedEnd,
+				ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, source));
+		Vec3 rayEnd = terrainHit.getLocation();
+		AABB aoi = new AABB(rayOrigin, rayEnd).inflate(1.0D);
 		// Server spatial entity queries can synchronously generate chunks around the shooter.
-		Iterable<Entity> entities = w instanceof ServerWorld ? ((ServerWorld)w).getAllEntities() : w.getEntities(source, aoi);
+		Iterable<Entity> entities = w instanceof ServerLevel ? ((ServerLevel)w).getAllEntities() : w.getEntities(source, aoi);
 		double closestDistSqr = rayOrigin.distanceToSqr(rayEnd);
 		Entity closestEntity = null;
-		Vector3d closestHit = null;
+		Vec3 closestHit = null;
 		for(Entity e : entities){
-			if(e == source || e.removed || e.isSpectator() || !aoi.intersects(e.getBoundingBox())) continue;
-			Optional<Vector3d> hit = rayHitBeforeTerrain(rayOrigin, rayEnd, e.getBoundingBox());
+			if(e == source || e.isRemoved() || e.isSpectator() || !aoi.intersects(e.getBoundingBox())) continue;
+			Optional<Vec3> hit = rayHitBeforeTerrain(rayOrigin, rayEnd, e.getBoundingBox());
 			if(hit.isPresent()){
 				double distSqr = rayOrigin.distanceToSqr(hit.get());
 				if(distSqr < closestDistSqr){
@@ -374,18 +377,29 @@ public class MusketItem extends net.minecraft.item.Item{
 				}
 			}
 		}
-		return closestEntity == null ? terrainHit : new EntityRayTraceResult(closestEntity, closestHit);
+		return closestEntity == null ? terrainHit : new EntityHitResult(closestEntity, closestHit);
 	}
 
-	static Optional<Vector3d> rayHitBeforeTerrain(Vector3d origin, Vector3d terrainEnd, AxisAlignedBB target){
-		Optional<Vector3d> hit = target.contains(origin) ? Optional.of(origin) : target.clip(origin, terrainEnd);
+	static Vec3 loadedRayEnd(Vec3 origin, Vec3 end, java.util.function.Predicate<BlockPos> loaded) {
+		if(!loaded.test(new BlockPos(origin))) return origin;
+		// Reuse native voxel traversal so even a grazing diagonal cannot enter an unloaded chunk.
+		Vec3 boundary = net.minecraft.world.level.BlockGetter.traverseBlocks(origin, end, loaded,
+				(test, pos) -> test.test(pos) ? null : new AABB(pos).clip(origin, end).orElse(origin),
+				test -> end);
+		if(boundary.equals(end)) return end;
+		return origin.distanceToSqr(boundary) <= 0.00000001D ? origin
+				: boundary.subtract(end.subtract(origin).normalize().scale(0.0001D));
+	}
+
+	static Optional<Vec3> rayHitBeforeTerrain(Vec3 origin, Vec3 terrainEnd, AABB target){
+		Optional<Vec3> hit = target.contains(origin) ? Optional.of(origin) : target.clip(origin, terrainEnd);
 		return hit.filter(point -> origin.distanceToSqr(point) < origin.distanceToSqr(terrainEnd));
 	}
 
-	public static boolean rayIntersectsBoundingBox(Vector3d rayOrigin, Vector3d rayDirection, AxisAlignedBB box){
+	public static boolean rayIntersectsBoundingBox(Vec3 rayOrigin, Vec3 rayDirection, AABB box){
 		if(box == null) return false;
 		// algorithm from http://gamedev.stackexchange.com/questions/18436/most-efficient-aabb-vs-ray-collision-algorithms
-		Vector3d inverse = new Vector3d(1.0 / rayDirection.x, 1.0 / rayDirection.y, 1.0 / rayDirection.z);
+		Vec3 inverse = new Vec3(1.0 / rayDirection.x, 1.0 / rayDirection.y, 1.0 / rayDirection.z);
 		double t1 = (box.minX - rayOrigin.x)*inverse.x;
 		double t2 = (box.maxX- rayOrigin.x)*inverse.x;
 		double t3 = (box.minY - rayOrigin.y)*inverse.y;
@@ -429,23 +443,23 @@ public class MusketItem extends net.minecraft.item.Item{
 	}
 	
 	@Override
-	public void appendHoverText(ItemStack stack, World world, List<ITextComponent> list, net.minecraft.client.util.ITooltipFlag flag){
+	public void appendHoverText(ItemStack stack, Level world, List<Component> list, net.minecraft.world.item.TooltipFlag flag){
 		super.appendHoverText(stack,world,list,flag);
-		list.add(new TranslationTextComponent("tooltip.musket.damage", (int)MusketItem.getShotDamage()));
+		list.add(new TranslatableComponent("tooltip.musket.damage", (int)MusketItem.getShotDamage()));
 		if(isLoaded(stack)){
-			list.add(new TranslationTextComponent("tooltip.musket.loaded"));
+			list.add(new TranslatableComponent("tooltip.musket.loaded"));
 		} else {
-			list.add(new TranslationTextComponent("tooltip.musket.unloaded"));
-			list.add(new TranslationTextComponent("tooltip.musket.ammo", new TranslationTextComponent("item.steamadvantage.blackpowder_cartridge")));
+			list.add(new TranslatableComponent("tooltip.musket.unloaded"));
+			list.add(new TranslatableComponent("tooltip.musket.ammo", new TranslatableComponent("item.steamadvantage.blackpowder_cartridge")));
 		}
 	}
 
 	/** Sets melee attack damage */
 	@Override
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack)
+	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack)
 	{
 		Multimap<Attribute, AttributeModifier> multimap = HashMultimap.create();
-		if(slot != EquipmentSlotType.MAINHAND) return multimap;
+		if(slot != EquipmentSlot.MAINHAND) return multimap;
 		multimap.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)getMeleeDamage(), AttributeModifier.Operation.ADDITION));
 		return multimap;
 	}

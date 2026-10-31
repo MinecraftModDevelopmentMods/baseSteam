@@ -1,7 +1,7 @@
 package zone.moddev.mc.steamadvantage.util;
 
 import java.io.InputStream;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
@@ -45,7 +45,7 @@ public class SoundHelperLoadedPlayersTest {
             for (AbstractInsnNode instruction : method.instructions.toArray()) {
                 if (instruction instanceof FieldInsnNode) {
                     FieldInsnNode field = (FieldInsnNode) instruction;
-                    if (field.getOpcode() == Opcodes.GETSTATIC && field.owner.equals("net/minecraft/util/EntityPredicates")
+                    if (field.getOpcode() == Opcodes.GETSTATIC && field.owner.equals("net/minecraft/world/entity/EntitySelector")
                             && field.name.equals("NO_SPECTATORS")) predicate = method.instructions.indexOf(instruction);
                 } else if (instruction instanceof MethodInsnNode) {
                     MethodInsnNode call = (MethodInsnNode) instruction;
@@ -56,7 +56,7 @@ public class SoundHelperLoadedPlayersTest {
                         assertTrue(method.name + " rejects a false native spectator predicate",
                                 guard instanceof JumpInsnNode && guard.getOpcode() == Opcodes.IFEQ);
                     }
-                    if (call.owner.equals("net/minecraft/network/play/server/SPlaySoundPacket") && call.name.equals("<init>")) {
+                    if (call.owner.equals("net/minecraft/network/protocol/game/ClientboundCustomSoundPacket") && call.name.equals("<init>")) {
                         packet = method.instructions.indexOf(instruction);
                     }
                 }
@@ -70,16 +70,16 @@ public class SoundHelperLoadedPlayersTest {
 
     @Test public void rangeSelectionKeepsStrictAabbOverlapNotDistanceOrPlayerCenter() {
         for (double radius : new double[]{16, 50}) {
-            AxisAlignedBB area = new AxisAlignedBB(-radius, -radius, -radius, radius, radius, radius);
+            AABB area = new AABB(-radius, -radius, -radius, radius, radius, radius);
             assertTrue("An overlapping player body is included even with its center outside the cube",
-                    area.intersects(new AxisAlignedBB(radius - 0.1, -0.5, -0.3, radius + 0.5, 1.3, 0.3)));
+                    area.intersects(new AABB(radius - 0.1, -0.5, -0.3, radius + 0.5, 1.3, 0.3)));
             assertTrue("Corner overlap remains included, not replaced with a spherical radius",
-                    area.intersects(new AxisAlignedBB(radius - 0.1, radius - 0.1, radius - 0.1,
+                    area.intersects(new AABB(radius - 0.1, radius - 0.1, radius - 0.1,
                             radius + 0.5, radius + 1.7, radius + 0.5)));
             assertFalse("Merely touching the positive boundary is not an intersection",
-                    area.intersects(new AxisAlignedBB(radius, -0.5, -0.3, radius + 0.6, 1.3, 0.3)));
+                    area.intersects(new AABB(radius, -0.5, -0.3, radius + 0.6, 1.3, 0.3)));
             assertFalse("Merely touching the negative boundary is not an intersection",
-                    area.intersects(new AxisAlignedBB(-radius - 0.6, -0.5, -0.3, -radius, 1.3, 0.3)));
+                    area.intersects(new AABB(-radius - 0.6, -0.5, -0.3, -radius, 1.3, 0.3)));
         }
     }
 
@@ -93,15 +93,15 @@ public class SoundHelperLoadedPlayersTest {
                 MethodInsnNode call = (MethodInsnNode) instruction;
                 if (call.name.equals("players")) playerLists++;
                 if (call.name.equals("getBoundingBox")) bounds++;
-                if (call.owner.equals("net/minecraft/util/math/AxisAlignedBB") && call.name.equals("intersects")
-                        && call.desc.equals("(Lnet/minecraft/util/math/AxisAlignedBB;)Z")) intersections++;
-                if (call.owner.equals("net/minecraft/network/play/server/SPlaySoundPacket") && call.name.equals("<init>")) soundPackets++;
+                if (call.owner.equals("net/minecraft/world/phys/AABB") && call.name.equals("intersects")
+                        && call.desc.equals("(Lnet/minecraft/world/phys/AABB;)Z")) intersections++;
+                if (call.owner.equals("net/minecraft/network/protocol/game/ClientboundCustomSoundPacket") && call.name.equals("<init>")) soundPackets++;
             } else if (instruction instanceof LdcInsnNode) {
                 Object value = ((LdcInsnNode) instruction).cst;
                 if (value instanceof Double && ((Double) value).doubleValue() == radius) correctRadius = true;
             } else if (instruction instanceof TypeInsnNode) {
                 TypeInsnNode type = (TypeInsnNode) instruction;
-                if (type.getOpcode() == Opcodes.INSTANCEOF && type.desc.equals("net/minecraft/entity/player/ServerPlayerEntity")) serverPlayer = true;
+                if (type.getOpcode() == Opcodes.INSTANCEOF && type.desc.equals("net/minecraft/server/level/ServerPlayer")) serverPlayer = true;
             } else if (instruction instanceof FieldInsnNode) {
                 FieldInsnNode field = (FieldInsnNode) instruction;
                 if (field.getOpcode() == Opcodes.GETFIELD && field.name.equals("connection")) connection = true;

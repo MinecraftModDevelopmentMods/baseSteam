@@ -1,29 +1,31 @@
 package zone.moddev.mc.steamadvantage.blocks;
 
 import zone.moddev.mc.steamadvantage.init.Blocks;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrillBitTileEntity extends TileEntity implements ITickableTileEntity{
+public class DrillBitTileEntity extends BlockEntity{
 
 	public final static float ROTATION_PER_TICK = 360f / 20f; // in degrees, 20 ticks per revolution
 	public float rotation = 0;
 	private Direction direction = Direction.DOWN;
 	
-	public DrillBitTileEntity(){
-		super(zone.moddev.mc.steamadvantage.init.Entities.DRILLBIT);
+	public DrillBitTileEntity() {
+		this(BlockPos.ZERO, new DrillBitBlock().defaultBlockState());
+	}
+
+	public DrillBitTileEntity(BlockPos pos, BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.DRILLBIT, pos, state);
 	}
 	
-	@Override
 	public void tick(){
 		if(hasLevel() && getLevel().isClientSide){
 			rotation = ROTATION_PER_TICK * (getLevel().getGameTime() % 20);
@@ -39,9 +41,9 @@ public class DrillBitTileEntity extends TileEntity implements ITickableTileEntit
 		return direction.getAxis();
 	}
 	
-	public static void createDrillBitBlock(World w, BlockPos coord, Direction dir){
+	public static void createDrillBitBlock(Level w, BlockPos coord, Direction dir){
 		w.setBlockAndUpdate(coord, zone.moddev.mc.steamadvantage.init.Blocks.drillbit.defaultBlockState());
-		TileEntity tile = w.getBlockEntity(coord);
+		BlockEntity tile = w.getBlockEntity(coord);
 		if(tile instanceof DrillBitTileEntity) ((DrillBitTileEntity) tile).setDirection(dir);
 	}
 	
@@ -76,7 +78,7 @@ public class DrillBitTileEntity extends TileEntity implements ITickableTileEntit
 	}
 	
 	@Override
-	public CompoundNBT save(CompoundNBT root){
+	public CompoundTag save(CompoundTag root){
 		super.save(root);
 		writeDirectionToNBT(root);
 		return root;
@@ -84,38 +86,38 @@ public class DrillBitTileEntity extends TileEntity implements ITickableTileEntit
 	
 
 	@Override
-	public void load(net.minecraft.block.BlockState state, CompoundNBT root){
-		super.load(state, root);
+	public void load(CompoundTag root){
+		super.load(root);
 		readDirectionFromNBT(root);
 	}
 
 	@Override
-	public CompoundNBT getUpdateTag() {
-		return save(new CompoundNBT());
+	public CompoundTag getUpdateTag() {
+		return save(new CompoundTag());
 	}
 
 	/**
 	 * Turns the data field NBT into a network packet
 	 */
 	@Override 
-	public SUpdateTileEntityPacket getUpdatePacket(){
-		CompoundNBT nbtTag = new CompoundNBT();
+	public ClientboundBlockEntityDataPacket getUpdatePacket(){
+		CompoundTag nbtTag = new CompoundTag();
 		writeDirectionToNBT(nbtTag);
-		return new SUpdateTileEntityPacket(this.getBlockPos(), 0, nbtTag);
+		return new ClientboundBlockEntityDataPacket(this.getBlockPos(), 0, nbtTag);
 	}
 	/**
 	 * Receives the network packet made by <code>getDescriptionPacket()</code>
 	 */
 	@Override
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket packet) {
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
 		readDirectionFromNBT(packet.getTag());
 	}
 
-	private void writeDirectionToNBT(CompoundNBT root) {
+	private void writeDirectionToNBT(CompoundTag root) {
 		root.putByte("dir", (byte)direction.get3DDataValue());
 	}
 
-	private void readDirectionFromNBT(CompoundNBT root) {
+	private void readDirectionFromNBT(CompoundTag root) {
 		if(root.contains("dir")){
 			this.direction = decodeDirection(root.getByte("dir"));
 		} else if(root.contains("d")){

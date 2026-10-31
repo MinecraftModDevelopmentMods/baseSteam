@@ -2,11 +2,11 @@ package zone.moddev.mc.steamadvantage.gui;
 
 import cyano.poweradvantage.api.simple.SimpleMachineGUI.GUIContainer;
 import zone.moddev.mc.poweradvantage.gui.FluidTankGUI;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import cyano.poweradvantage.api.fluid.FluidStack;
 
 @net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
@@ -41,10 +41,10 @@ public abstract class GUIHelper {
 		float angle = (1f - value) * PI;
 		float offsetX = pivotX;
 		float offsetY = pivotY;
-		BufferBuilder renderer = Tessellator.getInstance().getBuilder();
+		BufferBuilder renderer = Tesselator.getInstance().getBuilder();
 
-		float sin = MathHelper.sin(angle);
-		float cos = MathHelper.cos(angle);
+		float sin = Mth.sin(angle);
+		float cos = Mth.cos(angle);
 
 		float tipX =   cos * needleL + offsetX;
 		float tipY =  -sin * needleL + offsetY;
@@ -75,13 +75,14 @@ public abstract class GUIHelper {
 		v[2] = v[1];		
 		v[3] = v[0];
 		
-		renderer.begin(7, DefaultVertexFormats.POSITION_TEX);
+		com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionTexShader);
+		renderer.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
 		// (x, y, z, u, v)
 		for(int i = 3; i >= 0; i--){
 			renderer.vertex(x[i], y[i], zLevel).uv(u[i],v[i]).endVertex();;
 		}
-		net.minecraft.client.renderer.Tessellator.getInstance().end();
+		com.mojang.blaze3d.vertex.Tesselator.getInstance().end();
 		
 	}
 	
@@ -111,7 +112,7 @@ public abstract class GUIHelper {
 		if(barHeight > 0){
 			FluidTankGUI.drawFluidFilledRectangle(guiContainer,fs,x+xPos, y+yPos+barSlotHeight-h,w, h,z);
 		}
-			net.minecraft.client.Minecraft.getInstance().getTextureManager().bind(displayImage);
+			com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, displayImage);
 		
 		guiContainer.blit(x+xPos-texMarginW, y+yPos-texMarginH, texOverlayX, texOverlayY, texOverlayW, texOverlayH); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}

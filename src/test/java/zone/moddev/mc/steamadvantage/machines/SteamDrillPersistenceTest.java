@@ -1,10 +1,10 @@
 package zone.moddev.mc.steamadvantage.machines;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
 import zone.moddev.mc.steamadvantage.init.Power;
 import java.lang.reflect.Field;
 import java.io.InputStream;
@@ -25,33 +25,33 @@ import static org.junit.Assert.assertTrue;
 
 public class SteamDrillPersistenceTest {
     @BeforeClass public static void bootstrapNativeRegistries() {
-        net.minecraft.util.registry.Bootstrap.bootStrap();
+        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
     }
 
     @Test public void retainsLegacyProgressUntilWorldIsAttached() {
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
-        drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), target(94));
+        drill.load(target(94));
         drill.prepareDataFieldsForSync();
         assertEquals(94, drill.getDataFieldArray()[1]);
     }
 
     @Test public void clearsPreviousProgressOnReadingAnUntargetedTile() {
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
-        drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), target(94));
-        drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), new CompoundNBT());
+        drill.load(target(94));
+        drill.load(new CompoundTag());
         drill.prepareDataFieldsForSync();
         assertEquals(0, drill.getDataFieldArray()[1]);
     }
 
     @Test public void preservesAllSixFacingsTargetAndWorkUntilWorldIsAttached() throws Exception {
         for (Direction facing : Direction.values()) {
-            CompoundNBT tag = target(94);
+            CompoundTag tag = target(94);
             tag.putByte("Facing", (byte) facing.get3DDataValue());
-            CompoundNBT state = new CompoundNBT();
+            CompoundTag state = new CompoundTag();
             state.putString("Name", "minecraft:stone");
             tag.put("TargetState", state);
             SteamDrillTileEntity drill = new SteamDrillTileEntity();
-            drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
+            drill.load(tag);
             assertEquals(facing, field(drill, "savedFacing"));
             assertEquals(new BlockPos(2048, 80, 2049), field(drill, "targetBlockCoord"));
             assertEquals(state, field(drill, "savedTargetState"));
@@ -63,31 +63,31 @@ public class SteamDrillPersistenceTest {
 
     @Test public void loadingAnotherTileDoesNotKeepPreviousFacing() throws Exception {
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
-        CompoundNBT tag = target(94);
+        CompoundTag tag = target(94);
         tag.putByte("Facing", (byte) Direction.UP.get3DDataValue());
-        drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
-        drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), target(12));
+        drill.load(tag);
+        drill.load(target(12));
         assertNull(field(drill, "savedFacing"));
         tag.putByte("Facing", (byte) 127);
-        drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
+        drill.load(tag);
         assertNull(field(drill, "savedFacing"));
     }
 
     @Test public void legacyEnergyAndOutputInventorySurviveDeferredRestore() {
-        CompoundNBT tag = target(94);
+        CompoundTag tag = target(94);
         tag.putIntArray("Energy", new int[] { Float.floatToIntBits(37.5F) });
-        ListNBT items = new ListNBT();
-        CompoundNBT stack = new CompoundNBT();
+        ListTag items = new ListTag();
+        CompoundTag stack = new CompoundTag();
         stack.putString("id", "minecraft:cobblestone");
         stack.putByte("Count", (byte) 23);
         stack.putByte("Slot", (byte) 4);
         items.add(stack);
         tag.put("Items", items);
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
-        drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
+        drill.load(tag);
         assertEquals(37.5F, drill.getEnergy(Power.steam_power), 0.0F);
         ItemStack output = drill.getItem(4);
-        assertEquals(net.minecraft.item.Items.COBBLESTONE, output.getItem());
+        assertEquals(net.minecraft.world.item.Items.COBBLESTONE, output.getItem());
         assertEquals(23, output.getCount());
     }
 
@@ -119,14 +119,13 @@ public class SteamDrillPersistenceTest {
         infer.setAccessible(true);
         BlockPos origin = new BlockPos(2048, 80, 2048);
         for (Direction direction : Direction.values()) {
-            CompoundNBT tag = target(94);
+            CompoundTag tag = target(94);
             BlockPos target = origin.relative(direction, 3);
             tag.putInt("targetX", target.getX());
             tag.putInt("targetY", target.getY());
             tag.putInt("targetZ", target.getZ());
-            SteamDrillTileEntity drill = new SteamDrillTileEntity();
-            drill.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
-            drill.setPosition(origin);
+            SteamDrillTileEntity drill = new SteamDrillTileEntity(origin, new SteamDrillBlock().defaultBlockState());
+            drill.load(tag);
             assertNull(field(drill, "savedFacing"));
             assertEquals(direction, infer.invoke(drill));
         }
@@ -138,8 +137,8 @@ public class SteamDrillPersistenceTest {
         return field.get(drill);
     }
 
-    private static CompoundNBT target(int progress) {
-        CompoundNBT tag = new CompoundNBT();
+    private static CompoundTag target(int progress) {
+        CompoundTag tag = new CompoundTag();
         tag.putShort("progress", (short) progress);
         tag.putInt("targetX", 2048);
         tag.putInt("targetY", 80);

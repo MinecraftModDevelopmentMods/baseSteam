@@ -1,14 +1,14 @@
 package zone.moddev.mc.steamadvantage.machines;
 
 import cyano.poweradvantage.api.ConduitType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
 import zone.moddev.mc.steamadvantage.compat.BaseMetalsCompat;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.sounds.SoundSource;
 
 import static zone.moddev.mc.steamadvantage.util.SoundHelper.playSoundAtTileEntity;
 
@@ -24,8 +24,13 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	
 	private int progress = 0;
 	
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
 	public RockCrusherTileEntity() {
-		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_CRUSHER, Power.steam_power, 50, "tile.steamadvantage.steam_crusher.name");
+		this(net.minecraft.core.BlockPos.ZERO, new RockCrusherBlock().defaultBlockState());
+	}
+
+	public RockCrusherTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_CRUSHER, pos, state, Power.steam_power, 50, "tile.steamadvantage.steam_crusher.name");
 		allSlots = new int[inventory.length];
 		for(int i = 0; i < allSlots.length; i++){
 			allSlots[i] = i;
@@ -82,7 +87,7 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 							// play steam sounds occasionally
 							timeSinceLastSteamBurst++;
 							if(timeSinceLastSteamBurst > 50){
-								playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundCategory.AMBIENT, 0.5f, 1f, this);
+								playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 								timeSinceLastSteamBurst = 0;
 							}
 						} else if (progress > 0){
@@ -99,7 +104,7 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 							inventory[0].shrink(1);
 							if(inventory[0].isEmpty()){inventory[0] = null;} // decrement the input slot
 							progress = 0;
-							playSoundAtTileEntity( SoundEvents.GRAVEL_BREAK, SoundCategory.AMBIENT, 0.5f, 0.2f, this);
+							playSoundAtTileEntity( SoundEvents.GRAVEL_BREAK, SoundSource.AMBIENT, 0.5f, 0.2f, this);
 						}
 					} else if (progress > 0){
 						// cannot crush, undo progress
@@ -112,7 +117,7 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 	
@@ -194,15 +199,15 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	}
 	
 	@Override
-	public CompoundNBT save(CompoundNBT tagRoot){
+	public CompoundTag save(CompoundTag tagRoot){
 		super.save(tagRoot);
 		tagRoot.putShort("progress",(short)progress);
 		return tagRoot;
 	}
 	
 	@Override
-	public void load(net.minecraft.block.BlockState state, CompoundNBT tagRoot){
-		super.load(state, tagRoot);
+	public void load(CompoundTag tagRoot){
+		super.load(tagRoot);
 		if(tagRoot.contains("progress")){
 			progress = tagRoot.getShort("progress");
 		}

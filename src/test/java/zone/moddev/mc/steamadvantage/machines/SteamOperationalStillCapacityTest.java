@@ -2,9 +2,9 @@ package zone.moddev.mc.steamadvantage.machines;
 
 import cyano.poweradvantage.api.fluid.FluidStack;
 import java.lang.reflect.Method;
-import net.minecraft.block.Blocks;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import zone.moddev.mc.poweradvantage.registry.still.recipe.DistillationRecipe;
@@ -15,9 +15,9 @@ import static org.junit.Assert.*;
 /** Pure capacity planning; native operating regressions live in SteamOperationalCases. */
 public class SteamOperationalStillCapacityTest {
     @BeforeClass public static void bootstrap() {
-        net.minecraft.util.registry.Bootstrap.bootStrap();
+        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
         if (Entities.STEAM_STILL == null) {
-            Entities.STEAM_STILL = TileEntityType.Builder.of(SteamStillTileEntity::new, Blocks.STONE).build(null);
+            Entities.STEAM_STILL = BlockEntityType.Builder.of(SteamStillTileEntity::new, Blocks.STONE).build(null);
         }
     }
 

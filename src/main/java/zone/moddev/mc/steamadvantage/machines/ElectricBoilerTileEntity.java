@@ -7,13 +7,13 @@ import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.fluid.FluidRequest;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.material.Fluid;
 
 import cyano.poweradvantage.api.fluid.FluidStack;
 import cyano.poweradvantage.api.fluid.FluidTank;
@@ -36,8 +36,13 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	
 	private final int[] dataSyncArray = new int[3];
 	
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
 	public ElectricBoilerTileEntity() {
-		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_BOILER_ELECTRIC, new ConduitType[]{Power.steam_power, ELECTRIC_POWER, Fluids.fluidConduit_general},
+		this(net.minecraft.core.BlockPos.ZERO, new ElectricBoilerBlock().defaultBlockState());
+	}
+
+	public ElectricBoilerTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_BOILER_ELECTRIC, pos, state, new ConduitType[]{Power.steam_power, ELECTRIC_POWER, Fluids.fluidConduit_general},
 				new float[]{100, MAX_ELECTRICITY, 1000},
 				"tile.steamadvantage.steam_boiler_electric.name");
 		tank = new FluidTank(FluidTank.BUCKET_VOLUME * 2) {
@@ -64,11 +69,11 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 				boilWater();
 				// play steam sounds occasionally
 				if(getLevel().random.nextInt(100) == 0){
-					playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundCategory.AMBIENT, 0.5f, 1f, this);
+					playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 				}
 				if(timeSinceSound > 200){
 					if(getTank().getFluidAmount() > 0){
-						playSoundAtTileEntity( SoundEvents.LAVA_AMBIENT, SoundCategory.AMBIENT, 0.3f, 1f, this);
+						playSoundAtTileEntity( SoundEvents.LAVA_AMBIENT, SoundSource.AMBIENT, 0.3f, 1f, this);
 					}
 					timeSinceSound = 0;
 				}
@@ -92,7 +97,7 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 	
@@ -172,7 +177,7 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	@Override
 	public void onDataFieldUpdate() {
 		this.setEnergy(Float.intBitsToFloat(dataSyncArray[0]), Power.steam_power);
-		this.getTank().setFluid(new FluidStack(net.minecraft.fluid.Fluids.WATER,dataSyncArray[1]));
+		this.getTank().setFluid(new FluidStack(net.minecraft.world.level.material.Fluids.WATER,dataSyncArray[1]));
 		this.setEnergy(Float.intBitsToFloat(dataSyncArray[2]),ELECTRIC_POWER);
 	}
 	
@@ -182,9 +187,9 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-    public CompoundNBT save(final CompoundNBT tagRoot) {
+    public CompoundTag save(final CompoundTag tagRoot) {
 		super.save(tagRoot);
-        CompoundNBT tankTag = new CompoundNBT();
+        CompoundTag tankTag = new CompoundTag();
         this.getTank().writeToNBT(tankTag);
         tagRoot.put("Tank", tankTag);
 		if(getEnergy(ELECTRIC_POWER) > 0)tagRoot.putFloat("Electricity", getEnergy(ELECTRIC_POWER));
@@ -195,10 +200,10 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
-		super.load(state, tagRoot);
+	public void load(final CompoundTag tagRoot) {
+		super.load(tagRoot);
 		if (tagRoot.contains("Tank")) {
-			CompoundNBT tankTag = tagRoot.getCompound("Tank");
+			CompoundTag tankTag = tagRoot.getCompound("Tank");
 			getTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
@@ -237,7 +242,7 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	@Override
 	public float addEnergy(float amount, ConduitType type){
 		if(Fluids.isFluidType(type)){
-			if(Fluids.conduitTypeToFluid(type) == net.minecraft.fluid.Fluids.WATER){
+			if(Fluids.conduitTypeToFluid(type) == net.minecraft.world.level.material.Fluids.WATER){
 				if(this.canFill(null, Fluids.conduitTypeToFluid(type))){
 					return this.fill(null, new FluidStack(Fluids.conduitTypeToFluid(type),(int)amount), true);
 				} else {
@@ -285,7 +290,7 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	
 	@Override
 	public PowerRequest getPowerRequest(ConduitType offer) {
-		if(Fluids.isFluidType(offer) && Fluids.conduitTypeToFluid(offer) == net.minecraft.fluid.Fluids.WATER){
+		if(Fluids.isFluidType(offer) && Fluids.conduitTypeToFluid(offer) == net.minecraft.world.level.material.Fluids.WATER){
 			PowerRequest request = new FluidRequest(FluidRequest.MEDIUM_PRIORITY+1,
 					(getTank().getCapacity() - getTank().getFluidAmount()),
 					this);
@@ -354,7 +359,7 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 	 */
 	@Override
 	public boolean canFill(Direction face, Fluid fluid) {
-		if(fluid != net.minecraft.fluid.Fluids.WATER) return false;
+		if(fluid != net.minecraft.world.level.material.Fluids.WATER) return false;
 		if(getTank().getFluid() == null) return true;
 		return getTank().getFluidAmount() <= getTank().getCapacity() && fluid.equals(getTank().getFluid().getFluid());
 	}

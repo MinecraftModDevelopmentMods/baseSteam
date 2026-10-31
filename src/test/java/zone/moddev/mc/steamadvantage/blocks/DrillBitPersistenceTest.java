@@ -1,20 +1,20 @@
 package zone.moddev.mc.steamadvantage.blocks;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class DrillBitPersistenceTest {
     @org.junit.BeforeClass public static void bootstrapNativeRegistries() {
-        net.minecraft.util.registry.Bootstrap.bootStrap();
+        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
     }
 
     @Test public void allSixDirectionsSurviveNativeUpdatePackets() {
         for (Direction direction : Direction.values()) {
             DrillBitTileEntity tile = new DrillBitTileEntity();
             tile.setDirection(direction);
-            CompoundNBT packet = tile.getUpdatePacket().getTag();
+            CompoundTag packet = tile.getUpdatePacket().getTag();
             assertEquals(direction.get3DDataValue(), packet.getByte("dir"));
             DrillBitTileEntity restored = new DrillBitTileEntity();
             restored.onDataPacket(null, tile.getUpdatePacket());
@@ -24,21 +24,21 @@ public class DrillBitPersistenceTest {
     }
 
     @Test public void oldDirectionKeyRemainsReadableAndCanonicalKeyWins() {
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.putByte("d", (byte) Direction.EAST.get3DDataValue());
         DrillBitTileEntity tile = new DrillBitTileEntity();
-        tile.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
+        tile.load(tag);
         assertEquals(Direction.Axis.X, tile.getDirection());
         tag.putByte("dir", (byte) Direction.NORTH.get3DDataValue());
-        tile.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
+        tile.load(tag);
         assertEquals(Direction.Axis.Z, tile.getDirection());
     }
 
     @Test public void invalidDirectionFallsBackToDown() {
-        CompoundNBT tag = new CompoundNBT();
+        CompoundTag tag = new CompoundTag();
         tag.putByte("dir", (byte) 127);
         DrillBitTileEntity tile = new DrillBitTileEntity();
-        tile.load(net.minecraft.block.Blocks.AIR.defaultBlockState(), tag);
+        tile.load(tag);
         assertEquals(Direction.DOWN.get3DDataValue(), tile.getUpdatePacket().getTag().getByte("dir"));
     }
 }

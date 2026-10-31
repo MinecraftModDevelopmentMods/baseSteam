@@ -1,10 +1,9 @@
 package zone.moddev.mc.steamadvantage.init;
 
-import java.util.function.Supplier;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -25,24 +24,24 @@ import zone.moddev.mc.steamadvantage.machines.SteamTankTileEntity;
 /** Stable tile entity registrations; registry names are unchanged from 1.12. */
 @Mod.EventBusSubscriber(modid = SteamAdvantage.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public final class Entities {
-    public static TileEntityType<CoalBoilerTileEntity> STEAM_BOILER_COAL;
-    public static TileEntityType<ElectricBoilerTileEntity> STEAM_BOILER_ELECTRIC;
-    public static TileEntityType<GeothermalBoilerTileEntity> STEAM_BOILER_GEOTHERMAL;
-    public static TileEntityType<SteamTankTileEntity> STEAM_TANK;
-    public static TileEntityType<BlastFurnaceTileEntity> STEAM_FURNACE;
-    public static TileEntityType<RockCrusherTileEntity> STEAM_CRUSHER;
-    public static TileEntityType<SteamDrillTileEntity> STEAM_DRILL;
-    public static TileEntityType<SteamElevatorTileEntity> STEAM_ELEVATOR;
-    public static TileEntityType<DrillBitTileEntity> DRILLBIT;
-    public static TileEntityType<SteamStillTileEntity> STEAM_STILL;
-    public static TileEntityType<SteamPumpTileEntity> STEAM_PUMP;
-    public static TileEntityType<OilBoilerTileEntity> STEAM_BOILER_OIL;
+    public static BlockEntityType<CoalBoilerTileEntity> STEAM_BOILER_COAL;
+    public static BlockEntityType<ElectricBoilerTileEntity> STEAM_BOILER_ELECTRIC;
+    public static BlockEntityType<GeothermalBoilerTileEntity> STEAM_BOILER_GEOTHERMAL;
+    public static BlockEntityType<SteamTankTileEntity> STEAM_TANK;
+    public static BlockEntityType<BlastFurnaceTileEntity> STEAM_FURNACE;
+    public static BlockEntityType<RockCrusherTileEntity> STEAM_CRUSHER;
+    public static BlockEntityType<SteamDrillTileEntity> STEAM_DRILL;
+    public static BlockEntityType<SteamElevatorTileEntity> STEAM_ELEVATOR;
+    public static BlockEntityType<DrillBitTileEntity> DRILLBIT;
+    public static BlockEntityType<SteamStillTileEntity> STEAM_STILL;
+    public static BlockEntityType<SteamPumpTileEntity> STEAM_PUMP;
+    public static BlockEntityType<OilBoilerTileEntity> STEAM_BOILER_OIL;
 
     private Entities() {}
     public static void init() {}
 
     @SubscribeEvent
-    public static void register(RegistryEvent.Register<TileEntityType<?>> event) {
+    public static void register(RegistryEvent.Register<BlockEntityType<?>> event) {
         STEAM_BOILER_COAL = register(event, "steam_boiler_coal", CoalBoilerTileEntity::new, Blocks.steam_boiler_coal);
         STEAM_BOILER_ELECTRIC = register(event, "steam_boiler_electric", ElectricBoilerTileEntity::new, Blocks.steam_boiler_electric);
         STEAM_BOILER_GEOTHERMAL = register(event, "steam_boiler_geothermal", GeothermalBoilerTileEntity::new, Blocks.steam_boiler_geothermal);
@@ -57,9 +56,9 @@ public final class Entities {
         STEAM_BOILER_OIL = register(event, "steam_boiler_oil", OilBoilerTileEntity::new, Blocks.steam_boiler_oil);
     }
 
-    private static <T extends TileEntity> TileEntityType<T> register(
-            RegistryEvent.Register<TileEntityType<?>> event, String id, Supplier<? extends T> factory, Block block) {
-        TileEntityType<T> type = TileEntityType.Builder.<T>of(factory, block).build(null);
+    private static <T extends BlockEntity> BlockEntityType<T> register(
+            RegistryEvent.Register<BlockEntityType<?>> event, String id, BlockEntityType.BlockEntitySupplier<T> factory, Block block) {
+        BlockEntityType<T> type = BlockEntityType.Builder.<T>of(factory, block).build(null);
         type.setRegistryName(SteamAdvantage.MODID, id);
         event.getRegistry().register(type);
         return type;

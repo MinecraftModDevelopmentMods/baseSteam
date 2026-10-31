@@ -1,9 +1,9 @@
 package zone.moddev.mc.steamadvantage.gui;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 
 import zone.moddev.mc.poweradvantage.math.Integer2D;
@@ -19,10 +19,10 @@ public class BlastFurnaceGUI extends SimpleMachineGUI{
 		);
 		for(int i = 4; i < 7; i++)super.specialSlots.put(i, (SlotContext c)->new Slot(c.machineInventory,c.slotIndex,c.screenPositionX,c.screenPositionY){
 			@Override
-			public ItemStack onTake(PlayerEntity player, ItemStack stack)
+			public void onTake(Player player, ItemStack stack)
 			{
 				stack.onCraftedBy(player.level, player, stack.getCount());
-				return super.onTake(player, stack);
+				super.onTake(player, stack);
 			}
 			@Override
 			public boolean mayPlace(ItemStack stack){ return false; }
@@ -47,7 +47,7 @@ public class BlastFurnaceGUI extends SimpleMachineGUI{
 	 * @param guiContainer This is the instance of GUIContainer that is drawing 
 	 * the GUI. You need to use it to draw on the screen. For example:<br>
 	   <pre>
-net.minecraft.client.Minecraft.getInstance().getTextureManager().bind(arrowTexture);
+com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, arrowTexture);
 guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, textureOffsetY, width, height)
 	   </pre>
 	 * @param x This is the x coordinate (in pixels) from the top-left corner of 

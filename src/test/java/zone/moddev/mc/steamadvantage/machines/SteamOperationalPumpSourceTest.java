@@ -2,17 +2,17 @@ package zone.moddev.mc.steamadvantage.machines;
 
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.IBucketPickupHandler;
-import net.minecraft.block.material.Material;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
@@ -29,7 +29,7 @@ public class SteamOperationalPumpSourceTest {
     private static final BlockPos SOURCE = new BlockPos(8, 80, 8);
 
     @BeforeClass public static void bootstrap() {
-        net.minecraft.util.registry.Bootstrap.bootStrap();
+        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
     }
 
     @Test public void nativePickupRetainsTheSlabAndOnlyClearsItsWater() {
@@ -92,11 +92,11 @@ public class SteamOperationalPumpSourceTest {
                 if (instruction instanceof FieldInsnNode) {
                     FieldInsnNode field = (FieldInsnNode) instruction;
                     assertFalse("Caller must not erase waterlogged hosts with AIR",
-                            field.getOpcode() == Opcodes.GETSTATIC && field.owner.equals("net/minecraft/block/Blocks")
+                            field.getOpcode() == Opcodes.GETSTATIC && field.owner.equals("net/minecraft/world/level/block/Blocks")
                                     && field.name.equals("AIR"));
                 } else if (instruction instanceof TypeInsnNode) {
                     TypeInsnNode type = (TypeInsnNode) instruction;
-                    if (type.getOpcode() == Opcodes.INSTANCEOF && type.desc.equals("net/minecraft/block/IBucketPickupHandler")) nativeGuard = true;
+                    if (type.getOpcode() == Opcodes.INSTANCEOF && type.desc.equals("net/minecraft/world/level/block/BucketPickup")) nativeGuard = true;
                 } else if (instruction instanceof MethodInsnNode) {
                     MethodInsnNode call = (MethodInsnNode) instruction;
                     assertFalse("No destructive fallback when native pickup is unavailable",
@@ -104,7 +104,7 @@ public class SteamOperationalPumpSourceTest {
                     if (candidate == pickup) {
                         assertFalse("Pickup policy delegates block mutation to the native handler",
                                 call.name.equals("setBlock") || call.name.equals("setBlockAndUpdate"));
-                        if (call.owner.equals("net/minecraft/block/IBucketPickupHandler") && call.name.equals("takeLiquid")) nativePickup = true;
+                        if (call.owner.equals("net/minecraft/world/level/block/BucketPickup") && call.name.equals("pickupBlock")) nativePickup = true;
                     } else {
                         if (call.name.equals("pickupSource")) extraction = index;
                         if (call.owner.equals("cyano/poweradvantage/api/fluid/FluidTank") && call.name.equals("fill")) fill = index;
@@ -122,20 +122,21 @@ public class SteamOperationalPumpSourceTest {
                 .orElseThrow(() -> new AssertionError("Missing pump method " + name));
     }
 
-    private static final class RefusingSource extends Block implements IBucketPickupHandler {
+    private static final class RefusingSource extends Block implements BucketPickup {
         private RefusingSource() { super(Block.Properties.of(Material.STONE)); }
         @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
-        @Override public Fluid takeLiquid(IWorld world, BlockPos pos, BlockState state) { return Fluids.EMPTY; }
+        @Override public net.minecraft.world.item.ItemStack pickupBlock(LevelAccessor world, BlockPos pos, BlockState state) { return net.minecraft.world.item.ItemStack.EMPTY; }
+        @Override public java.util.Optional<net.minecraft.sounds.SoundEvent> getPickupSound() { return java.util.Optional.empty(); }
     }
 
     private static final class PickupWorld {
         private BlockState state;
         private int writes;
-        private final IWorld world;
+        private final LevelAccessor world;
 
         private PickupWorld(BlockState initial) {
             state = initial;
-            world = (IWorld) Proxy.newProxyInstance(IWorld.class.getClassLoader(), new Class<?>[]{IWorld.class},
+            world = (LevelAccessor) Proxy.newProxyInstance(LevelAccessor.class.getClassLoader(), new Class<?>[]{LevelAccessor.class},
                     (proxy, method, arguments) -> {
                         if (method.getName().equals("setBlock")) {
                             assertEquals(SOURCE, arguments[0]);

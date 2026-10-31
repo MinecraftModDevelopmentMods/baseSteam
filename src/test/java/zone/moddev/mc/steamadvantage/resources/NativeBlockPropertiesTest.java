@@ -3,15 +3,15 @@ package zone.moddev.mc.steamadvantage.resources;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.registry.Bootstrap;
-import net.minecraft.world.EmptyBlockReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.server.Bootstrap;
+import net.minecraft.world.level.EmptyBlockGetter;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -35,7 +35,7 @@ public class NativeBlockPropertiesTest {
     @Parameterized.Parameter(1) public int height;
     private Block block;
 
-    @BeforeClass public static void bootstrapNativeRegistries() { Bootstrap.bootStrap(); }
+    @BeforeClass public static void bootstrapNativeRegistries() { net.minecraft.SharedConstants.tryDetectVersion(); Bootstrap.bootStrap(); }
 
     @Before public void createNativeBlockAndStateCaches() {
         block = height < 0 ? new SteamTrackBlock() : new PlatformBlock();
@@ -48,7 +48,7 @@ public class NativeBlockPropertiesTest {
 
     @Test public void remainsNonOpaque() {
         for (BlockState state : states()) {
-            assertFalse(state.toString(), state.isSolidRender(EmptyBlockReader.INSTANCE, BlockPos.ZERO));
+            assertFalse(state.toString(), state.isSolidRender(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
         }
     }
 
@@ -56,13 +56,13 @@ public class NativeBlockPropertiesTest {
         // Native opacity is 1, not 0, for a non-solid block with a full-cube outline.
         int expected = height < 0 || height == 4 ? 1 : 0;
         for (BlockState state : states()) {
-            assertEquals(state.toString(), expected, state.getLightBlock(EmptyBlockReader.INSTANCE, BlockPos.ZERO));
+            assertEquals(state.toString(), expected, state.getLightBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
         }
     }
 
     @Test public void remainsANonNormalCube() {
         for (BlockState state : states()) {
-            assertFalse(state.toString(), state.isRedstoneConductor(EmptyBlockReader.INSTANCE, BlockPos.ZERO));
+            assertFalse(state.toString(), state.isRedstoneConductor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
         }
     }
 
@@ -78,29 +78,29 @@ public class NativeBlockPropertiesTest {
     @Test public void retainsExactNativeStrengthAndHarvestLevel() {
         for (BlockState state : states()) {
             assertEquals(height < 0 ? 0.75F : 5.0F,
-                    state.getDestroySpeed(EmptyBlockReader.INSTANCE, BlockPos.ZERO), 0.0F);
-            assertEquals(-1, state.getHarvestLevel());
-            assertNull(state.getHarvestTool());
+                    state.getDestroySpeed(EmptyBlockGetter.INSTANCE, BlockPos.ZERO), 0.0F);
+            assertFalse("Native tags must not add a mandatory harvest tool or tier",
+                    state.requiresCorrectToolForDrops());
         }
     }
 
     @Test public void fullCollisionHelpersNeitherSuffocateNorBlockTheView() {
         for (BlockState state : states()) {
-            assertFalse(state.toString(), state.isSuffocating(EmptyBlockReader.INSTANCE, BlockPos.ZERO));
-            assertFalse(state.toString(), state.isViewBlocking(EmptyBlockReader.INSTANCE, BlockPos.ZERO));
+            assertFalse(state.toString(), state.isSuffocating(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+            assertFalse(state.toString(), state.isViewBlocking(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
         }
     }
 
     @Test public void preservesOutlineAndCollisionShapes() {
-        VoxelShape expected = height < 0 || height == 4 ? VoxelShapes.block()
-                : height == 0 ? VoxelShapes.box(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D)
-                : VoxelShapes.box(0.0D, 0.0D, 0.0D, 1.0D, height * 0.25D, 1.0D);
+        VoxelShape expected = height < 0 || height == 4 ? Shapes.block()
+                : height == 0 ? Shapes.box(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D)
+                : Shapes.box(0.0D, 0.0D, 0.0D, 1.0D, height * 0.25D, 1.0D);
         if (height < 0) assertEquals(64, states().size());
         for (BlockState state : states()) {
-            assertFalse(state + " outline", VoxelShapes.joinIsNotEmpty(expected,
-                    state.getShape(EmptyBlockReader.INSTANCE, BlockPos.ZERO), IBooleanFunction.NOT_SAME));
-            assertFalse(state + " collision", VoxelShapes.joinIsNotEmpty(expected,
-                    state.getCollisionShape(EmptyBlockReader.INSTANCE, BlockPos.ZERO), IBooleanFunction.NOT_SAME));
+            assertFalse(state + " outline", Shapes.joinIsNotEmpty(expected,
+                    state.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO), BooleanOp.NOT_SAME));
+            assertFalse(state + " collision", Shapes.joinIsNotEmpty(expected,
+                    state.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO), BooleanOp.NOT_SAME));
         }
     }
 

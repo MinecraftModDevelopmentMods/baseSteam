@@ -1,6 +1,6 @@
 package zone.moddev.mc.steamadvantage.util;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.ForgeHooks;
 
 /** Forge-aware access to the vanilla furnace fuel calculation. */

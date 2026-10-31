@@ -5,7 +5,7 @@ import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 import zone.moddev.mc.poweradvantage.math.Integer2D;
 import zone.moddev.mc.steamadvantage.SteamAdvantage;
 import zone.moddev.mc.steamadvantage.machines.SteamPumpTileEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import cyano.poweradvantage.api.fluid.FluidStack;
 
 public class SteamPumpGUI extends SimpleMachineGUI{
@@ -34,7 +34,7 @@ public class SteamPumpGUI extends SimpleMachineGUI{
 	 * @param guiContainer This is the instance of GUIContainer that is drawing 
 	 * the GUI. You need to use it to draw on the screen. For example:<br>
 	   <pre>
-net.minecraft.client.Minecraft.getInstance().getTextureManager().bind(arrowTexture);
+com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, arrowTexture);
 guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, textureOffsetY, width, height)
 	   </pre>
 	 * @param x This is the x coordinate (in pixels) from the top-left corner of 

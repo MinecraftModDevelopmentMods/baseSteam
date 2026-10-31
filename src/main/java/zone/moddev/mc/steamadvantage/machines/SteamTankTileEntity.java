@@ -4,9 +4,9 @@ import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.fluid.FluidTank;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 
 @SuppressWarnings("deprecation")
 public class SteamTankTileEntity  extends cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine {
@@ -14,8 +14,13 @@ public class SteamTankTileEntity  extends cyano.poweradvantage.api.simple.TileEn
 	private final ItemStack[] inventory = new ItemStack[0];
 	private final int[] dataSyncArray = new int[1];
 	
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
 	public SteamTankTileEntity() {
-		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_TANK, Power.steam_power, FluidTank.BUCKET_VOLUME * 10, "tile.steamadvantage.steam_tank.name");
+		this(net.minecraft.core.BlockPos.ZERO, new SteamTankBlock().defaultBlockState());
+	}
+
+	public SteamTankTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_TANK, pos, state, Power.steam_power, FluidTank.BUCKET_VOLUME * 10, "tile.steamadvantage.steam_tank.name");
 	}
 	
 	private boolean redstone = true;
@@ -116,7 +121,7 @@ public class SteamTankTileEntity  extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 }

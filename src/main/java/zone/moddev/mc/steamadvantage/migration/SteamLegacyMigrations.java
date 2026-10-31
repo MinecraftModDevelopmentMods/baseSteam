@@ -2,11 +2,11 @@ package zone.moddev.mc.steamadvantage.migration;
 
 import cyano.poweradvantage.api.migration.LegacyMigrationApi;
 import cyano.poweradvantage.api.simple.BlockSimplePowerMachine;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import zone.moddev.mc.poweradvantage.blocks.BlockPowerSwitch;
 import zone.moddev.mc.steamadvantage.SteamAdvantage;
 import zone.moddev.mc.steamadvantage.blocks.PlatformBlock;
@@ -81,7 +81,7 @@ public final class SteamLegacyMigrations {
         return Math.min(metadata & 15, 4);
     }
 
-    static boolean repairPersistenceKeys(CompoundNBT compound) {
+    static boolean repairPersistenceKeys(CompoundTag compound) {
         String id = compound.getString("id");
         boolean changed = false;
         if (isTile(id, "steam_pump") && !compound.contains("Tank", 10) && compound.contains("TankOut", 10)) {

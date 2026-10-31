@@ -6,11 +6,11 @@ import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.steamadvantage.init.Blocks;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 
 
 /**
@@ -27,8 +27,8 @@ public class SteamPumpBlock extends cyano.poweradvantage.api.simple.BlockSimpleP
 	}
 
 	@Override
-	public PoweredEntity newBlockEntity(net.minecraft.world.IBlockReader world) {
-		return new SteamPumpTileEntity();
+	public PoweredEntity newBlockEntity(net.minecraft.core.BlockPos pos, BlockState state) {
+		return new SteamPumpTileEntity(pos, state);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class SteamPumpBlock extends cyano.poweradvantage.api.simple.BlockSimpleP
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState bs, World world, BlockPos coord) {
+	public int getAnalogOutputSignal(BlockState bs, Level world, BlockPos coord) {
 		if(world.getBlockEntity(coord) instanceof SteamPumpTileEntity){
 			return ((SteamPumpTileEntity)world.getBlockEntity(coord)).getComparatorOutput();
 		}
@@ -57,19 +57,19 @@ public class SteamPumpBlock extends cyano.poweradvantage.api.simple.BlockSimpleP
 		return !ConduitType.areSameType(Power.steam_power, type);
 	}
 	@Override
-	public void onRemove(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
+	public void onRemove(BlockState state, Level w, BlockPos coord, BlockState newState, boolean isMoving) {
 		if (state.getBlock() != newState.getBlock()) destroyPipe(w, coord);
 		super.onRemove(state, w, coord, newState, isMoving);
 	}
 
 	@Override
-	public void wasExploded(World w, BlockPos coord, Explosion boom){
+	public void wasExploded(Level w, BlockPos coord, Explosion boom){
 		destroyPipe(w, coord);
 		super.wasExploded(w, coord, boom);
 	}
 	
 	
-	private void destroyPipe(World w, BlockPos coord) {
+	private void destroyPipe(Level w, BlockPos coord) {
 		if(w.isClientSide) return;
 		// destroy connected drill bits
 		BlockPos c = coord.below();

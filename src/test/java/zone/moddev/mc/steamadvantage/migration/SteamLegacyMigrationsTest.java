@@ -5,8 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import cyano.poweradvantage.api.migration.LegacyMigrationApi;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
 import org.junit.Test;
 
 public class SteamLegacyMigrationsTest {
@@ -23,21 +23,21 @@ public class SteamLegacyMigrationsTest {
     }
 
     @Test public void repairsLegacyPumpAndGeothermalKeysWithoutOverwritingCanonicalState() {
-        CompoundNBT pump = new CompoundNBT();
+        CompoundTag pump = new CompoundTag();
         pump.putString("id", "steamadvantage.steam_pump");
-        CompoundNBT oldTank = new CompoundNBT();
+        CompoundTag oldTank = new CompoundTag();
         oldTank.putInt("Amount", 1250);
         pump.put("TankOut", oldTank);
         assertTrue(SteamLegacyMigrations.repairPersistenceKeys(pump));
         assertEquals(1250, pump.getCompound("Tank").getInt("Amount"));
 
-        CompoundNBT boiler = new CompoundNBT();
+        CompoundTag boiler = new CompoundTag();
         boiler.putString("id", "steamadvantage:steam_boiler_geothermal");
         boiler.putFloat("Tempoerature", 412.5F);
         assertTrue(SteamLegacyMigrations.repairPersistenceKeys(boiler));
         assertEquals(412.5F, boiler.getFloat("Temperature"), 0.0F);
 
-        CompoundNBT canonical = new CompoundNBT();
+        CompoundTag canonical = new CompoundTag();
         canonical.putString("id", "steamadvantage:steam_boiler_geothermal");
         canonical.putFloat("Temperature", 500.0F);
         canonical.putFloat("Tempoerature", 100.0F);

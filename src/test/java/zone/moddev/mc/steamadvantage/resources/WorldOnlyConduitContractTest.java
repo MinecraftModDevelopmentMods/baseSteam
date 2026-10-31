@@ -26,7 +26,7 @@ public class WorldOnlyConduitContractTest {
                     if (!call.owner.equals("zone/moddev/mc/poweradvantage/conduitnetwork/ConduitRegistry")
                             || !call.name.startsWith("conduitBlock")) continue;
                     assertTrue(type + "." + method.name + call.desc,
-                            call.desc.startsWith("(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;"));
+                            call.desc.startsWith("(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;"));
                     callbacks++;
                 }
             }

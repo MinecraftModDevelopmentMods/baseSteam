@@ -5,11 +5,11 @@ import cyano.poweradvantage.api.PoweredEntity;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 
 
 /**
@@ -26,8 +26,8 @@ public class OilBoilerBlock extends cyano.poweradvantage.api.simple.BlockSimpleP
 	}
 
 	@Override
-	public PoweredEntity newBlockEntity(net.minecraft.world.IBlockReader world) {
-		return new OilBoilerTileEntity();
+	public PoweredEntity newBlockEntity(net.minecraft.core.BlockPos pos, BlockState state) {
+		return new OilBoilerTileEntity(pos, state);
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class OilBoilerBlock extends cyano.poweradvantage.api.simple.BlockSimpleP
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState bs, World world, BlockPos coord) {
+	public int getAnalogOutputSignal(BlockState bs, Level world, BlockPos coord) {
 		if(world.getBlockEntity(coord) instanceof OilBoilerTileEntity){
 			return ((OilBoilerTileEntity)world.getBlockEntity(coord)).getComparatorOutput();
 		}

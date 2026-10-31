@@ -5,22 +5,22 @@ import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.steamadvantage.blocks.DrillBitTileEntity;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.block.material.Material;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.item.Item;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.Container;
+import net.minecraft.world.Containers;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 
 import java.util.Random;
 
@@ -40,7 +40,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * Override of default block behavior
 	 */
 	@Override
-	public void onPlace(final BlockState state, final World world, final BlockPos coord, final BlockState oldState, final boolean moving) {
+	public void onPlace(final BlockState state, final Level world, final BlockPos coord, final BlockState oldState, final boolean moving) {
 		super.onPlace(state, world, coord, oldState, moving);
 		ConduitRegistry.getInstance().conduitBlockPlacedEvent(world, coord, Power.steam_power);
 	}
@@ -48,7 +48,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onRemove(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving){
+	public void onRemove(BlockState state, Level w, BlockPos coord, BlockState newState, boolean isMoving){
 		if (state.getBlock() != newState.getBlock()) {
 			destroyNeighbors(w, coord, state);
 			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, Power.steam_power);
@@ -59,7 +59,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void wasExploded(World w, BlockPos coord, Explosion boom){
+	public void wasExploded(Level w, BlockPos coord, Explosion boom){
 		destroyNeighbors(w,coord,w.getBlockState(coord));
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, Power.steam_power);
 		super.wasExploded(w, coord, boom);
@@ -67,7 +67,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 
 
 
-	private void destroyNeighbors(World w, BlockPos coord, BlockState state) {
+	private void destroyNeighbors(Level w, BlockPos coord, BlockState state) {
 		if(w.isClientSide) return;
 		// destroy connected drill bits
 		for(int i = 0; i < 6; i++){
@@ -85,8 +85,8 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * <b>TileEntitySimplePowerConsumer</b>.
 	 */
 	@Override
-	public PoweredEntity newBlockEntity(final net.minecraft.world.IBlockReader world){
-		return new SteamDrillTileEntity();
+	public PoweredEntity newBlockEntity(net.minecraft.core.BlockPos pos, BlockState state){
+		return new SteamDrillTileEntity(pos, state);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * Creates the blockstate of this block when it is placed in the world
 	 */
 	@Override
-	public BlockState getStateForPlacement(final BlockItemUseContext context) {
+	public BlockState getStateForPlacement(final BlockPlaceContext context) {
 		return this.defaultBlockState().setValue(FACING, context.getClickedFace().getOpposite());
 	}
 
@@ -128,10 +128,10 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * Creates the blockstate of this block when it is placed in the world
 	 */
 	@Override
-	public void setPlacedBy(final World world, final BlockPos coord, final BlockState bs,
+	public void setPlacedBy(final Level world, final BlockPos coord, final BlockState bs,
 			final LivingEntity placer, final ItemStack srcItemStack) {
 		if (srcItemStack.hasCustomHoverName()) {
-			final TileEntity tileEntity = world.getBlockEntity(coord);
+			final BlockEntity tileEntity = world.getBlockEntity(coord);
 			if (tileEntity instanceof PoweredEntity){
 				((PoweredEntity)tileEntity).setCustomInventoryName(srcItemStack.getDisplayName().getString());
 			}
@@ -183,8 +183,8 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * @return a number from 0 to 15
 	 */
 	@Override
-	public int getAnalogOutputSignal(BlockState bs, final World world, final BlockPos coord){
-		TileEntity te = world.getBlockEntity(coord);
+	public int getAnalogOutputSignal(BlockState bs, final Level world, final BlockPos coord){
+		BlockEntity te = world.getBlockEntity(coord);
 		if(te instanceof SteamDrillTileEntity){
 			return ((SteamDrillTileEntity)te).getComparatorOutput();
 		} else {
@@ -196,7 +196,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * Creates a blockstate
 	 */
 	@Override
-	protected void createBlockStateDefinition(StateContainer.Builder<net.minecraft.block.Block, BlockState> builder) {
+	protected void createBlockStateDefinition(StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
 		builder.add(FACING);
 	}
 

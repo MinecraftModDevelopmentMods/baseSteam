@@ -2,19 +2,19 @@ package zone.moddev.mc.steamadvantage.machines;
 
 import static org.junit.Assert.*;
 import java.lang.reflect.Field;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RockCrusherReloadRedstoneTest {
     @BeforeClass public static void bootstrap() {
-        net.minecraft.util.registry.Bootstrap.bootStrap();
+        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
         if (zone.moddev.mc.steamadvantage.init.Entities.STEAM_CRUSHER == null)
-            zone.moddev.mc.steamadvantage.init.Entities.STEAM_CRUSHER = net.minecraft.tileentity.TileEntityType.Builder.of(RockCrusherTileEntity::new, net.minecraft.block.Blocks.STONE).build(null);
+            zone.moddev.mc.steamadvantage.init.Entities.STEAM_CRUSHER = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(RockCrusherTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
         if (zone.moddev.mc.steamadvantage.init.Entities.STEAM_FURNACE == null)
-            zone.moddev.mc.steamadvantage.init.Entities.STEAM_FURNACE = net.minecraft.tileentity.TileEntityType.Builder.of(BlastFurnaceTileEntity::new, net.minecraft.block.Blocks.STONE).build(null);
+            zone.moddev.mc.steamadvantage.init.Entities.STEAM_FURNACE = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(BlastFurnaceTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
     }
 
     @Test public void resumedWorkCannotBeDecrementedBeforeTheFirstLiveControlSample() throws Exception {
@@ -72,14 +72,14 @@ public class RockCrusherReloadRedstoneTest {
     }
     private static final class ProbeCrusher extends RockCrusherTileEntity {
         ControlWorld testWorld;
-        @Override public World getLevel() { return testWorld; }
+        @Override public Level getLevel() { return testWorld; }
     }
     private static final class ProbeFurnace extends BlastFurnaceTileEntity {
         ControlWorld testWorld;
-        @Override public World getLevel() { return testWorld; }
+        @Override public Level getLevel() { return testWorld; }
     }
     private static final class ControlSample extends RuntimeException {}
-    private static final class ControlWorld extends ServerWorld {
+    private static final class ControlWorld extends ServerLevel {
         boolean powered, stopAtFirstSample;
         int samples;
         private ControlWorld() { super(null, null, null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false); }

@@ -1,7 +1,7 @@
 package zone.moddev.mc.steamadvantage.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import zone.moddev.mc.steamadvantage.SteamAdvantage;
 
 /** Common configuration retaining the legacy gameplay defaults. */
@@ -29,7 +29,7 @@ public final class SteamAdvantageConfig {
 
     private SteamAdvantageConfig() {}
 
-    public static void onConfigLoading(ModConfig.Loading event) {
+    public static void onConfigLoading(ModConfigEvent.Loading event) {
         if (event.getConfig().getSpec() != SPEC) return;
         loaded = true;
         apply();

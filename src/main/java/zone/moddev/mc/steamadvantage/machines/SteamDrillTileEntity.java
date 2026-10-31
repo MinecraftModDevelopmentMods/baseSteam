@@ -6,22 +6,22 @@ import zone.moddev.mc.steamadvantage.blocks.DrillBitTileEntity;
 import zone.moddev.mc.steamadvantage.compat.BaseMetalsCompat;
 import zone.moddev.mc.steamadvantage.init.Blocks;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ISidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.Container;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +44,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	private int progressGoal = 0;
 	private BlockPos targetBlockCoord = null;
 	private BlockState targetBlockState = null;
-	private CompoundNBT savedTargetState = null;
+	private CompoundTag savedTargetState = null;
 	private Block targetBlock = null;
 	private List<ItemStack> targetBlockItems = null;
 	private Direction oldDir = null;
@@ -53,8 +53,13 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	
 	private boolean deferred = false;
 	
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
 	public SteamDrillTileEntity() {
-		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_DRILL, Power.steam_power, 50, "tile.steamadvantage.steam_drill.name");
+		this(net.minecraft.core.BlockPos.ZERO, new SteamDrillBlock().defaultBlockState());
+	}
+
+	public SteamDrillTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_DRILL, pos, state, Power.steam_power, 50, "tile.steamadvantage.steam_drill.name");
 	}
 
 	
@@ -89,8 +94,8 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 						progress++;
 						if(progress >= progressGoal){
 							// Mined it!
-							playSoundAtPosition(targetBlockCoord.getX()+0.5, targetBlockCoord.getY()+0.5, targetBlockCoord.getZ()+0.5, targetBlock.getSoundType(targetBlockState, powerAdvantageWorld(), targetBlockCoord, null).getPlaceSound(), SoundCategory.BLOCKS, 0.5f, 1f, this.powerAdvantageWorld());
-							playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundCategory.AMBIENT, 0.5f, 1f, this);
+							playSoundAtPosition(targetBlockCoord.getX()+0.5, targetBlockCoord.getY()+0.5, targetBlockCoord.getZ()+0.5, targetBlock.getSoundType(targetBlockState, powerAdvantageWorld(), targetBlockCoord, null).getPlaceSound(), SoundSource.BLOCKS, 0.5f, 1f, this.powerAdvantageWorld());
+							playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 							powerAdvantageWorld().removeBlock(targetBlockCoord, false);
 							for(ItemStack item : targetBlockItems){
 								addItem(item);
@@ -173,24 +178,23 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 		
 		// clone this block into neighboring block
 		this.untargetBlock();
-		World w = powerAdvantageWorld();
+		Level w = powerAdvantageWorld();
 		BlockPos currentPos = powerAdvantagePos();
 		BlockPos nextPos = currentPos.relative(trackDir);
 		BlockState trackState = w.getBlockState(nextPos);
 		w.setBlock(nextPos, w.getBlockState(currentPos), 2);
-		TileEntity movedTile = w.getBlockEntity(nextPos);
+		BlockEntity movedTile = w.getBlockEntity(nextPos);
 		if(!(movedTile instanceof SteamDrillTileEntity)){
 			w.setBlock(nextPos, trackState, 2);
 			return false;
 		}
 		SteamDrillTileEntity te = (SteamDrillTileEntity)movedTile;
-		CompoundNBT dataTransfer = new CompoundNBT();
+		CompoundTag dataTransfer = new CompoundTag();
 		this.save(dataTransfer);
 		dataTransfer.putInt("x", nextPos.getX());
 		dataTransfer.putInt("y", nextPos.getY());
 		dataTransfer.putInt("z", nextPos.getZ());
-		te.load(w.getBlockState(nextPos), dataTransfer);
-		te.setPosition(nextPos);
+		te.load(dataTransfer);
 		te.clearRemoved();
 		te.subtractEnergy(ENERGY_COST_MOVE, Power.steam_power);
 		te.setChanged();
@@ -328,14 +332,14 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 		targetBlockCoord = n;
 		progressGoal = this.getBlockStrength(n);
 		targetBlockState = powerAdvantageWorld().getBlockState(n);
-		savedTargetState = NBTUtil.writeBlockState(targetBlockState);
+		savedTargetState = NbtUtils.writeBlockState(targetBlockState);
 		targetBlock = targetBlockState.getBlock();
 		ItemStack crusherOutput = BaseMetalsCompat.getCrusherRecipeOutput(powerAdvantageWorld(), targetBlockState);
 		if(crusherOutput != null){
 			targetBlockItems = Arrays.asList(crusherOutput);
 		} else {
 			NonNullList<ItemStack> drops = NonNullList.create();
-			drops.addAll(Block.getDrops(targetBlockState, (ServerWorld) powerAdvantageWorld(), n,
+			drops.addAll(Block.getDrops(targetBlockState, (ServerLevel) powerAdvantageWorld(), n,
 					powerAdvantageWorld().getBlockEntity(n)));
 			targetBlockItems = drops;
 		}
@@ -347,7 +351,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 				|| !powerAdvantageWorld().hasChunkAt(targetBlockCoord)) return;
 		int savedProgress = progress;
 		if(savedTargetState != null && !savedTargetState.equals(
-				NBTUtil.writeBlockState(powerAdvantageWorld().getBlockState(targetBlockCoord)))){
+				NbtUtils.writeBlockState(powerAdvantageWorld().getBlockState(targetBlockCoord)))){
 			untargetBlock();
 			return;
 		}
@@ -412,7 +416,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	
 	private boolean canMine(BlockPos coord){
 		Block b = powerAdvantageWorld().getBlockState(coord).getBlock();
-		return !(b == net.minecraft.block.Blocks.BEDROCK || b == net.minecraft.block.Blocks.BARRIER);
+		return !(b == net.minecraft.world.level.block.Blocks.BEDROCK || b == net.minecraft.world.level.block.Blocks.BARRIER);
 	}
 	
 	private int getBlockStrength(BlockPos coord){
@@ -427,9 +431,9 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	
 
 	private void inventoryTransfer(BlockPos adj, Direction otherFace) {
-		TileEntity te = powerAdvantageWorld().getBlockEntity(adj);
-		if(te instanceof IInventory ){
-			ISidedInventory inv = InventoryWrapper.wrap((IInventory)te);
+		BlockEntity te = powerAdvantageWorld().getBlockEntity(adj);
+		if(te instanceof Container ){
+			WorldlyContainer inv = InventoryWrapper.wrap((Container)te);
 			int[] accessibleSlots = inv.getSlotsForFace(otherFace);
 			if(accessibleSlots.length == 0) return;
 			for(int mySlot = 0; mySlot < this.inventory.length; mySlot++){
@@ -466,7 +470,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	@Override
-	public CompoundNBT save(CompoundNBT tagRoot){
+	public CompoundTag save(CompoundTag tagRoot){
 		super.save(tagRoot);
 		tagRoot.putShort("progress",(short)progress);
 		// getFacing refreshes this during normal ticks. World lookups here can
@@ -482,8 +486,8 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 	
 	@Override
-	public void load(net.minecraft.block.BlockState state, CompoundNBT tagRoot){
-		super.load(state, tagRoot);
+	public void load(CompoundTag tagRoot){
+		super.load(tagRoot);
 		untargetBlock();
 		savedFacing = null;
 		oldDir = null;
@@ -540,7 +544,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 }

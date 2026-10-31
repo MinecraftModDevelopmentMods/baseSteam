@@ -1,19 +1,19 @@
 package zone.moddev.mc.steamadvantage.resources;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.resources.ResourcePackType;
-import net.minecraft.resources.SimpleReloadableResourceManager;
-import net.minecraft.resources.VanillaPack;
-import net.minecraft.tags.ITagCollection;
-import net.minecraft.tags.ITagCollectionSupplier;
-import net.minecraft.tags.TagCollectionManager;
-import net.minecraft.tags.TagCollectionReader;
-import net.minecraft.tags.TagRegistryManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.SimpleReloadableResourceManager;
+import net.minecraft.server.packs.VanillaPackResources;
+import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.SerializationTags;
+import net.minecraft.tags.TagLoader;
+import net.minecraft.tags.StaticTags;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Registry;
 import net.minecraftforge.common.ForgeHooks;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,19 +22,20 @@ import static org.junit.Assert.*;
 
 public class NativeFuelContractTest {
     @BeforeClass public static void bootstrapNativeFuel() {
-        net.minecraft.util.registry.Bootstrap.bootStrap();
+        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
         // Standalone tests need the actual vanilla item tags before the native fuel map.
         try (SimpleReloadableResourceManager resources =
-                     new SimpleReloadableResourceManager(ResourcePackType.SERVER_DATA)) {
-            resources.add(new VanillaPack("minecraft"));
-            TagCollectionReader<Item> reader =
-                    new TagCollectionReader<>(Registry.ITEM::getOptional, "tags/items", "item");
-            ITagCollection<Item> items = reader.load(reader.prepare(resources, Runnable::run).join());
+                     new SimpleReloadableResourceManager(PackType.SERVER_DATA)) {
+            resources.add(new VanillaPackResources(null, "minecraft"));
+            TagLoader<Item> reader =
+                    new TagLoader<>(Registry.ITEM::getOptional, "tags/items");
+            TagCollection<Item> items = reader.loadAndBuild(resources);
             assertTrue(items.getAllTags().containsKey(new ResourceLocation("minecraft:non_flammable_wood")));
-            ITagCollectionSupplier current = TagCollectionManager.getInstance();
-            TagRegistryManager.get(new ResourceLocation("minecraft:item")).reset(
-                    ITagCollectionSupplier.of(current.getBlocks(), items,
-                            current.getFluids(), current.getEntityTypes()));
+            TagContainer current = SerializationTags.getInstance();
+            TagContainer loaded = new TagContainer.Builder()
+                    .add(Registry.ITEM_REGISTRY, items).build();
+            StaticTags.resetAll(loaded);
+            SerializationTags.bind(loaded);
         }
         ForgeHooks.updateBurns();
     }
@@ -47,7 +48,7 @@ public class NativeFuelContractTest {
 
     @Test public void retainsTheForgeItemBurnTimeOverride() {
         Item item = new Item(new Item.Properties()) {
-            @Override public int getBurnTime(ItemStack stack, IRecipeType<?> recipeType) {
+            @Override public int getBurnTime(ItemStack stack, RecipeType<?> recipeType) {
                 assertNull(recipeType);
                 return 237;
             }

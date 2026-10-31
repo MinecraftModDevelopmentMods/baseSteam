@@ -2,12 +2,12 @@ package zone.moddev.mc.steamadvantage.init;
 
 import java.util.List;
 import java.util.Random;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.merchant.villager.VillagerProfession;
-import net.minecraft.entity.merchant.villager.VillagerTrades;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MerchantOffer;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -22,7 +22,7 @@ public final class Villages {
     @SubscribeEvent
     public static void addTrades(VillagerTradesEvent event) {
         VillagerProfession profession = event.getType();
-        List<VillagerTrades.ITrade> novice = event.getTrades().get(1);
+        List<VillagerTrades.ItemListing> novice = event.getTrades().get(1);
         if (profession == VillagerProfession.ARMORER || profession == VillagerProfession.TOOLSMITH
                 || profession == VillagerProfession.WEAPONSMITH || profession == VillagerProfession.LIBRARIAN) {
             novice.add(sell(Items.steam_governor, -4, -1));
@@ -43,7 +43,7 @@ public final class Villages {
         }
     }
 
-    private static VillagerTrades.ITrade sell(Item item, int min, int max) {
+    private static VillagerTrades.ItemListing sell(Item item, int min, int max) {
         return (trader, random) -> {
             int price = randomPrice(random, min, max);
             return offer(price < 0 ? 1 : price, new ItemStack(item, price < 0 ? -price : 1));
@@ -55,6 +55,6 @@ public final class Villages {
     }
 
     private static MerchantOffer offer(int emeralds, ItemStack output) {
-        return new MerchantOffer(new ItemStack(net.minecraft.item.Items.EMERALD, emeralds), output, 7, 1, 0.0F);
+        return new MerchantOffer(new ItemStack(net.minecraft.world.item.Items.EMERALD, emeralds), output, 7, 1, 0.0F);
     }
 }

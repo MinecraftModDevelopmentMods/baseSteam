@@ -5,11 +5,11 @@ import cyano.poweradvantage.api.PoweredEntity;
 import zone.moddev.mc.poweradvantage.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
 
 public class GeothermalBoilerBlock extends cyano.poweradvantage.api.simple.BlockSimplePowerMachine{
 
@@ -18,8 +18,8 @@ public class GeothermalBoilerBlock extends cyano.poweradvantage.api.simple.Block
 	}
 
 	@Override
-	public PoweredEntity newBlockEntity(net.minecraft.world.IBlockReader world) {
-		return new GeothermalBoilerTileEntity();
+	public PoweredEntity newBlockEntity(net.minecraft.core.BlockPos pos, BlockState state) {
+		return new GeothermalBoilerTileEntity(pos, state);
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class GeothermalBoilerBlock extends cyano.poweradvantage.api.simple.Block
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState bs, World world, BlockPos coord) {
+	public int getAnalogOutputSignal(BlockState bs, Level world, BlockPos coord) {
 		if(world.getBlockEntity(coord) instanceof GeothermalBoilerTileEntity){
 			return ((GeothermalBoilerTileEntity)world.getBlockEntity(coord)).getComparatorOutput();
 		}

@@ -1,14 +1,14 @@
 package zone.moddev.mc.steamadvantage.enchantments;
 
 import zone.moddev.mc.steamadvantage.init.Items;
-import net.minecraft.enchantment.EnchantmentType;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 
-public class PowderlessEnchantment extends net.minecraft.enchantment.Enchantment{
+public class PowderlessEnchantment extends net.minecraft.world.item.enchantment.Enchantment{
 
 	public PowderlessEnchantment() {
-		super(Rarity.VERY_RARE,EnchantmentType.BREAKABLE,new EquipmentSlotType[]{EquipmentSlotType.MAINHAND});
+		super(Rarity.VERY_RARE,EnchantmentCategory.BREAKABLE,new EquipmentSlot[]{EquipmentSlot.MAINHAND});
 	}
 
 	

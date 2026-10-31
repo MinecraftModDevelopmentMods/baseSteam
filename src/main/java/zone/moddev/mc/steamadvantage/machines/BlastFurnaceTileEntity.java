@@ -2,17 +2,17 @@ package zone.moddev.mc.steamadvantage.machines;
 
 import cyano.poweradvantage.api.ConduitType;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.AbstractFurnaceTileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -46,8 +46,13 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 		redstoneInitialized = false;
 	}
 	
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
 	public BlastFurnaceTileEntity() {
-		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_FURNACE, Power.steam_power, 200, "tile.steamadvantage.steam_furnace.name");
+		this(net.minecraft.core.BlockPos.ZERO, new BlastFurnaceBlock().defaultBlockState());
+	}
+
+	public BlastFurnaceTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_FURNACE, pos, state, Power.steam_power, 200, "tile.steamadvantage.steam_furnace.name");
 		allSlots = new int[inventory.length];
 		for(int i = 0; i < allSlots.length; i++){
 			allSlots[i] = i;
@@ -88,7 +93,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 					burnTime = fuel;
 					totalBurnTime = fuel;
 					decrementFuel();
-					playSoundAtTileEntity( SoundEvents.FURNACE_FIRE_CRACKLE, SoundCategory.AMBIENT, 0.5f, 1f, this);
+					playSoundAtTileEntity( SoundEvents.FURNACE_FIRE_CRACKLE, SoundSource.AMBIENT, 0.5f, 1f, this);
 				}
 				energyDecay();
 			}
@@ -114,7 +119,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 							inventory[slot].shrink(1);
 							if(inventory[slot].isEmpty()){inventory[slot] = null;} // decrement the input slot
 							if(!smeltSuccess){
-								playSoundAtTileEntity(SoundEvents.FIRE_EXTINGUISH, SoundCategory.AMBIENT, 0.5f, 1f, this);
+								playSoundAtTileEntity(SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 							}
 							smeltSuccess = true;
 						}
@@ -264,7 +269,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	
 
 	@Override
-	public CompoundNBT save(CompoundNBT tagRoot){
+	public CompoundTag save(CompoundTag tagRoot){
 		super.save(tagRoot);
 		prepareDataFieldsForSync();
 		tagRoot.putIntArray("Data", getDataFieldArray());
@@ -272,8 +277,8 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	}
 	
 	@Override
-	public void load(net.minecraft.block.BlockState state, CompoundNBT tagRoot){
-		super.load(state, tagRoot);
+	public void load(CompoundTag tagRoot){
+		super.load(tagRoot);
 		if(tagRoot.contains("Data")){
 			int[] data = tagRoot.getIntArray("Data");
 			System.arraycopy(data, 0, this.getDataFieldArray(), 0, Math.min(data.length,this.getDataFieldArray().length));
@@ -330,9 +335,9 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 
 	private ItemStack getSmeltingResult(ItemStack input) {
 		if (input == null || input.isEmpty() || getLevel() == null) return ItemStack.EMPTY;
-		Inventory inventory = new Inventory(1);
+		SimpleContainer inventory = new SimpleContainer(1);
 		inventory.setItem(0, input);
-		return getLevel().getRecipeManager().getRecipeFor(IRecipeType.SMELTING, inventory, getLevel())
+		return getLevel().getRecipeManager().getRecipeFor(RecipeType.SMELTING, inventory, getLevel())
 				.map(recipe -> recipe.assemble(inventory)).orElse(ItemStack.EMPTY);
 	}
 
@@ -348,7 +353,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 }

@@ -1,11 +1,11 @@
 package zone.moddev.mc.steamadvantage.graphics;
 
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
 import zone.moddev.mc.steamadvantage.init.Items;
 import zone.moddev.mc.steamadvantage.items.MusketItem;
 import zone.moddev.mc.steamadvantage.init.Blocks;
@@ -15,14 +15,17 @@ import zone.moddev.mc.steamadvantage.init.Entities;
 public final class ClientRegistration {
     private ClientRegistration() {}
 
+    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(Entities.DRILLBIT, DrillBitRenderer::new);
+    }
+
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ClientRegistry.bindTileEntityRenderer(Entities.DRILLBIT, DrillBitRenderer::new);
-            RenderTypeLookup.setRenderLayer(Blocks.steam_track, RenderType.cutout());
-            ItemModelsProperties.register(Items.blackpowder_musket, new ResourceLocation("loaded"),
-                    (item, world, entity) -> MusketItem.isLoaded(item) ? 1.0F : 0.0F);
-            ItemModelsProperties.register(Items.blackpowder_musket, new ResourceLocation("loading"),
-                    (item, world, entity) -> entity != null && entity.isUsingItem()
+            ItemBlockRenderTypes.setRenderLayer(Blocks.steam_track, RenderType.cutout());
+            ItemProperties.register(Items.blackpowder_musket, new ResourceLocation("loaded"),
+                    (item, world, entity, seed) -> MusketItem.isLoaded(item) ? 1.0F : 0.0F);
+            ItemProperties.register(Items.blackpowder_musket, new ResourceLocation("loading"),
+                    (item, world, entity, seed) -> entity != null && entity.isUsingItem()
                             && entity.getUseItem() == item ? 1.0F : 0.0F);
         });
     }

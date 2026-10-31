@@ -1,6 +1,6 @@
 package zone.moddev.mc.steamadvantage.init;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import zone.moddev.mc.poweradvantage.RecipeMode;
 import zone.moddev.mc.steamadvantage.compat.BaseMetalsCompat;

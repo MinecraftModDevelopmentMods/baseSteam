@@ -12,13 +12,13 @@ import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.poweradvantage.registry.still.recipe.DistillationRecipe;
 import zone.moddev.mc.poweradvantage.registry.still.recipe.DistillationRecipeRegistry;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.material.Fluid;
 import cyano.poweradvantage.api.fluid.FluidStack;
 import cyano.poweradvantage.api.fluid.FluidTank;
 import cyano.poweradvantage.api.fluid.FluidTankInfo;
@@ -36,8 +36,13 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	private final int[] dataSyncArray = new int[5];
 
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
 	public SteamStillTileEntity() {
-		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_STILL, new ConduitType[]{Power.steam_power, Fluids.fluidConduit_general}, new float[]{100,1000}, "tile.steamadvantage.steam_still.name");
+		this(net.minecraft.core.BlockPos.ZERO, new SteamStillBlock().defaultBlockState());
+	}
+
+	public SteamStillTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_STILL, pos, state, new ConduitType[]{Power.steam_power, Fluids.fluidConduit_general}, new float[]{100,1000}, "tile.steamadvantage.steam_still.name");
 		outputTank = new FluidTank(FluidTank.BUCKET_VOLUME );
 		inputTank = new FluidTank(FluidTank.BUCKET_VOLUME);
 	}
@@ -56,7 +61,7 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 						&& canDistill(getInputTank().getFluid()) && distill()){
 					this.subtractEnergy(steamPerDistill, Power.steam_power);
 					if(timeSinceSound > 200){
-						playSoundAtTileEntity(SoundEvents.LAVA_AMBIENT, SoundCategory.AMBIENT, 0.3f, 1.5f, this);
+						playSoundAtTileEntity(SoundEvents.LAVA_AMBIENT, SoundSource.AMBIENT, 0.3f, 1.5f, this);
 						timeSinceSound = 0;
 					}
 					timeSinceSound++;
@@ -153,9 +158,9 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	public void prepareDataFieldsForSync() {
 		dataSyncArray[0] = Float.floatToRawIntBits(this.getEnergy(Power.steam_power));
 		dataSyncArray[1] = this.getOutputTank().getFluidAmount();
-		dataSyncArray[2] = FluidIdHelper.getFluidId(this.getOutputTank().getFluidAmount() > 0 ? this.getOutputTank().getFluid().getFluid() : net.minecraft.fluid.Fluids.WATER);
+		dataSyncArray[2] = FluidIdHelper.getFluidId(this.getOutputTank().getFluidAmount() > 0 ? this.getOutputTank().getFluid().getFluid() : net.minecraft.world.level.material.Fluids.WATER);
 		dataSyncArray[3] = inputTank.getFluidAmount();
-		dataSyncArray[4] = FluidIdHelper.getFluidId(inputTank.getFluidAmount() > 0 ? inputTank.getFluid().getFluid() : net.minecraft.fluid.Fluids.WATER);
+		dataSyncArray[4] = FluidIdHelper.getFluidId(inputTank.getFluidAmount() > 0 ? inputTank.getFluid().getFluid() : net.minecraft.world.level.material.Fluids.WATER);
 	}
 
 	@Override
@@ -171,12 +176,12 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public CompoundNBT save(final CompoundNBT tagRoot) {
+	public CompoundTag save(final CompoundTag tagRoot) {
 		super.save(tagRoot);
-		CompoundNBT tankTag = new CompoundNBT();
+		CompoundTag tankTag = new CompoundTag();
 		this.getOutputTank().writeToNBT(tankTag);
 		tagRoot.put("TankOut", tankTag);
-		CompoundNBT tankTag2 = new CompoundNBT();
+		CompoundTag tankTag2 = new CompoundTag();
 		this.getInputTank().writeToNBT(tankTag2);
 		tagRoot.put("TankIn", tankTag2);
 		return tagRoot;
@@ -186,10 +191,10 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public void load(net.minecraft.block.BlockState state, final CompoundNBT tagRoot) {
-		super.load(state, tagRoot);
+	public void load(final CompoundTag tagRoot) {
+		super.load(tagRoot);
 		if (tagRoot.contains("TankOut")) {
-			CompoundNBT tankTag = tagRoot.getCompound("TankOut");
+			CompoundTag tankTag = tagRoot.getCompound("TankOut");
 			getOutputTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
@@ -198,7 +203,7 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 		}
 
 		if (tagRoot.contains("TankIn")) {
-			CompoundNBT tankTag = tagRoot.getCompound("TankIn");
+			CompoundTag tankTag = tagRoot.getCompound("TankIn");
 			getInputTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
@@ -438,7 +443,7 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 }

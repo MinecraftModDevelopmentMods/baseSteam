@@ -1,31 +1,31 @@
 package zone.moddev.mc.steamadvantage.blocks;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.StateDefinition;
 import java.util.Collections;
 import java.util.List;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.loot.LootContext;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import zone.moddev.mc.steamadvantage.init.Blocks;
 
 /** Hidden elevator platform segments. HEIGHT preserves the legacy metadata values 0-4. */
 public class PlatformBlock extends Block {
     public static final IntegerProperty HEIGHT = IntegerProperty.create("height", 0, 4);
     private static final VoxelShape[] SHAPES = new VoxelShape[] {
-            VoxelShapes.box(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D),
-            VoxelShapes.box(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D),
-            VoxelShapes.box(0.0D, 0.0D, 0.0D, 1.0D, 0.50D, 1.0D),
-            VoxelShapes.box(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D),
-            VoxelShapes.block()
+            Shapes.box(0.25D, 0.0D, 0.25D, 0.75D, 1.0D, 0.75D),
+            Shapes.box(0.0D, 0.0D, 0.0D, 1.0D, 0.25D, 1.0D),
+            Shapes.box(0.0D, 0.0D, 0.0D, 1.0D, 0.50D, 1.0D),
+            Shapes.box(0.0D, 0.0D, 0.0D, 1.0D, 0.75D, 1.0D),
+            Shapes.block()
     };
 
     public PlatformBlock() {
@@ -36,17 +36,17 @@ public class PlatformBlock extends Block {
         registerDefaultState(getStateDefinition().any().setValue(HEIGHT, 1));
     }
 
-    @Override protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) { builder.add(HEIGHT); }
-    @Override public VoxelShape getShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) { return SHAPES[state.getValue(HEIGHT)]; }
-    @Override public VoxelShape getCollisionShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) { return SHAPES[state.getValue(HEIGHT)]; }
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(HEIGHT); }
+    @Override public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPES[state.getValue(HEIGHT)]; }
+    @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPES[state.getValue(HEIGHT)]; }
     @Override public List<ItemStack> getDrops(BlockState state, LootContext.Builder context) { return Collections.emptyList(); }
 
     @Override
-    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
         if (!canBlockStay(world, pos)) world.destroyBlock(pos, true);
     }
 
-    public boolean canBlockStay(World world, BlockPos pos) {
+    public boolean canBlockStay(Level world, BlockPos pos) {
         Block below = world.getBlockState(pos.below()).getBlock();
         return below == this || below == Blocks.steam_elevator_platform || below == Blocks.steam_elevator;
     }

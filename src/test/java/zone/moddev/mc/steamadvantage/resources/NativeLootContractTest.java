@@ -39,8 +39,8 @@ public class NativeLootContractTest {
         }
     }
 
-    @Test public void packUsesNative116Format() throws Exception {
-        assertEquals(6, read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack").get("pack_format").getAsInt());
+    @Test public void packUsesNative117Format() throws Exception {
+        assertEquals(7, read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack").get("pack_format").getAsInt());
     }
 
     private static JsonObject read(Path path) throws Exception {

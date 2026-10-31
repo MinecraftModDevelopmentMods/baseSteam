@@ -3,14 +3,14 @@ package zone.moddev.mc.steamadvantage.machines;
 import cyano.poweradvantage.api.ConduitType;
 import zone.moddev.mc.steamadvantage.init.Blocks;
 import zone.moddev.mc.steamadvantage.init.Power;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
 
 import java.util.List;
 
@@ -28,8 +28,13 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 	
 	private boolean above = false;
 	
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
 	public SteamElevatorTileEntity() {
-		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_ELEVATOR, Power.steam_power, STEAM_PER_ELEVATOR_MOVE*2, "tile.steamadvantage.steam_elevator.name");
+		this(net.minecraft.core.BlockPos.ZERO, new SteamElevatorBlock().defaultBlockState());
+	}
+
+	public SteamElevatorTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.steamadvantage.init.Entities.STEAM_ELEVATOR, pos, state, Power.steam_power, STEAM_PER_ELEVATOR_MOVE*2, "tile.steamadvantage.steam_elevator.name");
 	}
 
 	private boolean redstone = true;
@@ -52,8 +57,8 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 	private boolean moveUp(){
 		if(this.getEnergy(Power.steam_power) < STEAM_PER_ELEVATOR_MOVE) return false;
 		this.subtractEnergy(STEAM_PER_ELEVATOR_MOVE, Power.steam_power);
-		playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundCategory.AMBIENT, 0.5f, 1f, this);
-		playSoundAtTileEntity( SoundEvents.PISTON_EXTEND, SoundCategory.BLOCKS, 0.5f, 1f, this);
+		playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
+		playSoundAtTileEntity( SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5f, 1f, this);
 		int dist = 0;
 		BlockPos p = this.getBlockPos().above();
 		while(p.getY() < 256 && dist < MAX_RANGE && getLevel().isEmptyBlock(p)){
@@ -75,7 +80,7 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 		}
 		// move people
 		List<Entity> passengers = getLevel().getEntitiesOfClass(Entity.class,
-				new AxisAlignedBB(getBlockPos().getX(),getBlockPos().getY()+1,getBlockPos().getZ(),
+				new AABB(getBlockPos().getX(),getBlockPos().getY()+1,getBlockPos().getZ(),
 						getBlockPos().getX()+1, topPos.getY(), getBlockPos().getZ()+1));
 
 		for(Entity e : passengers){
@@ -88,8 +93,8 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 	private boolean moveDown(){
 		if(this.getEnergy(Power.steam_power) < STEAM_PER_ELEVATOR_MOVE) return false;
 		this.subtractEnergy(STEAM_PER_ELEVATOR_MOVE, Power.steam_power);
-		playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundCategory.AMBIENT, 0.5f, 1f, this);
-		playSoundAtTileEntity( SoundEvents.PISTON_CONTRACT, SoundCategory.BLOCKS, 0.5f, 1f, this);
+		playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
+		playSoundAtTileEntity( SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.5f, 1f, this);
 		// scan up the piston and clear it
 		BlockPos destination = this.getBlockPos().above();
 		BlockPos p = destination;
@@ -103,7 +108,7 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 		}
 		// move people
 		List<Entity> passengers = getLevel().getEntitiesOfClass(Entity.class,
-				new AxisAlignedBB(p.getX(),p.getY(),p.getZ(), p.getX()+1, p.getY()+2, p.getZ()+1));
+				new AABB(p.getX(),p.getY(),p.getZ(), p.getX()+1, p.getY()+2, p.getZ()+1));
 		
 		for(Entity e : passengers){
 			e.teleportTo(e.getX(), destination.getY()+smallAmount,e.getZ());
@@ -167,15 +172,15 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 
 	
 	@Override
-	public CompoundNBT save(CompoundNBT tagRoot){
+	public CompoundTag save(CompoundTag tagRoot){
 		super.save(tagRoot);
 		tagRoot.putBoolean("up",above);
 		return tagRoot;
 	}
 	
 	@Override
-	public void load(net.minecraft.block.BlockState state, CompoundNBT tagRoot){
-		super.load(state, tagRoot);
+	public void load(CompoundTag tagRoot){
+		super.load(tagRoot);
 		if(tagRoot.contains("up")){
 			above = tagRoot.getBoolean("up");
 		}
@@ -200,7 +205,7 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 	}
 
 	@Override
-	public boolean stillValid(PlayerEntity player) {
+	public boolean stillValid(Player player) {
 		return true;
 	}
 }

@@ -1,10 +1,10 @@
 package zone.moddev.mc.steamadvantage.graphics;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -16,8 +16,8 @@ public class DrillBitRendererTest {
     @Test public void everyFacingKeepsLegacyDimensionsUvsAndNativeVertexAttributes() {
         for (Direction facing : Direction.values()) {
             RecordingBuffer buffer = new RecordingBuffer();
-            MatrixStack matrices = new MatrixStack();
-            MatrixStack.Entry caller = matrices.last();
+            PoseStack matrices = new PoseStack();
+            PoseStack.Pose caller = matrices.last();
             DrillBitRenderer.renderGeometry(facing.getAxis(), 0, matrices, buffer, LIGHT, OVERLAY);
             assertSame(caller, matrices.last());
             assertEquals(24, buffer.vertices.size());
@@ -51,15 +51,15 @@ public class DrillBitRendererTest {
 
     @Test public void rotationTransformsBothPositionsAndNormals() {
         RecordingBuffer buffer = new RecordingBuffer();
-        DrillBitRenderer.renderGeometry(Direction.Axis.Y, 90, new MatrixStack(), buffer, LIGHT, OVERLAY);
+        DrillBitRenderer.renderGeometry(Direction.Axis.Y, 90, new PoseStack(), buffer, LIGHT, OVERLAY);
         Vertex first = buffer.vertices.get(0);
         assertArrayEquals(new double[] { 0.25D, 1, 0.25D }, first.position, EPSILON);
         assertArrayEquals(new float[] { -1, 0, 0 }, first.normal, (float) EPSILON);
     }
 
     @Test public void failedVertexSubmissionRestoresTheCallerMatrix() {
-        MatrixStack matrices = new MatrixStack();
-        MatrixStack.Entry caller = matrices.last();
+        PoseStack matrices = new PoseStack();
+        PoseStack.Pose caller = matrices.last();
         try {
             DrillBitRenderer.renderGeometry(Direction.Axis.X, 37, matrices, new RecordingBuffer() {
                 @Override public void endVertex() { throw new IllegalStateException("submission failed"); }
@@ -79,25 +79,31 @@ public class DrillBitRendererTest {
         int overlay, light;
     }
 
-    private static class RecordingBuffer implements IVertexBuilder {
+    private static class RecordingBuffer implements VertexConsumer {
         final List<Vertex> vertices = new ArrayList<>();
         private Vertex vertex = new Vertex();
 
-        @Override public IVertexBuilder vertex(double x, double y, double z) {
+        @Override public VertexConsumer vertex(double x, double y, double z) {
             vertex.position[0] = x; vertex.position[1] = y; vertex.position[2] = z;
             return this;
         }
-        @Override public IVertexBuilder color(int red, int green, int blue, int alpha) {
+        @Override public VertexConsumer color(int red, int green, int blue, int alpha) {
             vertex.color[0] = red; vertex.color[1] = green; vertex.color[2] = blue; vertex.color[3] = alpha;
             return this;
         }
-        @Override public IVertexBuilder uv(float u, float v) { vertex.u = u; vertex.v = v; return this; }
-        @Override public IVertexBuilder overlayCoords(int u, int v) { vertex.overlay = u | v << 16; return this; }
-        @Override public IVertexBuilder uv2(int u, int v) { vertex.light = u | v << 16; return this; }
-        @Override public IVertexBuilder normal(float x, float y, float z) {
+        @Override public VertexConsumer uv(float u, float v) { vertex.u = u; vertex.v = v; return this; }
+        @Override public VertexConsumer overlayCoords(int u, int v) { vertex.overlay = u | v << 16; return this; }
+        @Override public VertexConsumer uv2(int u, int v) { vertex.light = u | v << 16; return this; }
+        @Override public VertexConsumer normal(float x, float y, float z) {
             vertex.normal[0] = x; vertex.normal[1] = y; vertex.normal[2] = z;
             return this;
         }
         @Override public void endVertex() { vertices.add(vertex); vertex = new Vertex(); }
+        @Override public void defaultColor(int red, int green, int blue, int alpha) {
+            throw new AssertionError("Drill vertices must retain their explicit colour attributes");
+        }
+        @Override public void unsetDefaultColor() {
+            throw new AssertionError("Drill rendering must not change the caller's default colour state");
+        }
     }
 }
