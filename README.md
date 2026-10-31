@@ -19,8 +19,8 @@ registry names, assets, saved NBT keys and provider IDs remain `steamadvantage`.
 The existing `cyano.poweradvantage.api` names remain in use.
 
 Power Advantage 2.4.8.117011 is required. The coordinated local source checkpoint is
-`fc4c47f2ed8cfebbaa010e6a0e807137a3329f95`, with development jar SHA-256
-`BDF486E16C1FE3B4CE2FE1ED78670AABA594063BCD2D4251265124B17FA9E767`.
+`5b9abe578b053d2ef59b1962cf9e04f6880c91b9`, with development jar SHA-256
+`799B59B06EB2AC3FC4682AA64BF42C3A2A2C1D89D7FFFE9C72745DEC7DFBE0D8`.
 This pin is not final runtime acceptance. The build must not use a 1.16
 dependency or silently replace these exact inputs.
 
@@ -59,10 +59,11 @@ CI is prepared for 1.17.1 but has not been run hosted.
 
 The current Power checkpoint and native advancement correction passed 195
 executed tests, release/resource audits, Javadoc and Eclipse configuration checks.
-Two forced offline runs executed all 32 tasks and produced identical production,
-sources, Javadoc and development jars. All four remain byte-identical to the
+The full build re-executed all 32 tasks without build-cache reuse. Production,
+sources, Javadoc and development jars remain byte-identical to frozen J and the
 previous advancement-fix candidate; full packaged runtime qualification with
-the new shared-persistence Power pin remains pending. The
+the native-registry Power pin remains pending. Independent per-commit clean-export
+qualification is recorded separately in the campaign's Steam Repro evidence. The
 [local test record](docs/PORT117-STATUS.md) identifies the exact inputs, retained
 failed runs and remaining runtime and client-launch gaps. These automated checks
 are not manual gameplay or visual acceptance.

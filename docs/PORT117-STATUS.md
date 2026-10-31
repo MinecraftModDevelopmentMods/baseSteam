@@ -6,7 +6,7 @@ Local source candidate: `2.2.9.117011`, branch
 
 The parent locally committed the original source checkpoint as
 `e5dd65cd59b14cba4d072d2a141cc4d89f224eef`. This update records the coordinated
-advancement correction, regression tests and shared-persistence Power repin.
+advancement correction, regression tests and coordinated Power repins.
 The user approved a local-only Steam commit after the new full gates pass,
 excluding the local agent file list. No port code push, PR, merge, tag or
 publication is authorized before manual testing and separate approval.
@@ -55,20 +55,22 @@ campaign API source paths. Public runtime hashes remain separate in
 `gradle.properties`. No dependency is embedded.
 
 Power 2.4.8.117011 is pinned to the parent's local checkpoint
-`fc4c47f2ed8cfebbaa010e6a0e807137a3329f95`, API jar SHA-256
-`BDF486E16C1FE3B4CE2FE1ED78670AABA594063BCD2D4251265124B17FA9E767`.
+`5b9abe578b053d2ef59b1962cf9e04f6880c91b9`, API jar SHA-256
+`799B59B06EB2AC3FC4682AA64BF42C3A2A2C1D89D7FFFE9C72745DEC7DFBE0D8`.
 The corresponding Power production jar SHA-256 is
-`04C7C26BA3EB3807A1B80CBD7F238DFF257B29757A8E3A7D0607AC4D3FE29D1C`.
+`336D9A11F5488EBD63F208554A039A53A398ABC58F632880B8420AF10F5AFBF0`.
 The parent's HEAD and both actual jar hashes were independently verified before
 this explicit repin. The new API input is
-`evidence/inputs/PowerAdvantage-2.4.8.117011-api-checkpoint-BDF486E1.jar`.
+`evidence/inputs/PowerAdvantage-2.4.8.117011-api-checkpoint-799B59B0.jar`.
 The verified input is copied under `evidence/inputs` so later parent builds
 cannot silently change the bytes used by Steam. This is a local checkpoint,
 not final runtime acceptance. No old-target Power jar has been used, and no
 extra shared API or constructor workaround was needed.
-This Power checkpoint marks loaded chunks unsaved when persistent machine state
-changes through server ticking or energy updates. Its 199-test parent build is
-not a full packaged runtime pass. Steam has no local timer or weapon-code fix.
+Power marks loaded chunks unsaved when persistent machine state
+changes through server ticking or energy updates. The current checkpoint also
+corrects two exact native registry aliases and the Block registry listener, with
+no public API change. Its 201-test parent build is not a full packaged runtime
+pass. Steam has no local timer or weapon-code fix.
 
 Plain JUnit uses Power's verified test-only native capability bootstrap, SHA-256
 `0F75844C30D3E0B4FAF43EE0905FABE5553D9CC32177FF0BB3A690088208701A`.
@@ -117,7 +119,7 @@ exclusive `gradle-shared.lease` and `D:/GradleCaches/advantage-117-20261031`.
   exactly the 17 parent-corrected advancement JSON entries, with no added or
   removed entries. All 71 production class entries, including weapon code,
   are byte-identical. Javadoc remains identical too.
-- Latest runs `steam-power-fc4c47f-j` and `steam-power-fc4c47f-repro-k` each
+- Earlier runs `steam-power-fc4c47f-j` and `steam-power-fc4c47f-repro-k` each
   passed `check build deobfJar javadoc verifyReleaseDependencies
   verifyReleaseArtifacts writeReleaseChecksums verifyEclipseProductionClasspath`
   with `--offline --rerun-tasks`, using the exact `fc4c47f2` Power source/API pin.
@@ -127,7 +129,32 @@ exclusive `gradle-shared.lease` and `D:/GradleCaches/advantage-117-20261031`.
   and to the preceding H/I advancement-fix candidate. Steam production Java,
   recipes and loot remain unchanged from `e5dd65c`.
 
-## Current Archived Candidate
+## Current Build Candidate
+
+`steam-power-5b9abe5-m` passed the complete Steam build, release, Javadoc and
+Eclipse configuration suite with `--offline --no-build-cache --rerun-tasks`:
+32 tasks executed, 195 tests in 27 suites, no failures, errors or skips.
+The exact native-registry Power source/API pin is recorded above. All four
+Steam jars remain byte-identical to frozen J: production `A07B14C1...`,
+development `F352BC04...`, sources `3A5CF129...` and Javadoc `122F4666...`.
+Their complete hashes and JUnit XML/HTML are retained in
+`evidence/steam-power-5b9abe5-m`.
+
+The source commit's independent clean exports are a separate campaign gate,
+recorded under the campaign's `Steam Repro <commit>` directory with a dedicated
+empty Gradle user home, command receipts, all four byte comparisons and JUnit
+snapshots. A primary-checkout rerun is not an independent export qualification.
+
+The preceding `f4818bf` / Power `fc4c47f2` checkpoint independently passed both
+spaced-path exports, including its initially empty Gradle cache: 195 tests and
+33 tasks per export, all four jars byte-exact to J. Its immutable handoff is
+`Steam Repro f4818bf/handoff.json`; it does not qualify a newer source/API pin.
+
+## Persistence-Fix Archived Candidate
+
+This retained candidate used Power `fc4c47f2ed8cfebbaa010e6a0e807137a3329f95`,
+API SHA-256 `BDF486E16C1FE3B4CE2FE1ED78670AABA594063BCD2D4251265124B17FA9E767`.
+It does not qualify the newer native-registry Power pin.
 
 Full evidence for the shared-persistence Power pin is retained in
 `evidence/steam-power-fc4c47f-j`; the independent forced offline repeat is in
@@ -225,8 +252,9 @@ ratios. This is a dependency-version distinction, not a Steam balance adjustment
 
 ## Required Next Gates
 
-The shared-persistence Power pin passed fresh Steam build, JUnit, resource,
-release, reproducibility and Eclipse configuration gates for its local commit.
+The native-registry Power pin passed fresh Steam build, JUnit, resource,
+release and Eclipse configuration gates for its local commit. Independent
+clean-export/cache/path proof is recorded separately against that exact commit.
 Any later Power change requires an explicit coordinated repin and fresh
 qualification; the existing F/G results apply only to their recorded inputs.
 Preserve all failed receipts and use a new evidence label for each run.

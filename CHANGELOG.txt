@@ -14,6 +14,7 @@ Steam Advantage 2.2.9.117011 (local 1.17.1 port candidate)
 - Retain all 1.16 regression coverage and add native factory, position, helper-ticker and chunk-boundary tests.
 - Pin the coordinated local Power source/API checkpoint and pass 195 Java tests, release/resource audits, Javadoc and Eclipse configuration checks.
 - Use Power's shared machine-persistence checkpoint; Steam's machine Java is unchanged and full runtime qualification remains pending.
+- Pin Power's native registry-alias correction without changing Steam's production Java or public identities.
 - Rebuild offline with all tasks forced and retain identical production, sources, Javadoc and development jar bytes.
 - Retain failed receipts separately; packaged runtime and client-launch acceptance remain open, and no historical pass qualifies this port.
 - Keep manual gameplay, multiplayer, migration acceptance and publication approval as separate gates.
