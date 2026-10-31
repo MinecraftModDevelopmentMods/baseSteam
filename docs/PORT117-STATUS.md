@@ -77,8 +77,9 @@ Plain JUnit uses Power's verified test-only native capability bootstrap, SHA-256
 It invokes Forge's own token transformer; it is not a capability replacement
 and is absent from production artifacts and launch classpaths.
 
-Every local Gradle invocation must use the campaign's `Invoke-Gradle117.ps1`,
-exclusive `gradle-shared.lease` and `D:/GradleCaches/advantage-117-20261031`.
+The coordinated campaign serialized builds through its own cache-lease wrapper.
+That internal arrangement is not a build prerequisite for other workspaces;
+the README provides portable wrapper commands, explicit JDK paths and API overrides.
 
 ## Checks Actually Run
 
@@ -129,7 +130,36 @@ exclusive `gradle-shared.lease` and `D:/GradleCaches/advantage-117-20261031`.
   and to the preceding H/I advancement-fix candidate. Steam production Java,
   recipes and loot remain unchanged from `e5dd65c`.
 
-## Current Build Candidate
+## Optional Provider Guard Candidate
+
+The absent-Base-Metals APOCALYPTIC worldgen attempt found nine unsupported
+`basemetals:crushing` recipe errors. Their resource bytes were unchanged from
+1.16; they had only a recipe-mode condition. Each now also requires Forge's
+native `forge:mod_loaded` condition for `basemetals`, matching the Power and
+Electric resource pattern. Inputs, outputs, quantities and the tank recipe's
+implicit single output are unchanged. No production Java changed.
+
+Four new regression tests cover all nine resources, malformed-provider negative
+controls, the actual Forge 37 condition serializer and exact processing payloads.
+`steam-optional-crushing-red-b` retained the expected missing-guard failure;
+`steam-optional-crushing-release-c` passed all 199 tests in 28 suites and the full
+32-task release, Javadoc and Eclipse configuration gate, without build-cache reuse.
+The earlier red-A receipt also remains: its additional failure was a new-test
+assumption about an explicit tank count, corrected to preserve the real omitted
+default-one representation rather than changing the recipe.
+
+This fix changes resource/archive hashes. Per-commit exports, native absent-provider
+startup, ECJ execution and fresh runtime reports must identify these new bytes;
+the old frozen-J equality below does not qualify them. Combined current runtime
+status belongs to Power Advantage's `docs/1.17/CURRENT-QUALIFICATION.md`, whose
+exact artifact pins and scoped results are authoritative. Manual acceptance and
+publication approval remain separate.
+
+## Native-Registry Archived Candidate
+
+The following build and equality record describes the earlier `f9fd1ec` source,
+before the optional-provider guard fix. It is retained evidence, not the current
+artifact's resource hash.
 
 `steam-power-5b9abe5-m` passed the complete Steam build, release, Javadoc and
 Eclipse configuration suite with `--offline --no-build-cache --rerun-tasks`:
@@ -252,23 +282,18 @@ ratios. This is a dependency-version distinction, not a Steam balance adjustment
 
 ## Required Next Gates
 
-The native-registry Power pin passed fresh Steam build, JUnit, resource,
-release and Eclipse configuration gates for its local commit. Independent
-clean-export/cache/path proof is recorded separately against that exact commit.
-Any later Power change requires an explicit coordinated repin and fresh
-qualification; the existing F/G results apply only to their recorded inputs.
-Preserve all failed receipts and use a new evidence label for each run.
+Use the coordinated Power Advantage 1.17.1 test record for current packaged
+server/client, migration, operation and endurance results. Every result is bound
+to exact Steam, Power, dependency and test-harness hashes; older F/G/J results do
+not qualify a changed archive merely because its version is unchanged. Preserve
+failed receipts and use a new evidence label for every run and explicit repin.
 
-The parent's shared packaged runtime and migration rig must qualify the exact
-Steam jar with the exact public Base Metals/OreSpawn runtime bytes. Automated
-proof, fresh/reload lifecycle, gameplay and visual acceptance remain separate.
-No packaged runtime pass is claimed by this module's build and unit-test proof.
-The initial combined machine-operation failures remain preserved. Operating E
-passed 132 natural-operation cases but failed restart persistence. G remains
-diagnostic-only because its finite-Float32 protocol changed during the restart
-phase; its pre-existing raw-save receipt remains red and unchanged. Full H must
-qualify the new shared persistence fix with a frozen final protocol. No complete
-runtime pass is claimed here; exact damage, ammunition and persistence checks remain.
+Earlier operating failures remain archived. G is diagnostic-only because its
+finite-Float32 protocol changed during restart; its pre-existing raw-save receipt
+remains red and unchanged. Those historical failures are not a statement that the
+current native-registry runtime is still waiting for its first qualification.
+The optional-provider fix needs its own exact-byte follow-up in the central
+record. Module build proof does not imply manual gameplay or visual acceptance.
 
 The generated client tokens are expected launcher inputs, not a confirmed
 generator defect: bytecode inspection of the pinned Slime Launcher 0.2.2 shows

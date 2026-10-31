@@ -35,19 +35,36 @@ ordering remains Power Advantage then Base Metals. No dependency is embedded.
 
 ## Local Verification
 
-The parent campaign owns dependency pins, the cache and the shared test rig.
-Every local Gradle command must use its `Invoke-Gradle117.ps1` helper, which
-holds `gradle-shared.lease` and uses
-`D:/GradleCaches/advantage-117-20261031`. Supply the exact native development
-jars with `-PpowerAdvantageDeobfJar`, `-PbaseMetalsDeobfJar` and
-`-PoreSpawnDeobfJar`. Never run concurrent builds against that cache.
-Standalone Java tests also require Power's verified test-only native capability
-bootstrap jar through `-PforgeCapabilityBootstrapJar`; it is never embedded or
-added to the production runtime.
+Use the checked-in Gradle wrapper and the exact development API jars described
+above. The build checks their hashes against `gradle.properties`; runtime jars
+are not replacements for these development inputs. Set the JDK-home and API-jar
+environment variables below to local paths. Java 8 is only for legacy utilities,
+not compilation or Minecraft. Power's `unitBootstrapJar` task builds the
+test-only Forge capability bootstrap; it is never embedded or launched in production.
 
-With the exact dependency pins supplied, the required tasks are
-`check build deobfJar javadoc verifyReleaseDependencies verifyReleaseArtifacts
-writeReleaseChecksums verifyEclipseProductionClasspath`.
+For example, from the Steam checkout in PowerShell:
+
+```powershell
+$env:JAVA_HOME = $env:JAVA17_HOME
+$jdks = @($env:JAVA17_HOME, $env:JAVA16_HOME, $env:JAVA25_HOME, $env:JAVA8_HOME) -join ','
+$toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
+  '-Porg.gradle.java.installations.auto-detect=false',
+  '-Porg.gradle.java.installations.auto-download=false')
+$power = $env:POWERADVANTAGE_CHECKOUT
+& "$power/gradlew.bat" -p $power @toolchains unitBootstrapJar `
+  "-PbaseMetalsDeobfJar=$env:BASEMETALS_DEOBF_JAR" `
+  "-PoreSpawnDeobfJar=$env:ORESPAWN_DEOBF_JAR"
+./gradlew.bat @toolchains check build deobfJar javadoc `
+  verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums `
+  verifyEclipseProductionClasspath `
+  "-PpowerAdvantageDeobfJar=$env:POWERADVANTAGE_DEOBF_JAR" `
+  "-PbaseMetalsDeobfJar=$env:BASEMETALS_DEOBF_JAR" `
+  "-PoreSpawnDeobfJar=$env:ORESPAWN_DEOBF_JAR" `
+  "-PforgeCapabilityBootstrapJar=$power/build/unit-bootstrap/forge-native-unit-bootstrap.jar"
+```
+
+`-PforgeCapabilityBootstrapJar` can instead point to a verified bootstrap jar
+built from the same pinned Power source. On other platforms use `./gradlew`.
 The public artifact family remains `SteamAdvantage-2.2.9.117011.jar`,
 `-sources.jar` and `-javadoc.jar`; the development jar stays under
 `build/libs-dev`.
@@ -57,16 +74,15 @@ The Java tests, release audits, Eclipse audit, packaged runtime, migration and
 reproducibility gates must be run against the exact pinned candidate.
 CI is prepared for 1.17.1 but has not been run hosted.
 
-The current Power checkpoint and native advancement correction passed 195
-executed tests, release/resource audits, Javadoc and Eclipse configuration checks.
-The full build re-executed all 32 tasks without build-cache reuse. Production,
-sources, Javadoc and development jars remain byte-identical to frozen J and the
-previous advancement-fix candidate; full packaged runtime qualification with
-the native-registry Power pin remains pending. Independent per-commit clean-export
-qualification is recorded separately in the campaign's Steam Repro evidence. The
-[local test record](docs/PORT117-STATUS.md) identifies the exact inputs, retained
-failed runs and remaining runtime and client-launch gaps. These automated checks
-are not manual gameplay or visual acceptance.
+The optional Base Metals recipe-guard fix passed 199 executed tests, release/resource
+audits, Javadoc and Eclipse configuration checks, re-executing all 32 tasks without
+build-cache reuse. It changes nine recipe conditions, so the preceding candidate's
+frozen-J artifact equality is historical, not proof of these new resource bytes.
+The [module test record](docs/PORT117-STATUS.md) identifies exact inputs and retained
+failures. Combined server, client, migration and endurance qualification is tracked
+in the coordinated Power Advantage checkout's `docs/1.17/CURRENT-QUALIFICATION.md`;
+read its artifact pins and remaining limits before reusing a result. Automated
+checks do not replace manual gameplay or visual acceptance.
 
 ## Port Details
 
@@ -89,6 +105,8 @@ their self-drop tables; hidden helpers still have no item form or drops.
 Recipe ingredients, processing costs and quantities are unchanged. Recipe-book
 advancements use native singleton `items` predicates; the ignored legacy `item`
 field must not turn an ingredient discovery into an unrestricted predicate.
+Optional Base Metals crushing recipes also require `forge:mod_loaded` before
+their recipe-mode condition, so APOCALYPTIC loads safely without that serializer.
 
 Steam reads the real Base Metals crushing recipes. In the pinned 1.17 release,
 raw copper crushes into one powder and copper ore into two. This follows Base

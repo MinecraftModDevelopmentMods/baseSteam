@@ -8,6 +8,7 @@ Steam Advantage 2.2.9.117011 (local 1.17.1 port candidate)
 - Port render buffers, renderer registration, model predicates, config events and native source-fluid pickup.
 - Add native pickaxe tags without new tool tiers, and retain self-drops and recipe unlocks.
 - Use the 1.17 ingredient-predicate format so unrelated items do not unlock recipes.
+- Skip the nine optional Base Metals crushing recipes when Base Metals is absent, including APOCALYPTIC mode; retain their inputs, outputs and quantities.
 - Stop musket terrain rays at unloaded chunk boundaries; retain loaded-player sounds and last-cartridge firing.
 - Read native lava temperature without changing vanilla heat input or machine ratios.
 - Use the published Base Metals raw-metal crushing recipes without overriding their quantities.

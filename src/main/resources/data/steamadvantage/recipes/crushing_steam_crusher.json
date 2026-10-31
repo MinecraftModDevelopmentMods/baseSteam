@@ -2,5 +2,5 @@
   "type": "basemetals:crushing",
   "ingredient": { "item": "steamadvantage:steam_crusher" },
   "result": { "item": "steamadvantage:steam_governor", "count": 2 },
-  "conditions": [{ "type": "steamadvantage:recipe_mode", "mode": "APOCALYPTIC" }]
+  "conditions": [{ "type": "forge:mod_loaded", "modid": "basemetals" }, { "type": "steamadvantage:recipe_mode", "mode": "APOCALYPTIC" }]
 }
