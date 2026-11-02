@@ -16,7 +16,7 @@ plugins {
 
 group = project.mod_group
 version = project.mod_version
-base.archivesName = 'SteamAdvantage'
+base.archivesName = 'baseSteam'
 
 def versionParts = project.mod_version.toString().tokenize('.')
 if (versionParts.size() != 4 || !versionParts.every { it ==~ /\d+/ }) {
@@ -144,22 +144,22 @@ repositories {
     }
 }
 
-// SteamAdvantage needs the full PowerAdvantage implementation in development,
+// baseSteam needs the full basePower implementation in development,
 // but the retired MMD Maven cannot provide a dependable deobfuscated artifact.
 // Local builds use the sibling FG7 output; CI supplies the same pinned jar via
 // -PpowerAdvantageDeobfJar after building the audited upstream commit.
 def defaultPowerAdvantageDeobfJar = file("../../PowerAdvantage/build/libs-dev/" \
-        + "PowerAdvantage-${project.poweradvantage_version}-deobf.jar")
+        + "basePower-${project.poweradvantage_version}-deobf.jar")
 def powerAdvantageDeobfJar = providers.gradleProperty('powerAdvantageDeobfJar')
         .map { file(it) }
         .getOrElse(defaultPowerAdvantageDeobfJar)
 if (!powerAdvantageDeobfJar.isFile()) {
-    throw new GradleException("Missing PowerAdvantage deobf jar at ${powerAdvantageDeobfJar}. "
+    throw new GradleException("Missing basePower deobf jar at ${powerAdvantageDeobfJar}. "
             + "Run gradlew.bat deobfJar in ../../PowerAdvantage first, or pass "
             + "-PpowerAdvantageDeobfJar=<path>.")
 }
-// PowerAdvantage requires OreSpawn 4. Keep it on development runtime only;
-// SteamAdvantage does not compile against OreSpawn or bundle its classes.
+// basePower requires OreSpawn 4. Keep it on development runtime only;
+// baseSteam does not compile against OreSpawn or bundle its classes.
 def defaultOreSpawnDeobfJar = file("../../../../MinecraftMineralogy/OS110/OreSpawn/build/libs-dev/" \
         + "OreSpawn-${project.orespawn_version}-deobf.jar")
 def oreSpawnDeobfJar = providers.gradleProperty('oreSpawnDeobfJar')
@@ -177,7 +177,7 @@ dependencies {
     // Mavenizer's legacy metadata omits this compile-time Minecraft library.
     compileOnly 'org.lwjgl.lwjgl:lwjgl_util:2.9.4-nightly-20150209'
 
-    // PowerAdvantage is required at runtime but remains a separate mod jar.
+    // basePower is required at runtime but remains a separate mod jar.
     compileOnly files(powerAdvantageDeobfJar)
     runtimeOnly files(powerAdvantageDeobfJar)
     runtimeOnly files(oreSpawnDeobfJar)
@@ -284,8 +284,8 @@ tasks.register('verifyReleaseConfiguration') {
     group = 'verification'
     description = 'Validates release identity, target metadata, and dependency policy.'
     doLast {
-        if (project.mod_version != '2.2.5.110021') {
-            throw new GradleException("Unexpected SteamAdvantage release version: ${project.mod_version}")
+        if (project.mod_version != '2.2.6.110021') {
+            throw new GradleException("Unexpected baseSteam release version: ${project.mod_version}")
         }
         if (project.minecraft_version != '1.10.2'
                 || project.forge_version != '12.18.3.2511'
@@ -299,23 +299,27 @@ tasks.register('verifyReleaseConfiguration') {
                 || project.gradle_java_version != '17') {
             throw new GradleException('Unexpected release dispatcher target metadata')
         }
-        if (project.mod_id != 'steamadvantage'
-                || project.group.toString() != 'zone.moddev.mc.steamadvantage'
-                || base.archivesName.get() != 'SteamAdvantage'
+        if (project.mod_id != 'basesteam' || project.mod_name != 'baseSteam'
+                || project.group.toString() != 'zone.moddev.mc.basesteam'
+                || base.archivesName.get() != 'baseSteam'
                 || project.mod_license != 'GPL-3.0-only'
-                || project.curseforge_project_id != '240984') {
+                || project.curseforge_project_id != '0') {
             throw new GradleException('Unexpected Forge, Maven, archive, or CurseForge identity')
         }
-        if (project.cf_requirements != 'power-advantage,base-metals'
+        if (project.cf_requirements != 'basepower,base-metals'
                 || project.cf_optionals != ''
                 || project.cf_versions != '1.10.2') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.poweradvantage_version != '2.4.3.110021'
-                || project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/PowerAdvantage'
-                || project.poweradvantage_source_ref != '2443eaae7c666b8d54a5c9c30091892b79e80994'
-                || project.poweradvantage_deobf_sha256 != '316262B51DDF4BD4258E19CC45221959E20133855B37E2367686F752A48C07C5') {
-            throw new GradleException('Unexpected PowerAdvantage compile dependency identity')
+        if (project.poweradvantage_version != '2.4.4.110021'
+                || project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/basePower'
+                || project.poweradvantage_source_ref != '79fb16437615df98b6c6298fe8d98643a0e7140b'
+                || project.poweradvantage_deobf_sha256 != '2992F2CADC30D8F61A17216DF9AB02BDF8E8211BB8B494A6CCED70A3267F69FE') {
+            throw new GradleException('Unexpected basePower compile dependency identity')
+        }
+        if (!(project.poweradvantage_source_ref ==~ /[a-f0-9]{40}/)
+                || !(project.poweradvantage_deobf_sha256 ==~ /[A-F0-9]{64}/)) {
+            throw new GradleException('Exact basePower source and artifact checksum pins are required')
         }
         if (project.orespawn_version != '4.0.8.110021'
                 || project.orespawn_source_repository != 'MinecraftModDevelopmentMods/OreSpawn'
@@ -327,50 +331,53 @@ tasks.register('verifyReleaseConfiguration') {
             String workflow = file(workflowPath).getText('UTF-8')
             if (!workflow.contains('repository: ' + project.poweradvantage_source_repository)
                     || !workflow.contains('ref: ' + project.poweradvantage_source_ref)
+                    || !workflow.contains(project.poweradvantage_deobf_sha256)
+                    || !workflow.contains('sha256sum --check --strict')
                     || !workflow.contains('repository: ' + project.orespawn_source_repository)
                     || !workflow.contains('ref: ' + project.orespawn_source_commit)) {
                 throw new GradleException("${workflowPath} does not build the pinned Advantage dependencies")
             }
         }
         String mainSource = file(
-                'src/main/java/zone/moddev/mc/steamadvantage/SteamAdvantage.java').getText('UTF-8')
-        if (!mainSource.contains('MODID = "steamadvantage"')
-                || !mainSource.contains('VERSION = "2.2.5.110021"')
-                || !mainSource.contains('dependencies = "required-after:poweradvantage@[2.4.3.110021,);after:basemetals"')) {
-            throw new GradleException('SteamAdvantage source identity or dependency policy changed')
+                'src/main/java/zone/moddev/mc/basesteam/SteamAdvantage.java').getText('UTF-8')
+        if (!mainSource.contains('MODID = "basesteam"') || !mainSource.contains('NAME = "baseSteam"')
+                || !mainSource.contains('VERSION = "2.2.6.110021"')
+                || !mainSource.contains('dependencies = "required-after:basepower@[2.4.4.110021,);after:basemetals"')) {
+            throw new GradleException('baseSteam source identity or dependency policy changed')
         }
         def metadata = new JsonSlurper().parse(file('src/main/resources/mcmod.info'))
         def mod = metadata instanceof List ? metadata.first() : metadata
-        if (mod.modid != 'steamadvantage') {
-            throw new GradleException('Source mcmod.info does not use the stable steamadvantage mod id')
+        if (mod.modid != 'basesteam' || mod.name != 'baseSteam') {
+            throw new GradleException('Source mcmod.info does not use the baseSteam identity')
         }
     }
 }
 
 tasks.register('verifyReleaseDependencies') {
     group = 'verification'
-    description = 'Resolves Forge and audits the exact required PowerAdvantage development jar.'
+    description = 'Resolves Forge and audits the exact required basePower development jar.'
     dependsOn tasks.named('verifyReleaseConfiguration')
     doLast {
         String actualHash = MessageDigest.getInstance('SHA-256')
                 .digest(powerAdvantageDeobfJar.bytes).encodeHex().toString().toUpperCase()
         if (actualHash != project.poweradvantage_deobf_sha256) {
-            throw new GradleException("PowerAdvantage SHA-256 is ${actualHash}, expected "
+            throw new GradleException("basePower SHA-256 is ${actualHash}, expected "
                     + project.poweradvantage_deobf_sha256)
         }
         new ZipFile(powerAdvantageDeobfJar).withCloseable { zip ->
             ['cyano/poweradvantage/api/PoweredEntity.class',
              'cyano/poweradvantage/api/GUIBlock.class',
              'cyano/poweradvantage/api/FluidCategoryRegistry.class',
-             'zone/moddev/mc/poweradvantage/conduitnetwork/ConduitRegistry.class',
-             'zone/moddev/mc/poweradvantage/init/Fluids.class'].each { required ->
+             'zone/moddev/mc/basepower/compat/LegacyIdentity.class',
+             'zone/moddev/mc/basepower/conduitnetwork/ConduitRegistry.class',
+             'zone/moddev/mc/basepower/init/Fluids.class'].each { required ->
                 if (zip.getEntry(required) == null) {
-                    throw new GradleException("PowerAdvantage dependency is missing ${required}")
+                    throw new GradleException("basePower dependency is missing ${required}")
                 }
             }
             def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
             if (manifest.getValue('Implementation-Version') != project.poweradvantage_version) {
-                throw new GradleException('PowerAdvantage dependency manifest has the wrong version')
+                throw new GradleException('basePower dependency manifest has the wrong version')
             }
         }
 
@@ -388,17 +395,17 @@ tasks.register('verifyReleaseDependencies') {
 
         Set<File> compileFiles = configurations.compileClasspath.files.collect { it.canonicalFile } as Set<File>
         if (!compileFiles.contains(powerAdvantageDeobfJar.canonicalFile)) {
-            throw new GradleException('PowerAdvantage is missing from compileClasspath')
+            throw new GradleException('basePower is missing from compileClasspath')
         }
         Set<File> runtimeFiles = configurations.runtimeClasspath.files.collect { it.canonicalFile } as Set<File>
         if (!runtimeFiles.contains(powerAdvantageDeobfJar.canonicalFile)) {
-            throw new GradleException('PowerAdvantage is missing from runtimeClasspath')
+            throw new GradleException('basePower is missing from runtimeClasspath')
         }
         if (!runtimeFiles.contains(oreSpawnDeobfJar.canonicalFile)) {
-            throw new GradleException('PowerAdvantage runtime dependency OreSpawn is missing from runtimeClasspath')
+            throw new GradleException('basePower runtime dependency OreSpawn is missing from runtimeClasspath')
         }
         if (compileFiles.contains(oreSpawnDeobfJar.canonicalFile)) {
-            throw new GradleException('SteamAdvantage must not compile against OreSpawn')
+            throw new GradleException('baseSteam must not compile against OreSpawn')
         }
         List<String> forbiddenRuntimeMods = runtimeFiles.collect { it.name.toLowerCase(Locale.ROOT) }
                 .findAll { name ->
@@ -449,16 +456,18 @@ tasks.register('verifyReleaseArtifacts') {
         new ZipFile(mainJar).withCloseable { zip ->
             List<String> names = zip.entries().collect { it.name }
             ['mcmod.info', 'pack.mcmeta',
-             'zone/moddev/mc/steamadvantage/SteamAdvantage.class',
-             'zone/moddev/mc/steamadvantage/machines/SteamDrillTileEntity.class',
-             'assets/steamadvantage/lang/en_US.lang'].each { required ->
+             'zone/moddev/mc/basesteam/SteamAdvantage.class',
+             'zone/moddev/mc/basesteam/machines/SteamDrillTileEntity.class',
+             'assets/basesteam/lang/en_US.lang'].each { required ->
                 if (!names.contains(required)) {
                     throw new GradleException("Release jar is missing ${required}")
                 }
             }
             ['agent-notes/', '.codex/', 'src/test/', 'cyano/poweradvantage/',
              'com/mcmoddev/steamadvantage/', 'com/mcmoddev/poweradvantage/',
-             'zone/moddev/mc/poweradvantage/', 'cyano/basemetals/', 'com/mcmoddev/lib/',
+             'zone/moddev/mc/basepower/', 'zone/moddev/mc/poweradvantage/',
+             'zone/moddev/mc/steamadvantage/', 'assets/steamadvantage/',
+             'cyano/basemetals/', 'com/mcmoddev/lib/',
              'zone/moddev/mc/orespawn/', 'com/mcmoddev/orespawn/',
              'net/minecraft/', 'net/minecraftforge/'].each { forbidden ->
                 if (names.any { it.contains(forbidden) }) {
@@ -468,12 +477,14 @@ tasks.register('verifyReleaseArtifacts') {
             def metadata = new JsonSlurper().parseText(zip.getInputStream(zip.getEntry('mcmod.info'))
                     .getText(StandardCharsets.UTF_8.name()))
             def mod = metadata instanceof List ? metadata.first() : metadata
-            if (mod.modid != project.mod_id || mod.version != project.mod_version
+            if (mod.modid != project.mod_id || mod.name != project.mod_name || mod.version != project.mod_version
                     || mod.mcversion != project.minecraft_version) {
                 throw new GradleException('Packaged mcmod.info identity, version, or target is incorrect')
             }
             def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
             if (manifest.getValue('Implementation-Version') != project.mod_version
+                    || manifest.getValue('Implementation-Title') != base.archivesName.get()
+                    || manifest.getValue('Maven-Artifact') != "${project.group}:${base.archivesName.get()}:${project.version}"
                     || manifest.getValue('Built-On-Java') != project.java_version
                     || manifest.getValue('Implementation-Timestamp') != null
                     || manifest.getValue('Timestamp') != null) {
@@ -494,9 +505,9 @@ tasks.register('verifyReleaseArtifacts') {
         }
 
         new ZipFile(new File(libs, expectedReleaseFiles.get()[1])).withCloseable { sourceZip ->
-            if (sourceZip.getEntry('zone/moddev/mc/steamadvantage/SteamAdvantage.java') == null
-                    || sourceZip.getEntry('zone/moddev/mc/steamadvantage/machines/SteamDrillTileEntity.java') == null) {
-                throw new GradleException('Sources jar is missing required SteamAdvantage sources')
+            if (sourceZip.getEntry('zone/moddev/mc/basesteam/SteamAdvantage.java') == null
+                    || sourceZip.getEntry('zone/moddev/mc/basesteam/machines/SteamDrillTileEntity.java') == null) {
+                throw new GradleException('Sources jar is missing required baseSteam sources')
             }
         }
         new ZipFile(new File(libs, expectedReleaseFiles.get()[2])).withCloseable { javadocZip ->
@@ -591,9 +602,9 @@ publishing {
                 artifact(tasks.named('javadocJar'))
             }
             pom {
-                name = 'Steam Advantage'
+                name = project.mod_name
                 description = project.mod_description
-                url = 'https://github.com/MinecraftModDevelopmentMods/SteamAdvantage'
+                url = 'https://github.com/MinecraftModDevelopmentMods/baseSteam'
                 licenses {
                     license {
                         name = 'GNU General Public License, Version 3'
@@ -601,9 +612,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/MinecraftModDevelopmentMods/SteamAdvantage.git'
-                    developerConnection = 'scm:git:ssh://git@github.com/MinecraftModDevelopmentMods/SteamAdvantage.git'
-                    url = 'https://github.com/MinecraftModDevelopmentMods/SteamAdvantage'
+                    connection = 'scm:git:https://github.com/MinecraftModDevelopmentMods/baseSteam.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/MinecraftModDevelopmentMods/baseSteam.git'
+                    url = 'https://github.com/MinecraftModDevelopmentMods/baseSteam'
                 }
             }
         }
@@ -620,9 +631,21 @@ publishing {
     }
 }
 
+tasks.register('validatePublicationIdentity') {
+    group = 'publishing'
+    description = 'Blocks publication until a new baseSteam CurseForge project is assigned.'
+    doLast {
+        String projectId = project.curseforge_project_id.toString()
+        if (!(projectId ==~ /[1-9][0-9]*/) || projectId == '240984') {
+            throw new GradleException('baseSteam has no assigned CurseForge project; publication is disabled')
+        }
+    }
+}
+
 tasks.register('validateMavenReleaseCredentials') {
     group = 'publishing'
     description = 'Prevents Maven publication from using a local or incomplete destination.'
+    dependsOn tasks.named('validatePublicationIdentity')
     doLast {
         if (!providers.environmentVariable('MAVEN_UPLOAD_URL').isPresent()
                 || !mavenUploadUsername.isPresent() || !mavenUploadPassword.isPresent()) {
@@ -773,7 +796,7 @@ tasks.register('verifyEclipseProductionClasspath') {
                     || contents.contains('src/test') || contents.contains('bin/test')) {
                 throw new GradleException("${name} does not isolate production code")
             }
-            if (!contents.contains('PROJECT_ATTR" value="SteamAdvantage"')) {
+            if (!contents.contains('PROJECT_ATTR" value="baseSteam"')) {
                 throw new GradleException("${name} targets the wrong Eclipse project")
             }
         }
