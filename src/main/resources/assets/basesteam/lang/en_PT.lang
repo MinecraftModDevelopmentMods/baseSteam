@@ -1,0 +1,44 @@
+language_support_goals=english (en_US,en_EN,en_CA,en_GB, en_AU, en_PT), spanish (es_MX,es_ES), chinese (zh_CN), japanese (ja_JA), portugese (pt_BR), german (de_DE), italian (it_IT), korean (ko_KR)
+
+item.basesteam.steam_governor.name=Steam Gov'ner
+
+tile.basesteam.steam_pipe.name=Brass Pipe
+tile.basesteam.steam_boiler_coal.name=Boiler
+tile.basesteam.steam_tank.name=Clockwerk Boiler Tank
+tile.basesteam.steam_furnace.name=Clockwerk Furnace
+tile.basesteam.steam_crusher.name=Clockwerk Stone-Chewer
+
+
+tile.basesteam.drillbit.name=Drill
+tile.basesteam.steam_drill.name=Clockwerk Drill
+item.basesteam.steam_drill_bit.name=Drill Bit
+death.attack.steam_machine=%1$s kissed the iron maiden
+death.attack.steam_machine.player=%1$s convinced %2$s to kiss the iron maiden
+
+
+tile.basesteam.steam_elevator.name=Clockwerk Plank-Raiser
+tile.basesteam.platform.name=Mecha-Plank
+death.attack.musket=%1$s got shot
+death.attack.musket.player=%2$s filled %1$s full of daylight
+item.basesteam.blackpowder_cartridge.name=Death Ball
+item.basesteam.musket.name=Blunderbuss
+tooltip.musket.damage=Shot deals %x damage
+tooltip.musket.ammo=Requires %x to reload
+tooltip.musket.loaded=Loaded
+tooltip.musket.unloaded=Not loaded
+enchantment.powderless=Unending Glory
+enchantment.rapid_reload=Faster Blaster
+enchantment.high_explosive=Big Boom
+enchantment.recoil=Kickback
+tile.basesteam.steam_track.name=Steam Path
+
+
+
+tile.basesteam.steam_boiler_electric.name=Lightnin' Boiler
+tile.basesteam.steam_boiler_geothermal.name=Lava Boiler
+
+tile.basesteam.steam_switch.name=Steam Valve
+tile.basesteam.steam_still.name=Clockwerk 'Stillery
+tile.basesteam.steam_pump.name=Clockwerk Bilge Pump
+tile.basesteam.steam_boiler_oil.name=Oil Boiler
+tile.basesteam.pump_pipe_steam.name=Pump Pipe

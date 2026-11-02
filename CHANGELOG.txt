@@ -1,4 +1,17 @@
-Unreleased - Minecraft 1.10.2
+baseSteam 2.2.6.110021
+
+- Rename Steam Advantage to baseSteam, using the basesteam mod and asset namespace.
+- Move implementation code to zone.moddev.mc.basesteam and require basePower 2.4.4.110021 or newer.
+- Read original steamadvantage block, item and tile identities; write new tile saves with basesteam IDs.
+- Import the old configuration and additional loot rules without replacing current administrator settings; retain the original bytes.
+- Honour old Power oil fuel-setting keys after the rename, with raw fluid names and current keys taking priority.
+- Keep the four original enchantment registry keys and numeric allocation order for 1.10 compatibility.
+- Preserve hitscan musket behavior, recipes, machine ratings, fuel settings, and the stable Power API.
+- Use basepower and base-metals CurseForge relations; leave the new project unassigned and block publication.
+- Pin the exact basePower source commit and development-jar checksum in the build and CI.
+- Document the copied-world, operating and restart checks without treating them as a guarantee for every third-party add-on.
+
+Also included:
 
 - Let Forge fluid sources control their own drainage, preserving the amount and fluid data they return.
 - Keep fluid in the steam pump when an attached tank refuses it, and only charge for successful pickup.

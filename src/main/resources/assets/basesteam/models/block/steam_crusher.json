@@ -1,0 +1,11 @@
+{
+    "parent": "basesteam:block/steam_machine_base",
+    "textures": {
+        "front": "basesteam:blocks/rock_crusher_front",
+        "top": "basesteam:blocks/rock_crusher_top",
+        "bottom": "basesteam:materials/bolted_iron",
+        "back": "basesteam:materials/iron",
+        "side": "basesteam:materials/iron",
+        "metal": "basesteam:materials/iron"
+    }
+}
