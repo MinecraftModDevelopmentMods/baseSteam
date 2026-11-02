@@ -65,7 +65,7 @@ gradlew.bat cleanEclipse verifyEclipseProductionClasspath
 
 The expected development artifact is `basePower-2.4.4.110021-deobf.jar`. Its SHA-256 is pinned in
 `gradle.properties`, the build audit, CI and CodeQL, together with source commit
-`79fb16437615df98b6c6298fe8d98643a0e7140b` from the MMD basePower repository.
+`425af862ef5b41b61d3e1f7e665d1d691852ff4b` from the MMD basePower repository.
 The build checks both pins. Do not substitute the old Power Advantage jar or a moving branch.
 
 basePower is required at compile time and runtime but is never bundled. OreSpawn is required transitively
