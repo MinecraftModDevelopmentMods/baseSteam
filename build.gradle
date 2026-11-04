@@ -303,7 +303,7 @@ tasks.register('verifyReleaseConfiguration') {
                 || project.group.toString() != 'zone.moddev.mc.basesteam'
                 || base.archivesName.get() != 'baseSteam'
                 || project.mod_license != 'GPL-3.0-only'
-                || project.curseforge_project_id != '0') {
+                || project.curseforge_project_id != '1781373') {
             throw new GradleException('Unexpected Forge, Maven, archive, or CurseForge identity')
         }
         if (project.cf_requirements != 'basepower,base-metals'
@@ -633,11 +633,11 @@ publishing {
 
 tasks.register('validatePublicationIdentity') {
     group = 'publishing'
-    description = 'Blocks publication until a new baseSteam CurseForge project is assigned.'
+    description = 'Checks that publication targets the assigned baseSteam CurseForge project.'
     doLast {
         String projectId = project.curseforge_project_id.toString()
-        if (!(projectId ==~ /[1-9][0-9]*/) || projectId == '240984') {
-            throw new GradleException('baseSteam has no assigned CurseForge project; publication is disabled')
+        if (projectId != '1781373') {
+            throw new GradleException('Use baseSteam CurseForge project 1781373; never reuse Steam Advantage 240984.')
         }
     }
 }

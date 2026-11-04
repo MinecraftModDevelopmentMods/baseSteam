@@ -9,7 +9,11 @@ The rename changes no recipes, machine ratings, fuel values, or musket balance.
 
 ## Release Status
 
-This version is not published. The local checks include 135 Steam unit tests, original-release
+Download baseSteam for Forge 1.10.2 from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/basesteam),
+project `1781373`. The [Boiler-House Handbook](https://github.com/MinecraftModDevelopmentMods/baseSteam/wiki)
+covers installation, recipes and using the machines.
+
+The local checks include 135 Steam unit tests, original-release
 migration fixtures, operating and full-restart checks, and finite-supply Steam endurance runs.
 The [cross-mod qualification notes](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-1.10.2/docs/1.10/base-qualification.md)
 record the tested jar checksums and limits. These checks do not replace manual gameplay acceptance.
@@ -73,6 +77,8 @@ by basePower. Base Metals remains a required distribution dependency while its i
 and absent from the compile classpath. The stable `cyano.poweradvantage.api` and required `com.mcmoddev`
 compatibility types are not renamed.
 
-CurseForge relations are `basepower` and `base-metals`. No new CurseForge project is assigned:
-`curseforge_project_id=0` deliberately blocks publication and release validation until
-a new project is assigned and the identity audit is updated. The former project ID must not be reused.
+CurseForge project `1781373` requires `basepower` and `base-metals`. The original Steam Advantage
+project is not an upload target. Ordinary CI does not publish a release.
+
+The [project-page copy](docs/curseforge-description.md) and [logo](docs/branding/README.md)
+are kept with the source, outside the mod jar.
