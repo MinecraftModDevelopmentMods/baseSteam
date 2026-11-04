@@ -38,8 +38,8 @@ jobs:
           loader_name="$(value loader_name)"
           loader_code="$(value loader_code)"
           project_id="$(value curseforge_project_id)"
-          if [[ ! "$project_id" =~ ^[1-9][0-9]*$ || "$project_id" == '240984' ]]; then
-            echo "baseSteam has no assigned CurseForge project; release validation is disabled" >&2
+          if [[ "$project_id" != '1781373' ]]; then
+            echo "Expected baseSteam CurseForge project 1781373; refusing $project_id" >&2
             exit 1
           fi
 
