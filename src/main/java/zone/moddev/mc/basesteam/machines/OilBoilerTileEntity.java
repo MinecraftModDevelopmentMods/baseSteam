@@ -5,6 +5,7 @@ import zone.moddev.mc.basepower.util.FluidIdHelper;
 import zone.moddev.mc.basesteam.util.LegacyFluidHandler;
 
 import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.FluidCategoryRegistry;
 import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.fluid.FluidRequest;
 import zone.moddev.mc.basepower.init.Fluids;
@@ -103,7 +104,7 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 		return (int)(getBurnTimePerBucketFor(fluid) * amount / Fluid.BUCKET_VOLUME);
 	}
 
-	private static Float getBurnTimePerBucketFor(Fluid fluid){
+	static Float getBurnTimePerBucketFor(Fluid fluid){
 		if(fluid == null) return 0f;
 		if(flammibilityCache.containsKey(fluid)){
 			return flammibilityCache.get(fluid)*1000;
@@ -113,6 +114,11 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 			if(fuelPerBucket != null){
 				flammibilityCache.put(fluid,0.001F*fuelPerBucket);
 				return fuelPerBucket;
+			}
+			if (FluidCategoryRegistry.matches(FluidCategoryRegistry.CRUDE_OIL, fluid)) {
+				float ticksPerUnit = zone.moddev.mc.basepower.init.Fuels.CRUDE_OIL_FUEL_PER_FLUID_UNIT;
+				flammibilityCache.put(fluid, ticksPerUnit);
+				return ticksPerUnit * Fluid.BUCKET_VOLUME;
 			}
 			// second, check universal bucket fuel registry
 			int vol = ForgeModContainer.getInstance().universalBucket.getCapacity();

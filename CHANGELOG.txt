@@ -2,6 +2,7 @@
 
 - Continue Steam Advantage as baseSteam. Read saved tiles from both the original 1.10.2 mod and baseSteam 1.10.2.
 - Map the four saved musket enchantments to their baseSteam names and retain the old oil fuel configuration overrides.
+- Burn Mineralogy crude at the same default rate as basePower crude. Explicit fuel settings still take precedence.
 - Use matching basePower 1.12.2 and keep the earlier drill, pump, still and boiler fixes.
 
 Earlier 1.12.2 test-coverage repairs
