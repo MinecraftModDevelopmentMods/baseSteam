@@ -1,4 +1,10 @@
-Unreleased - Minecraft 1.12.2
+2.2.6.112021 - baseSteam for Minecraft 1.12.2
+
+- Continue Steam Advantage as baseSteam. Read saved tiles from both the original 1.10.2 mod and baseSteam 1.10.2.
+- Map the four saved musket enchantments to their baseSteam names and retain the old oil fuel configuration overrides.
+- Use matching basePower 1.12.2 and keep the earlier drill, pump, still and boiler fixes.
+
+Earlier 1.12.2 test-coverage repairs
 
 - Let Forge fluid sources control their own drainage, preserving the amount and fluid data they return.
 - Keep fluid in the steam pump when an attached tank refuses it, and only charge for successful pickup.

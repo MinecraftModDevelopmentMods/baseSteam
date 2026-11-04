@@ -1,0 +1,34 @@
+{
+	"type": "forge:ore_shaped",
+	"pattern": [
+		" t ",
+		"srs",
+		"btb"
+	],
+	"key": {
+		"t": {
+			"type": "forge:ore_dict",
+			"ore": "nuggetIron"
+		},
+		"s": {
+			"item": "minecraft:stick"
+		},
+		"r": {
+			"item": "minecraft:stick"
+		},
+		"b": {
+			"type": "forge:ore_dict",
+			"ore": "ingotBrass"
+		}
+	},
+	"result": {
+		"item": "basesteam:steam_governor"
+	},
+	"conditions": [
+		{
+			"type": "basesteam:recipe_mode",
+			"mode": "NORMAL"
+		}
+	],
+	"group": "parts"
+}

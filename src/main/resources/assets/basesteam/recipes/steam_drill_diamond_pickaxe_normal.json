@@ -1,0 +1,34 @@
+{
+	"type": "forge:ore_shaped",
+	"pattern": [
+		"gXg",
+		"pmp"
+	],
+	"key": {
+		"X": {
+			"item": "minecraft:diamond_pickaxe"
+		},
+		"g": {
+			"type": "forge:ore_dict",
+			"ore": "governor"
+		},
+		"p": {
+			"type": "forge:ore_dict",
+			"ore": "plateIron"
+		},
+		"m": {
+			"type": "forge:ore_dict",
+			"ore": "frameSteel"
+		}
+	},
+	"result": {
+		"item": "basesteam:steam_drill"
+	},
+	"conditions": [
+		{
+			"type": "basesteam:recipe_mode",
+			"mode": "NORMAL"
+		}
+	],
+	"group": "steam_machines"
+}

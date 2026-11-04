@@ -1,0 +1,43 @@
+language_support_goals=english (en_US,en_EN,en_CA,en_GB, en_AU, en_PT), spanish (es_MX,es_ES), chinese (zh_CN), japanese (ja_JA), portugese (pt_BR), german (de_DE), italian (it_IT), korean (ko_KR)
+
+item.basesteam.steam_governor.name=Controlar de Vapor
+
+tile.basesteam.steam_pipe.name=Latón Tubo de Vapor
+tile.basesteam.steam_boiler_coal.name=Caldera de Vapor con Carbón
+tile.basesteam.steam_tank.name=Tanque de Vapor
+tile.basesteam.steam_furnace.name=Vapor del Horno Accionado
+tile.basesteam.steam_crusher.name=Vapor Trituradora de Piedra Accionado
+
+
+tile.basesteam.drillbit.name=Broca
+tile.basesteam.steam_drill.name=Vapor Taladro Accionado
+item.basesteam.steam_drill_bit.name=Broca
+death.attack.steam_machine=%1$s se molió entre los engranajes de una máquina
+death.attack.steam_machine.player=%1$s se molió entre los engranajes de una máquina de %2$s
+
+
+tile.basesteam.steam_elevator.name=Ascensor a Vapor
+tile.basesteam.platform.name=Vapor Plataforma Ascensor
+death.attack.musket=%1$s recibió un disparo
+death.attack.musket.player=%2$s tiro %1$s muertos
+item.basesteam.blackpowder_cartridge.name=Cartucho de Pólvora
+item.basesteam.musket.name=Mosquete
+tooltip.musket.damage=Disparo trata %x daños
+tooltip.musket.ammo=Requiere %x para recargar
+tooltip.musket.loaded=Cargado
+tooltip.musket.unloaded=No cargado
+enchantment.powderless=Munición Infinita
+enchantment.rapid_reload=Rápidamente Actualizar
+enchantment.high_explosive=Bomba
+enchantment.recoil=Retroceso
+tile.basesteam.steam_track.name=Vía a Vapor
+
+
+tile.basesteam.steam_boiler_electric.name=Caldera de Vapor Eléctrica
+tile.basesteam.steam_boiler_geothermal.name=Caldera de Vapor Geotérmico
+
+tile.basesteam.steam_switch.name=Válvula de Vapor
+tile.basesteam.steam_still.name=Vapor Destilería
+tile.basesteam.steam_pump.name=Vapor de la Bomba Accionada
+tile.basesteam.steam_boiler_oil.name=Caldera de Vapor con Aceite
+tile.basesteam.pump_pipe_steam.name=Tubería de la Bomba

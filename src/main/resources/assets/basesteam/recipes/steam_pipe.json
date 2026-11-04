@@ -1,0 +1,19 @@
+{
+	"type": "forge:ore_shaped",
+	"pattern": [
+		"xxx",
+		"   ",
+		"xxx"
+	],
+	"key": {
+		"x": {
+			"type": "forge:ore_dict",
+			"ore": "ingotBrass"
+		}
+	},
+	"result": {
+		"item": "basesteam:steam_pipe",
+		"count": 6
+	},
+	"group": "pipes"
+}

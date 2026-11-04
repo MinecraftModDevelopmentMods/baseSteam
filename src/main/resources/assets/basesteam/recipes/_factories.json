@@ -1,0 +1,6 @@
+{
+	"conditions": {
+		"recipe_mode": "zone.moddev.mc.basesteam.recipe.condition.RecipeModeConditionFactory",
+		"musket_enabled": "zone.moddev.mc.basesteam.recipe.condition.MusketEnabledConditionFactory"
+	}
+}

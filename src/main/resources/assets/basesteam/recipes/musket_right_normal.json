@@ -1,0 +1,33 @@
+{
+	"type": "forge:ore_shaped",
+	"pattern": [
+		"ssf",
+		"  w"
+	],
+	"key": {
+		"f": {
+			"item": "minecraft:flint_and_steel"
+		},
+		"s": {
+			"type": "forge:ore_dict",
+			"ore": "ingotSteel"
+		},
+		"w": {
+			"type": "forge:ore_dict",
+			"ore": "plankWood"
+		}
+	},
+	"result": {
+		"item": "basesteam:musket"
+	},
+	"conditions": [
+		{
+			"type": "basesteam:recipe_mode",
+			"mode": "NORMAL"
+		},
+		{
+			"type": "basesteam:musket_enabled"
+		}
+	],
+	"group": "weapons"
+}

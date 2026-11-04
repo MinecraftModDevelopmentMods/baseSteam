@@ -1,7 +1,7 @@
 [
 {
-  "modid": "steamadvantage",
-  "name": "Steam Advantage",
+  "modid": "basesteam",
+  "name": "baseSteam",
   "description": "Add-on mod to Power Advantage that adds steam-powered machines to Minecraft",
   "version": "${version}",
   "mcversion": "${mcversion}",
