@@ -1,0 +1,32 @@
+{
+	"type": "forge:ore_shaped",
+	"pattern": [
+		" Y ",
+		"gXg",
+		"pmp"
+	],
+	"key": {
+		"X": {
+			"item": "minecraft:furnace"
+		},
+		"Y": {
+			"item": "minecraft:bucket"
+		},
+		"g": {
+			"type": "forge:ore_dict",
+			"ore": "governor"
+		},
+		"p": {
+			"type": "forge:ore_dict",
+			"ore": "plateIron"
+		},
+		"m": {
+			"type": "forge:ore_dict",
+			"ore": "frameSteel"
+		}
+	},
+	"result": {
+		"item": "basesteam:steam_boiler_oil"
+	},
+	"group": "steam_machines"
+}

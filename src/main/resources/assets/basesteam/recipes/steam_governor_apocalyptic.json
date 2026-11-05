@@ -1,0 +1,36 @@
+{
+	"type": "forge:ore_shaped",
+	"pattern": [
+		" t ",
+		"srs",
+		"btb"
+	],
+	"key": {
+		"t": {
+			"type": "forge:ore_dict",
+			"ore": "sprocket"
+		},
+		"s": {
+			"type": "forge:ore_dict",
+			"ore": "rod"
+		},
+		"r": {
+			"type": "forge:ore_dict",
+			"ore": "rod"
+		},
+		"b": {
+			"type": "forge:ore_dict",
+			"ore": "ingotBrass"
+		}
+	},
+	"result": {
+		"item": "basesteam:steam_governor"
+	},
+	"conditions": [
+		{
+			"type": "basesteam:recipe_mode",
+			"mode": "APOCALYPTIC"
+		}
+	],
+	"group": "parts"
+}

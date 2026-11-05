@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "active=false":  { "model": "basesteam:steam_switch_off"},
+        "active=true":   { "model": "basesteam:steam_switch_on"}
+    }
+}

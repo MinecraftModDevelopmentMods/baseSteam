@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "facing=east": { "model": "basesteam:steam_still", "y": 90 },
+        "facing=north": { "model": "basesteam:steam_still" },
+        "facing=south": { "model": "basesteam:steam_still", "y": 180 },
+        "facing=west": { "model": "basesteam:steam_still", "y": 270 }
+    }
+}

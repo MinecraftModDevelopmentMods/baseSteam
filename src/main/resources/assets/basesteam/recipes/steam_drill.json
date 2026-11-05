@@ -1,0 +1,28 @@
+{
+	"type": "forge:ore_shaped",
+	"pattern": [
+		"gXg",
+		"pmp"
+	],
+	"key": {
+		"X": {
+			"item": "basesteam:steam_drill_bit"
+		},
+		"g": {
+			"type": "forge:ore_dict",
+			"ore": "governor"
+		},
+		"p": {
+			"type": "forge:ore_dict",
+			"ore": "plateIron"
+		},
+		"m": {
+			"type": "forge:ore_dict",
+			"ore": "frameSteel"
+		}
+	},
+	"result": {
+		"item": "basesteam:steam_drill"
+	},
+	"group": "steam_machines"
+}

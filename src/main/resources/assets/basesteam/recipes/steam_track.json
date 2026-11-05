@@ -1,0 +1,15 @@
+{
+	"type": "forge:ore_shapeless",
+	"ingredients": [
+		{
+			"item": "basesteam:steam_pipe"
+		},
+		{
+			"item": "basepower:steel_frame"
+		}
+	],
+	"result": {
+		"item": "basesteam:steam_track"
+	},
+	"group": "tracks"
+}
