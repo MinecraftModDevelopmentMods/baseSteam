@@ -1,0 +1,29 @@
+{
+  "repository": "MinecraftModDevelopmentMods/baseSteam",
+  "groupId": "zone.moddev.mc.basesteam",
+  "artifactId": "baseSteam",
+  "description": "Steam generation, pipework and machinery for basePower.",
+  "license": "GNU General Public License, Version 3",
+  "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.txt",
+  "releases": {
+    "2.2.6.110021": {
+      "branch": "master-1.10.2",
+      "commit": "0dfbdcc9ed1069c5037dba1a59b8bbb1f496a787",
+      "runId": 41803894182,
+      "artifactId": 13309535752,
+      "archiveSha256": "d3b87634afedc4e7528445d33e70790618a9c7024e45a76b5b902d19d5cac99f",
+      "curseFileId": 9420177,
+      "mainSha256": "728e37a1a0551596d8167976a7022e31ef075a383640bb385470160dd9a8f07d"
+    },
+    "2.2.6.112021": {
+      "branch": "master-1.12.2",
+      "commit": "0556cb4156ce27ab59c6f9bab09b5d0b5141bfaa",
+      "tag": "2.2.6.112021",
+      "runId": 42009983263,
+      "artifactId": 13405624215,
+      "archiveSha256": "70a34d540f1a3b9398754029bd2254472a0e4ffdb9de264e536d8150a955f005",
+      "curseFileId": 9452305,
+      "mainSha256": "fffed5310a2fe795e6ab0495705d28df16f18e05fc4c7d9efaa63d481f16f39f"
+    }
+  }
+}
