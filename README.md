@@ -4,7 +4,9 @@ baseSteam continues DrCyano's Steam Advantage, adding boilers, brass pipework, s
 
 ## Upgrading a world
 
-Replace the installed Advantage family together. baseSteam `2.2.6.112021` reads the original Steam Advantage and released baseSteam 1.10.2 tile IDs. Back up your save, then check inventories, drill directions, pressure and unfinished work on a copy before and after a full restart.
+Install [basePower 2.4.4 for Forge 1.12.2](https://www.curseforge.com/minecraft/mc-mods/basepower/files/9452029) and Base Metals. Use the 1.12.2 builds of all mods in your workshop.
+
+baseSteam replaces Steam Advantage on 1.12.2 and can read worlds from Steam Advantage or baseSteam on 1.10.2. Back up your world and config, then replace the old Advantage mods together on a copy of the world. Check your machine inventories, drill directions, steam pressure and unfinished work. Save, close Minecraft completely, and check again after reopening the copy.
 
 [World upgrade guide](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-1.12.2/docs/1.12-upgrade.md) | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/basesteam)
 

@@ -1,9 +1,10 @@
 2.2.6.112021 - baseSteam for Minecraft 1.12.2
 
-- Continue Steam Advantage as baseSteam. Read saved tiles from both the original 1.10.2 mod and baseSteam 1.10.2.
-- Map the four saved musket enchantments to their baseSteam names and retain the old oil fuel configuration overrides.
-- Burn Mineralogy crude at the same default rate as basePower crude. Explicit fuel settings still take precedence.
-- Use matching basePower 1.12.2 and keep the earlier drill, pump, still and boiler fixes.
+- Build against the released basePower 2.4.4.112021.
+- Bring baseSteam to Forge 1.12.2. Move worlds from Steam Advantage or baseSteam 1.10.2 without rebuilding your steam workshop.
+- Keep your musket enchantments and existing oil fuel settings when you upgrade.
+- Let the oil boiler burn Mineralogy crude at the same default rate as basePower crude. Your own fuel settings still take precedence.
+- Keep the fixes for saved drill progress, pump contents, boiler heat and still output.
 
 Earlier 1.12.2 test-coverage repairs
 
