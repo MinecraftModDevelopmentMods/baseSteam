@@ -24,6 +24,15 @@
       "archiveSha256": "70a34d540f1a3b9398754029bd2254472a0e4ffdb9de264e536d8150a955f005",
       "curseFileId": 9452305,
       "mainSha256": "fffed5310a2fe795e6ab0495705d28df16f18e05fc4c7d9efaa63d481f16f39f"
+    },
+    "2.2.7.113021": {
+      "branch": "master-1.13.2",
+      "commit": "e399bf40812dbff7308c4b3a96d1fc38159ef046",
+      "tag": "2.2.7.113021",
+      "runId": 42231926094,
+      "artifactId": 13510451562,
+      "archiveSha256": "6e95414b4ae744dac0d1c024beb7c42b5827c55a7460db1eeb9c47f3d0ed0f0a",
+      "mainSha256": "5e04d04ce6ed3e137eccbb269f94a2509c80fb31f87a048e0233aabafb655f83"
     }
   }
 }
