@@ -1,13 +1,10 @@
-# SteamAdvantage
+# baseSteam for Minecraft 1.15.2
 
-**Minecraft 1.15.2, version 2.2.7.115021.** See the
-[shared test record](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.15.2/docs/1.15/TEST-COVERAGE-BACKPORT.md)
-for exact jars, automated machine and upgrade results, and remaining manual
-checks. Visuals and recipe unlocks were accepted on 27 October 2026. The historical
-[1.14 test results](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.14.4/docs/1.14/BROADER-QUALIFICATION.md)
-are not evidence of 1.15 gameplay or world-upgrade compatibility.
+baseSteam continues DrCyano's Steam Advantage. It adds boilers, steam pipes and steam-powered machines to basePower.
+Find its machines and parts on the **basePower** creative tab.
 
-Steam Advantage adds steam-powered machines and infrastructure to Power Advantage for Minecraft 1.15.2.
+Use basePower `2.4.7.115021` for Minecraft 1.15.2. Back up your world and config,
+and try the upgrade on a copy before opening your main save.
 
 Every crafting variant has an ingredient-triggered recipe-book discovery. See the [shared material checklist and discovery tests](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.13.2/docs/1.13/RECIPE-DISCOVERY.md). Regenerate unlock JSON after recipe changes with `node tools/generate-recipe-unlocks.js`; `check` audits recipe coverage and criteria. Crushing recipes are deliberately excluded from the crafting book.
 
@@ -21,14 +18,10 @@ Run Gradle with Temurin 17.0.1+12; production code is compiled with Temurin 8.0.
 The Forge Mavenizer also requires Temurin 25.0.3+9.0.LTS. CI installs all three
 explicitly and disables automatic toolchain detection and downloads.
 
-Build the matching 1.15 PowerAdvantage, Base Metals and OreSpawn deobf jars first.
-Dependency versions, checksums and the exact Power source reference belong in
-`gradle.properties`. Release audits reject missing or placeholder pins; do not
-bypass those checks or substitute a dependency from an earlier Minecraft version.
-Base Metals `3.0.2.115021` source `ac1781e7cade15045ffe0135077087b4d1722603`
-and Power source `6666099a734eba16561d98c86f3f4bb1b7c742f7` are the exact tested
-dependency pins. CI builds them before Steam Advantage; none is embedded in
-the Steam Advantage jar.
+Build the matching 1.15.2 basePower, Base Metals and OreSpawn development jars
+first. This branch is pinned to the [released basePower build](https://www.curseforge.com/minecraft/mc-mods/basepower/files/9482607).
+`gradle.properties` records its source commit and the development and release
+checksums. The dependencies are not bundled in baseSteam.
 
 With the standard sibling layout:
 

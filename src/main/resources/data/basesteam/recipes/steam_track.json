@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "basesteam:steam_pipe"
+    },
+    {
+      "item": "basepower:steel_frame"
+    }
+  ],
+  "result": {
+    "item": "basesteam:steam_track"
+  },
+  "group": "basesteam:steam_track"
+}

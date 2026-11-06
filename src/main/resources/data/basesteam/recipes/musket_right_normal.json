@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ssf",
+    "  w"
+  ],
+  "key": {
+    "f": {
+      "item": "minecraft:flint_and_steel"
+    },
+    "s": {
+      "tag": "forge:ingots/steel"
+    },
+    "w": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "item": "basesteam:musket"
+  },
+  "conditions": [
+    {
+      "type": "basesteam:recipe_mode",
+      "mode": "NORMAL"
+    },
+    {
+      "type": "basesteam:musket_enabled"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:ingots/steel"
+    }
+  ],
+  "group": "basesteam:musket"
+}
