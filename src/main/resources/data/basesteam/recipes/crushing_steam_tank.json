@@ -1,0 +1,6 @@
+{
+  "type": "basemetals:crushing",
+  "ingredient": { "item": "basesteam:steam_tank" },
+  "result": { "item": "basesteam:steam_governor" },
+  "conditions": [{ "type": "basesteam:recipe_mode", "mode": "APOCALYPTIC" }]
+}

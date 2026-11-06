@@ -1,6 +1,6 @@
-# SteamAdvantage
+# baseSteam
 
-**Minecraft 1.16.5 source port candidate, version 2.2.8.116051.**
+**Minecraft 1.16.5 local test candidate, version 2.2.9.116051.**
 This source port remains pending manual acceptance and publication approval.
 The follow-up checks use finite supplies and ordinary server ticks to measure
 actual machine output, energy use, blocked routes and saved state. They also
@@ -13,7 +13,9 @@ Earlier-candidate results and accepted 1.15 results do not qualify this candidat
 The [shared test record](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.16.5/docs/1.16/CURRENT-QUALIFICATION.md)
 records the exact jars, completed checks and remaining limits.
 
-Steam Advantage adds steam-powered machines and infrastructure to Power Advantage.
+baseSteam continues DrCyano's Steam Advantage. It adds boilers, steam
+distribution and steam-powered machinery to basePower. Back up your world
+before upgrading; the port maps legacy Steam Advantage blocks and saved state.
 
 ## Build Target
 
@@ -24,9 +26,9 @@ Compilation and Minecraft launches use Temurin 8.0.502+7 and Java 8 bytecode;
 Mavenizer uses Temurin 25.0.3+9.0.LTS.
 
 Power Advantage 2.4.7.116051 remains a separate required mod. The pinned compile
-dependency uses source `bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7`.
+dependency uses source `a21d0653129912e8d45bc443080b211eb09ae88c`.
 Its development jar SHA-256 is
-`2FB923944A456B4F26AB2F9212C646469CE3F49BFD4DAE894C15559B48908386`.
+`156674F6DF6007D351AD419416344356F6586452077FCAE2E9BC9404EE14A14B`.
 These exact pins are recorded in `gradle.properties` and audited during builds.
 Use an immutable development jar through `-PpowerAdvantageDeobfJar=<path>`.
 Release audits reject missing, placeholder, or mismatched pins. These source pins

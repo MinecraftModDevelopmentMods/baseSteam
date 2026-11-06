@@ -1,0 +1,11 @@
+{
+    "parent": "basesteam:block/steam_machine_base",
+    "textures": {
+        "front": "basesteam:blocks/steam_pump_front",
+        "top": "basesteam:materials/bolted_iron",
+        "bottom": "basesteam:materials/bolted_iron",
+        "back": "basesteam:blocks/steam_pump_side",
+        "side": "basesteam:blocks/steam_pump_side",
+        "metal": "basesteam:materials/bolted_iron"
+    }
+}

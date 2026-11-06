@@ -1,0 +1,11 @@
+{
+    "parent": "basesteam:block/steam_machine_base",
+    "textures": {
+        "front": "basesteam:blocks/geothermal_boiler_side",
+        "top": "basesteam:blocks/geothermal_boiler_top",
+        "bottom": "basesteam:materials/bolted_iron",
+        "back": "basesteam:blocks/geothermal_boiler_side",
+        "side": "basesteam:blocks/geothermal_boiler_side",
+        "metal": "basesteam:materials/bolted_iron"
+    }
+}
