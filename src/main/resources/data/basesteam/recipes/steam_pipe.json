@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "   ",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "forge:ingots/brass"
+    }
+  },
+  "result": {
+    "item": "basesteam:steam_pipe",
+    "count": 6
+  },
+  "group": "basesteam:steam_pipe",
+  "conditions": [
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:ingots/brass"
+    }
+  ]
+}

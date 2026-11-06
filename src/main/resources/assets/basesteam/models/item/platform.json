@@ -1,0 +1,4 @@
+{
+    "parent": "basesteam:block/platform3",
+    "ambientocclusion": false
+}

@@ -1,0 +1,47 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " Y ",
+    "gXg",
+    "pmp"
+  ],
+  "key": {
+    "X": {
+      "tag": "forge:wires"
+    },
+    "Y": {
+      "item": "minecraft:bucket"
+    },
+    "g": {
+      "tag": "forge:governors"
+    },
+    "p": {
+      "tag": "forge:plates/iron"
+    },
+    "m": {
+      "tag": "forge:frames/steel"
+    }
+  },
+  "result": {
+    "item": "basesteam:steam_boiler_electric"
+  },
+  "group": "basesteam:steam_boiler_electric",
+  "conditions": [
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:frames/steel"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:governors"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:plates/iron"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:wires"
+    }
+  ]
+}
