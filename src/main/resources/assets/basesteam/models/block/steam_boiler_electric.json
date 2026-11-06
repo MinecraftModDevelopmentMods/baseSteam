@@ -1,0 +1,11 @@
+{
+    "parent": "basesteam:block/steam_machine_base",
+    "textures": {
+        "front": "basesteam:blocks/electric_boiler_front",
+        "top": "basesteam:materials/bolted_iron",
+        "bottom": "basesteam:materials/bolted_iron",
+        "back": "basesteam:blocks/electric_boiler_back",
+        "side": "basesteam:materials/bolted_iron",
+        "metal": "basesteam:materials/bolted_iron"
+    }
+}

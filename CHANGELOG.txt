@@ -1,3 +1,9 @@
+2.2.7.113021 - baseSteam for Minecraft 1.13.2
+
+- Bring baseSteam to Forge 1.13.2. Keep your steam workshop when moving from Steam Advantage or an earlier baseSteam release.
+- Keep drill directions, machine inventories, saved steam and musket enchantments.
+- Find the machines and parts on the shared basePower creative tab.
+
 Unreleased - Minecraft 1.13.2
 
 - Use a server-safe collision box when tracing musket shots on dedicated servers.

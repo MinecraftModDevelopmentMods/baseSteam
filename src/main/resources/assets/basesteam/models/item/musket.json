@@ -1,0 +1,25 @@
+{
+  "parent": "builtin/generated",
+  "overrides": [
+    {
+      "predicate": {
+        "loaded": 0,
+        "loading": 0
+      },
+      "model": "basesteam:item/musket_unloaded"
+    },
+    {
+      "predicate": {
+        "loaded": 0,
+        "loading": 1
+      },
+      "model": "basesteam:item/musket_loading"
+    },
+    {
+      "predicate": {
+        "loaded": 1
+      },
+      "model": "basesteam:item/musket_loaded"
+    }
+  ]
+}

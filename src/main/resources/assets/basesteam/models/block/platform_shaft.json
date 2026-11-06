@@ -1,0 +1,21 @@
+{
+  "parent": "block/block",
+  "textures": {
+        "shaft": "basepower:materials/steel",
+        "platform": "basesteam:blocks/platform_top",
+        "particle": "basepower:materials/steel"
+    },
+    "elements": [
+        {   "from": [ 4, 0, 4 ],
+            "to":   [ 12, 16, 12 ],
+            "faces": {
+                "down":  { "uv": [ 4, 4,12,12 ], "texture": "#shaft" },
+                "up":    { "uv": [ 4, 4,12,12 ], "texture": "#shaft" },
+                "north": { "uv": [ 4, 0,12,16 ], "texture": "#shaft" },
+                "south": { "uv": [ 4, 0,12,16 ], "texture": "#shaft" },
+                "west":  { "uv": [ 4, 0,12,16 ], "texture": "#shaft" },
+                "east":  { "uv": [ 4, 0,12,16 ], "texture": "#shaft" }
+            }
+        }
+    ]
+}

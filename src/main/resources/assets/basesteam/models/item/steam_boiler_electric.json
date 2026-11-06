@@ -1,0 +1,4 @@
+{
+    "parent": "basesteam:block/steam_boiler_electric",
+    "ambientocclusion": false
+}

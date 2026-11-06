@@ -1,8 +1,10 @@
-# SteamAdvantage
+# baseSteam for Minecraft 1.13.2
 
-Steam Advantage adds steam-powered machines and infrastructure to Power Advantage for Minecraft 1.13.2.
+baseSteam continues DrCyano's Steam Advantage, adding boilers, pipework, storage and steam-powered machines to basePower.
 
-Every crafting variant has an ingredient-triggered recipe-book discovery. See the [shared material checklist and discovery tests](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.13.2/docs/1.13/RECIPE-DISCOVERY.md). Regenerate unlock JSON after recipe changes with `node tools/generate-recipe-unlocks.js`; `check` audits recipe coverage and criteria. Crushing recipes are deliberately excluded from the crafting book.
+Use basePower `2.4.5.113021` and Base Metals `3.0.2.113021` for Forge 1.13.2. baseSteam's machines and parts are on the shared **basePower** creative tab. Back up the world and config, then replace the old jars together and test on a copy. Save, close Minecraft completely, and reopen the copy to check your machines.
+
+The recipe book unlocks steam recipes when you pick up the ingredients. See the [material checklist](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-1.13.2/docs/1.13/RECIPE-DISCOVERY.md). Crushing is a machine recipe, so it doesn't appear in the crafting book. After changing recipes, run `node tools/generate-recipe-unlocks.js` and `check`.
 
 The [manufacturing progression audit](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.13.2/docs/1.13/MANUFACTURING-PROGRESSION.md) checks raw-material, processing and loot acquisition paths in every mode, including restart persistence.
 
@@ -10,8 +12,7 @@ The [manufacturing progression audit](https://github.com/MinecraftModDevelopment
 
 The `master-1.13.2` build uses ForgeGradle 7.0.34 and Gradle 9.6.1. Run Gradle with Java 17; production code is compiled for Java 8.
 
-Build the pinned PowerAdvantage, Base Metals, and OreSpawn deobf jars first.
-Exact source commits and checksums are recorded in `gradle.properties`; CI builds the same commits.
+Build the pinned basePower, Base Metals and OreSpawn development jars first. The source commits and checksums in `gradle.properties` keep local and CI builds on the same inputs.
 With the standard sibling layout:
 
 ```text
@@ -26,6 +27,8 @@ gradlew.bat clean check build javadoc verifyReleaseDependencies verifyReleaseArt
 ```
 
 Alternative layouts may pass `-PpowerAdvantageDeobfJar=<path>`, `-PbaseMetalsDeobfJar=<path>`, and `-PoreSpawnDeobfJar=<path>`. None of those dependencies is embedded.
+
+For publishing, use the [MMD release workflow](https://github.com/MinecraftModDevelopmentMods/baseSteam/actions/workflows/deploy-release.yml). It publishes the same checked jar to CurseForge and MMD Maven.
 
 For Eclipse, import this repository as an existing Gradle project and run:
 
@@ -44,7 +47,7 @@ records measured machine work, restart checks, repaired windows and remaining li
 
 For an all-Advantage play-test, run `prepareCombinedEclipseLaunch` in the sibling PowerAdvantage checkout and select its `runClientAllAdvantage.launch`. The [native resource probe](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.13.2/test-rig/client-resources/README.md) checks models, textures and names across all three mods. These resource checks do not replace gameplay testing.
 
-The implementation namespace is `zone.moddev.mc.steamadvantage`. Runtime identities, registries, tile IDs, saved NBT, recipes, and assets remain stable. Steam registers its legacy state and NBT codecs with PowerAdvantage's shared migration hook so 1.10 and 1.12 worlds can be converted before Minecraft flattens old numeric block states.
+The implementation namespace is `zone.moddev.mc.basesteam`. Steam registers its legacy block and tile mappings with basePower so old Steam Advantage and baseSteam worlds can be converted before Minecraft flattens the saved block states. Boiler heat, tanks, inventories and drill state are carried over rather than reinitialised.
 
 Read PowerAdvantage's [1.13 migration guide](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.13.2/docs/1.13/MIGRATION.md) before upgrading, and always use a backup. The [qualification notes](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.13.2/docs/1.13/CURRENT-QUALIFICATION.md) list the tested scenarios and remaining gaps.
 

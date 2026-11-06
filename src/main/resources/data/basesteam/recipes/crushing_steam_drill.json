@@ -1,0 +1,6 @@
+{
+  "type": "basemetals:crushing",
+  "ingredient": { "item": "basesteam:steam_drill" },
+  "result": { "item": "basesteam:steam_governor", "count": 2 },
+  "conditions": [{ "type": "basesteam:recipe_mode", "mode": "APOCALYPTIC" }]
+}

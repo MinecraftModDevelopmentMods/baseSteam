@@ -1,0 +1,37 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " g ",
+    " i ",
+    "did"
+  ],
+  "key": {
+    "g": {
+      "tag": "forge:sprockets"
+    },
+    "i": {
+      "tag": "forge:ingots/steel"
+    },
+    "d": {
+      "tag": "forge:gems/diamond"
+    }
+  },
+  "result": {
+    "item": "basesteam:steam_drill_bit"
+  },
+  "group": "basesteam:steam_drill_bit",
+  "conditions": [
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:gems/diamond"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:ingots/steel"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:sprockets"
+    }
+  ]
+}
