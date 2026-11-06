@@ -1,0 +1,85 @@
+package zone.moddev.mc.basesteam.machines;
+
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PoweredEntity;
+import zone.moddev.mc.basepower.conduitnetwork.ConduitRegistry;
+import zone.moddev.mc.basepower.init.Fluids;
+import zone.moddev.mc.basesteam.init.Blocks;
+import zone.moddev.mc.basesteam.init.Power;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
+
+
+/**
+ * The coal boiler is a bit more complicated because it consumes fluids (water) and produces steam, 
+ * making it a multi-type powered block.
+ * @author DrCyano
+ *
+ */
+public class SteamPumpBlock extends cyano.poweradvantage.api.simple.BlockSimplePowerMachine{
+
+	
+	public SteamPumpBlock() {
+		super(Material.PISTON, 0.75f, Power.steam_power, Fluids.fluidConduit_general);
+	}
+
+	@Override
+	public PoweredEntity createNewTileEntity(net.minecraft.world.IBlockReader world) {
+		return new SteamPumpTileEntity();
+	}
+
+	@Override
+	public boolean hasComparatorInputOverride(BlockState bs) {
+		return true;
+	}
+
+	@Override
+	public int getComparatorInputOverride(BlockState bs, World world, BlockPos coord) {
+		if(world.getTileEntity(coord) instanceof SteamPumpTileEntity){
+			return ((SteamPumpTileEntity)world.getTileEntity(coord)).getComparatorOutput();
+		}
+		return 0;
+	}
+
+	
+	
+	///// Overrides to make this a multi-type block /////
+	@Override
+	public boolean isPowerSink(ConduitType type){
+		return ConduitType.areSameType(Power.steam_power, type);
+	}
+
+	@Override
+	public boolean isPowerSource(ConduitType type){
+		return !ConduitType.areSameType(Power.steam_power, type);
+	}
+	@Override
+	public void onReplaced(BlockState state, World w, BlockPos coord, BlockState newState, boolean isMoving) {
+		if (state.getBlock() != newState.getBlock()) destroyPipe(w, coord);
+		super.onReplaced(state, w, coord, newState, isMoving);
+	}
+
+	@Override
+	public void onExplosionDestroy(World w, BlockPos coord, Explosion boom){
+		destroyPipe(w, coord);
+		super.onExplosionDestroy(w, coord, boom);
+	}
+	
+	
+	private void destroyPipe(World w, BlockPos coord) {
+		if(w.isRemote) return;
+		// destroy connected drill bits
+		BlockPos c = coord.down();
+		while(c.getY() > 0 && w.getBlockState(c).getBlock() == Blocks.pump_pipe_steam){
+			w.removeBlock(c, false);
+			c = c.down();
+		}
+	}
+
+
+	
+	///// end multi-type overrides /////
+}
