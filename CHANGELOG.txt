@@ -1,4 +1,11 @@
-Unreleased - Minecraft 1.14.4
+2.2.8.114041 - baseSteam for Minecraft 1.14.4
+
+- Continue Steam Advantage under the baseSteam name on Forge 1.14.4.
+- Built and tested with the published basePower 2.4.6.114041 release.
+- Keep the old steam machine IDs and musket enchantments readable when upgrading.
+- Find the steam machines and parts on the shared basePower creative tab.
+
+Earlier 1.14.4 fixes
 
 - Keep waterlogged blocks intact when the steam pump collects their water, and only charge for successful pickup.
 - Keep fluid in the steam pump when an attached tank refuses it.

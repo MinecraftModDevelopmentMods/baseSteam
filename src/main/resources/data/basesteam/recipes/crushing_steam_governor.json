@@ -1,0 +1,6 @@
+{
+  "type": "basemetals:crushing",
+  "ingredient": { "item": "basesteam:steam_governor" },
+  "result": { "item": "basepower:sprocket", "count": 2 },
+  "conditions": [{ "type": "basesteam:recipe_mode", "mode": "APOCALYPTIC" }]
+}

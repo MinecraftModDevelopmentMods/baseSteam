@@ -1,0 +1,4 @@
+{
+    "parent": "basesteam:block/steam_pipe_ns",
+    "ambientocclusion": false
+}
