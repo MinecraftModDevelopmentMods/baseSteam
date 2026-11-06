@@ -42,6 +42,15 @@
       "artifactId": 13525428903,
       "archiveSha256": "2d377a370962ed063c8ac61e72fe702a63958b73d44ccdd854460d4cd7f5f52b",
       "mainSha256": "2cb0774379011ed0caefdac3ace9b5025c6ac879eecb92acce01d130678b68c0"
+    },
+    "2.2.8.115021": {
+      "branch": "master-1.15.2",
+      "commit": "9e4433e31ce5c7d4f5bfa62f3eb632b27877d054",
+      "tag": "2.2.8.115021",
+      "runId": 42308030447,
+      "artifactId": 13547281776,
+      "archiveSha256": "91e32541f9c21a264b6d3574ff04590c5e5d978fc7744295e3c206ce657349f5",
+      "mainSha256": "728aee8f0aee87716fbc7670a0590c92c06187132cafcee028ab7bf8d2d4d045"
     }
   }
 }
