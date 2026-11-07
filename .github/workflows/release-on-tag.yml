@@ -1,4 +1,4 @@
-name: Validate Steam Advantage release tag
+name: Validate baseSteam release tag
 
 on:
   push:
@@ -10,13 +10,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: steamadvantage-release-tag-${{ github.ref_name }}
+  group: basesteam-release-tag-${{ github.ref_name }}
   cancel-in-progress: false
 
 jobs:
   validate-release-tag:
     name: Validate tag for manual release confirmation
-    if: github.repository == 'MinecraftModDevelopmentMods/SteamAdvantage'
+    if: github.repository == 'MinecraftModDevelopmentMods/baseSteam'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

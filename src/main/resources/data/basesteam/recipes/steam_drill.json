@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "gXg",
+    "pmp"
+  ],
+  "key": {
+    "X": {
+      "item": "basesteam:steam_drill_bit"
+    },
+    "g": {
+      "tag": "forge:governors"
+    },
+    "p": {
+      "tag": "forge:plates/iron"
+    },
+    "m": {
+      "tag": "forge:frames/steel"
+    }
+  },
+  "result": {
+    "item": "basesteam:steam_drill"
+  },
+  "group": "basesteam:steam_drill",
+  "conditions": [
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:frames/steel"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:governors"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:plates/iron"
+    }
+  ]
+}

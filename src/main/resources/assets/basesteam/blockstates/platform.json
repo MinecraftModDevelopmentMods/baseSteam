@@ -1,0 +1,9 @@
+{
+    "variants": {
+        "height=0": { "model": "basesteam:block/platform_shaft" },
+        "height=1": { "model": "basesteam:block/platform1" },
+        "height=2": { "model": "basesteam:block/platform2" },
+        "height=3": { "model": "basesteam:block/platform3" },
+        "height=4": { "model": "basesteam:block/platform4" }
+    }
+}

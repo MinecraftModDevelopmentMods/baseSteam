@@ -1,4 +1,41 @@
-# Steam 1.17.1 Port Status
+# baseSteam 1.17.1 Port Status
+
+## Current Identity Candidate
+
+`2.2.10.117011`, branch `feature/basesteam-1.17.1-identity-migration`,
+based on the native Steam Advantage port at `f16b4d3`. This changes the mod,
+package, archive and resource identities without changing registry paths or
+machine behavior. The shared basePower migration hook recognizes the old
+`steamadvantage` namespace and dotted block-entity IDs for both namespaces.
+The existing state codecs and NBT repairs remain in place.
+
+The exact basePower 2.4.9.117011 source and development jar pins are pending.
+The earlier pins below cannot be reused.
+
+Base Metals 3.1.1.117011 is pinned to local, unpushed source
+`0deeeeecdbbc1fbcdecf910c59477de8efe164d7`. The dependency owner reports that
+its Gradle release and Eclipse suite passed. The supplied development jar was
+independently checked against SHA-256
+`83A8C32C633B56BB7E4405E8B3B24A4DEA32B9119216E5097B884056D679CAD1`.
+This is not a public runtime hash. Hosted builds still require checkout of
+the exact pinned commit; no remote fallback is allowed.
+
+Source checks passed without Gradle: 179 JSON resources, 12 native factories,
+17 harvest entries and 24 recipe unlocks. The baseline comparison found only
+identity edits in 61 production Java files and 178 JSON files; all 39 binary
+assets were byte-identical. Workflow YAML and shell syntax passed, and both
+dependency setup workflows rejected the pending basePower pin. An isolated
+XML fixture reproduced the original Eclipse repeat-refresh failure and passed
+with the fix, retaining the launcher, classpath order and arguments.
+
+Gradle compilation, Java tests, repeat Eclipse refresh against real inputs,
+packaged runtime, copied-world upgrade and manual acceptance are pending.
+
+## Historical Steam Advantage Record
+
+The remaining sections document the native Advantage-named candidate and its
+retained evidence. Their artifacts, build results and pins do not qualify
+baseSteam 2.2.10.117011.
 
 Local source candidate: `2.2.9.117011`, branch
 `feature/steamadvantage-1.17.1-port`, baseline

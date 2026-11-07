@@ -1,11 +1,22 @@
-# SteamAdvantage
+# baseSteam
 
-**Minecraft 1.17.1 local source port, version 2.2.9.117011.**
+**Minecraft 1.17.1 (Forge), version 2.2.10.117011. Local candidate.**
 
-Steam Advantage adds boilers, steam-powered machines, pumps, storage, elevators
-and a blackpowder musket to Power Advantage. This candidate is not a published
-release. Manual testing and separate approval are required before any port push,
-PR, merge, tag or release.
+baseSteam, formerly Steam Advantage, adds boilers, steam-powered machines,
+pumps, storage, elevators and a blackpowder musket to basePower. Its items and
+blocks use the shared basePower creative tab. This version is not published.
+
+## Upgrading a World
+
+Back up your world and test the upgrade on a copy. Replace Steam Advantage and
+Power Advantage with baseSteam and basePower; do not install both sets of mods.
+The migration recognizes old Steam Advantage IDs and keeps the registry paths,
+machine settings and saved data used by earlier baseSteam versions. The
+Minecraft 1.17.1 world upgrade still needs verification for this candidate.
+
+Existing `basesteam-common.toml` settings take precedence. When that file is
+absent, baseSteam can copy `steamadvantage-common.toml` or import settings from an
+older `.cfg` file. The old config is left in place.
 
 ## Build Target
 
@@ -14,33 +25,24 @@ Minecraft 1.17.1, Forge 37.1.1, official 1.17.1 mappings and MCP
 Production compilation and launches use Temurin 16.0.2+7, class major 60.
 Mavenizer uses Java 25. Java 8 is available only for older build utilities.
 
-The implementation namespace is `zone.moddev.mc.steamadvantage`. The mod ID,
-registry names, assets, saved NBT keys and provider IDs remain `steamadvantage`.
-The existing `cyano.poweradvantage.api` names remain in use.
+The mod ID and resource namespace are `basesteam`; the Java implementation
+namespace is `zone.moddev.mc.basesteam`. The shared `cyano.poweradvantage.api`
+names remain in use.
 
-Power Advantage 2.4.8.117011 is required. The coordinated local source checkpoint is
-`5b9abe578b053d2ef59b1962cf9e04f6880c91b9`, with development jar SHA-256
-`799B59B06EB2AC3FC4682AA64BF42C3A2A2C1D89D7FFFE9C72745DEC7DFBE0D8`.
-This pin is not final runtime acceptance. The build must not use a 1.16
-dependency or silently replace these exact inputs.
-
-Base Metals 3.1.0.117011 and OreSpawn 4.1.0.117011 are separate mods, not
-embedded libraries. Development jars must come from the coordinated builds of
-published sources `dacfaa3af2e3310d5cb6b081da79f09260ae103d` and
-`b56e2b62a1a6ea4d1dd96f8646a87801a817dbdf`. Their development hashes
-are not the public runtime hashes recorded separately in `gradle.properties`.
-
-Base Metals remains optional in Forge metadata; CurseForge's required-install
-ordering remains Power Advantage then Base Metals. No dependency is embedded.
+basePower 2.4.9.117011 is required. Base Metals 3.1.1.117011 remains optional
+in Forge; the CurseForge install metadata lists basePower and Base Metals.
+The exact basePower source commit and development jar hash are pending.
+The Base Metals development pin in `gradle.properties` is local and unpushed,
+so hosted verification cannot check it out yet. OreSpawn 4.1.0.117011 is
+unchanged in the development dependency chain. No dependency is embedded.
 
 ## Local Verification
 
-Use the checked-in Gradle wrapper and the exact development API jars described
-above. The build checks their hashes against `gradle.properties`; runtime jars
-are not replacements for these development inputs. Set the JDK-home and API-jar
-environment variables below to local paths. Java 8 is only for legacy utilities,
-not compilation or Minecraft. Power's `unitBootstrapJar` task builds the
-test-only Forge capability bootstrap; it is never embedded or launched in production.
+Once the exact pins are recorded in `gradle.properties`, use the checked-in
+Gradle wrapper and supply explicit paths to the matching development jars.
+Runtime jars are not interchangeable with development jars. Use the test-only
+Forge capability bootstrap from the same basePower source pin. Use a Steam-only
+Gradle user home; do not build against a sibling checkout's cache or mutable jar.
 
 For example, from the Steam checkout in PowerShell:
 
@@ -50,39 +52,24 @@ $jdks = @($env:JAVA17_HOME, $env:JAVA16_HOME, $env:JAVA25_HOME, $env:JAVA8_HOME)
 $toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
   '-Porg.gradle.java.installations.auto-detect=false',
   '-Porg.gradle.java.installations.auto-download=false')
-$power = $env:POWERADVANTAGE_CHECKOUT
-& "$power/gradlew.bat" -p $power @toolchains unitBootstrapJar `
-  "-PbaseMetalsDeobfJar=$env:BASEMETALS_DEOBF_JAR" `
-  "-PoreSpawnDeobfJar=$env:ORESPAWN_DEOBF_JAR"
+$env:GRADLE_USER_HOME = $env:BASESTEAM_GRADLE_USER_HOME
 ./gradlew.bat @toolchains check build deobfJar javadoc `
   verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums `
   verifyEclipseProductionClasspath `
   "-PpowerAdvantageDeobfJar=$env:POWERADVANTAGE_DEOBF_JAR" `
   "-PbaseMetalsDeobfJar=$env:BASEMETALS_DEOBF_JAR" `
   "-PoreSpawnDeobfJar=$env:ORESPAWN_DEOBF_JAR" `
-  "-PforgeCapabilityBootstrapJar=$power/build/unit-bootstrap/forge-native-unit-bootstrap.jar"
+  "-PforgeCapabilityBootstrapJar=$env:FORGE_CAPABILITY_BOOTSTRAP_JAR"
 ```
 
-`-PforgeCapabilityBootstrapJar` can instead point to a verified bootstrap jar
-built from the same pinned Power source. On other platforms use `./gradlew`.
-The public artifact family remains `SteamAdvantage-2.2.9.117011.jar`,
-`-sources.jar` and `-javadoc.jar`; the development jar stays under
-`build/libs-dev`.
+On other platforms use `./gradlew`. The artifact family is
+`baseSteam-2.2.10.117011.jar`, plus sources and Javadoc. The development jar
+stays under `build/libs-dev`.
 
-`node tools/verify-native-port.js` performs source and resource checks only.
-The Java tests, release audits, Eclipse audit, packaged runtime, migration and
-reproducibility gates must be run against the exact pinned candidate.
-CI is prepared for 1.17.1 but has not been run hosted.
-
-The optional Base Metals recipe-guard fix passed 199 executed tests, release/resource
-audits, Javadoc and Eclipse configuration checks, re-executing all 32 tasks without
-build-cache reuse. It changes nine recipe conditions, so the preceding candidate's
-frozen-J artifact equality is historical, not proof of these new resource bytes.
-The [module test record](docs/PORT117-STATUS.md) identifies exact inputs and retained
-failures. Combined server, client, migration and endurance qualification is tracked
-in the coordinated Power Advantage checkout's `docs/1.17/CURRENT-QUALIFICATION.md`;
-read its artifact pins and remaining limits before reusing a result. Automated
-checks do not replace manual gameplay or visual acceptance.
+`node tools/verify-native-port.js` and `node tools/generate-recipe-unlocks.js --check`
+run without the dependency jars. The [port status](docs/PORT117-STATUS.md) separates
+these checks from the pending build and runtime gates and retains the earlier
+Steam Advantage evidence.
 
 ## Port Details
 
@@ -108,17 +95,15 @@ field must not turn an ingredient discovery into an unrestricted predicate.
 Optional Base Metals crushing recipes also require `forge:mod_loaded` before
 their recipe-mode condition, so APOCALYPTIC loads safely without that serializer.
 
-Steam reads the real Base Metals crushing recipes. In the pinned 1.17 release,
-raw copper crushes into one powder and copper ore into two. This follows Base
-Metals' published raw-metal recipes; Steam does not override the balance.
+Steam reads Base Metals' crushing recipes without overriding their balance.
 Geothermal heat uses native Forge lava temperature, retaining the existing
 1300 K input and resulting heat value.
 
 ## Acceptance Still Required
 
-No historical 1.16 automated result qualifies this candidate. Compilation,
-executed unit tests, packaged server/client checks and manual gameplay are
-separate gates. Until those runs complete, no runtime pass is claimed here.
+Historical results from earlier versions do not qualify this candidate.
+Compilation, Java tests, repeat Eclipse refresh, packaged server/client checks,
+world migration and manual gameplay are separate gates.
 
 Manual testing must cover all boilers, crusher and furnace reload/redstone,
 drills in six directions and track moves with inventory and energy, helper

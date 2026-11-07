@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "gXg",
+    "pmp"
+  ],
+  "key": {
+    "X": {
+      "item": "minecraft:furnace"
+    },
+    "g": {
+      "tag": "forge:governors"
+    },
+    "p": {
+      "tag": "forge:plates/iron"
+    },
+    "m": {
+      "tag": "forge:frames/steel"
+    }
+  },
+  "result": {
+    "item": "basesteam:steam_furnace"
+  },
+  "group": "basesteam:steam_furnace",
+  "conditions": [
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:frames/steel"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:governors"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:plates/iron"
+    }
+  ]
+}
