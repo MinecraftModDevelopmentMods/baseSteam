@@ -9,8 +9,11 @@ machine behavior. The shared basePower migration hook recognizes the old
 `steamadvantage` namespace and dotted block-entity IDs for both namespaces.
 The existing state codecs and NBT repairs remain in place.
 
-The exact basePower 2.4.9.117011 source and development jar pins are pending.
-The earlier pins below cannot be reused.
+basePower 2.4.9.117011 is pinned to source
+`308d42a89483d56d0fad4805cdb65dac483d9e31` and development jar SHA-256
+`312FA3012CB57C91F5F22079DA4778D481BA45EF7B8A0587D9993899E1B6D08E`.
+The player jar hash is recorded separately in `gradle.properties`. The earlier
+pins below cannot be reused.
 
 Base Metals 3.1.1.117011 is pinned to local, unpushed source
 `0deeeeecdbbc1fbcdecf910c59477de8efe164d7`. The dependency owner reports that
@@ -28,8 +31,9 @@ dependency setup workflows rejected the pending basePower pin. An isolated
 XML fixture reproduced the original Eclipse repeat-refresh failure and passed
 with the fix, retaining the launcher, classpath order and arguments.
 
-Gradle compilation, Java tests, repeat Eclipse refresh against real inputs,
-packaged runtime, copied-world upgrade and manual acceptance are pending.
+Local Gradle qualification is recorded separately in the untracked
+`evidence/basesteam-117-identity-20261107` receipts. Packaged runtime,
+copied-world upgrade and manual acceptance are separate checks.
 
 ## Historical Steam Advantage Record
 

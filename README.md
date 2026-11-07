@@ -31,15 +31,15 @@ names remain in use.
 
 basePower 2.4.9.117011 is required. Base Metals 3.1.1.117011 remains optional
 in Forge; the CurseForge install metadata lists basePower and Base Metals.
-The exact basePower source commit and development jar hash are pending.
-The Base Metals development pin in `gradle.properties` is local and unpushed,
+Use the exact basePower source and development jar pinned in `gradle.properties`.
+The Base Metals development pin there is local and unpushed,
 so hosted verification cannot check it out yet. OreSpawn 4.1.0.117011 is
 unchanged in the development dependency chain. No dependency is embedded.
 
 ## Local Verification
 
-Once the exact pins are recorded in `gradle.properties`, use the checked-in
-Gradle wrapper and supply explicit paths to the matching development jars.
+Use the checked-in Gradle wrapper and supply explicit paths to the development
+jars matching the pins in `gradle.properties`.
 Runtime jars are not interchangeable with development jars. Use the test-only
 Forge capability bootstrap from the same basePower source pin. Use a Steam-only
 Gradle user home; do not build against a sibling checkout's cache or mutable jar.
