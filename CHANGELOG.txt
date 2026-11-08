@@ -1,3 +1,9 @@
+baseSteam 2.2.9.116051 (Minecraft 1.16.5)
+
+- Bring baseSteam to Minecraft 1.16.5 and use the shared basePower creative tab.
+- Map legacy Steam Advantage blocks, items and saved machine state to baseSteam when upgrading.
+- Fix Eclipse refreshes when ForgeGradle reuses an existing client or server launch.
+
 Steam Advantage 2.2.8.116051 (local port candidate)
 
 - Read live redstone before the crusher and furnace resume after loading, preserving saved work and the first-tick steam heat bonus without changing the normal polling interval.

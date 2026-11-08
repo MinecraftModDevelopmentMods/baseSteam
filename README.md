@@ -1,19 +1,15 @@
-# SteamAdvantage
+# baseSteam
 
-**Minecraft 1.16.5 source port candidate, version 2.2.8.116051.**
-This source port remains pending manual acceptance and publication approval.
-The follow-up checks use finite supplies and ordinary server ticks to measure
-actual machine output, energy use, blocked routes and saved state. They also
-cover fluid pickup without destroying waterlogged blocks. Rendered GUI checks
-require machine names and inventory labels as well as correctly placed controls.
-The shared record below identifies the current jars and each completed run;
-earlier results are retained separately rather than counted again.
-Earlier-candidate results and accepted 1.15 results do not qualify this candidate.
+**Minecraft 1.16.5, version 2.2.9.116051.**
 
-The [shared test record](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.16.5/docs/1.16/CURRENT-QUALIFICATION.md)
-records the exact jars, completed checks and remaining limits.
+Use [basePower 2.4.8.116051](https://www.curseforge.com/minecraft/mc-mods/basepower/files/9501921)
+and [Base Metals 3.1.1.116051](https://www.curseforge.com/minecraft/mc-mods/base-metals/files/9501458). The
+[shared test record](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-1.16.5/docs/1.16/BASE-RELEASE-CANDIDATE.md)
+covers machine operation, world upgrades and full restarts.
 
-Steam Advantage adds steam-powered machines and infrastructure to Power Advantage.
+baseSteam continues DrCyano's Steam Advantage. It adds boilers, steam
+distribution and steam-powered machinery to basePower. Back up your world
+before upgrading; the port maps legacy Steam Advantage blocks and saved state.
 
 ## Build Target
 
@@ -23,11 +19,8 @@ ForgeGradle 7.0.34 and Gradle 9.6.1 run on Temurin 17.0.1+12.
 Compilation and Minecraft launches use Temurin 8.0.502+7 and Java 8 bytecode;
 Mavenizer uses Temurin 25.0.3+9.0.LTS.
 
-Power Advantage 2.4.7.116051 remains a separate required mod. The pinned compile
-dependency uses source `bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7`.
-Its development jar SHA-256 is
-`2FB923944A456B4F26AB2F9212C646469CE3F49BFD4DAE894C15559B48908386`.
-These exact pins are recorded in `gradle.properties` and audited during builds.
+basePower 2.4.8.116051 is a separate required mod. Its source revision and
+development JAR checksum are pinned in `gradle.properties` and checked during builds.
 Use an immutable development jar through `-PpowerAdvantageDeobfJar=<path>`.
 Release audits reject missing, placeholder, or mismatched pins. These source pins
 do not grant publication approval.
@@ -68,9 +61,9 @@ against the same cache or checkout.
 
 ## Compatibility
 
-Runtime identities remain `steamadvantage:*`; the implementation namespace remains
-`zone.moddev.mc.steamadvantage`. Registry names, tile IDs, resources, recipes,
-trade ranges, machine costs, output quantities, and persistent NBT remain stable.
+New saves use `basesteam:*`. The shared upgrade code maps older
+`steamadvantage:*` IDs to their baseSteam equivalents. Trade ranges, machine
+costs, output quantities and saved machine data are preserved.
 
 The native port uses world-only conduit callbacks. Power Advantage owns registry-key
 dimension handling, shared capability invalidation/revival, fluid adapters, and base
@@ -99,7 +92,7 @@ pinned inputs. Preserve original worlds and backups; never open a world in an
 older Minecraft version after upgrading it. Manual acceptance and publication
 approval remain separate from automated evidence.
 
-The shared [machine operating checks](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.16.5/docs/1.16/OPERATING-TESTS.md)
+The shared [machine operating checks](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-1.16.5/docs/1.16/OPERATING-TESTS.md)
 exercise finite boiler, processing, pumping, storage, elevator and musket jobs.
 They check real output and resource use, including failed jobs and complete
 server restarts. Live player controls and rendering still need a walkthrough.

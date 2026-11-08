@@ -16,7 +16,7 @@ plugins {
 
 group = project.mod_group
 version = project.mod_version
-base.archivesName = 'SteamAdvantage'
+base.archivesName = 'baseSteam'
 
 def versionParts = project.mod_version.toString().tokenize('.')
 if (versionParts.size() != 4 || !versionParts.every { it ==~ /\d+/ }) {
@@ -101,7 +101,7 @@ minecraft {
             workingDir.convention layout.projectDirectory.dir(configuredRunDirectory)
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             systemProperty 'forge.logging.console.level', 'info'
-            mods { steamadvantage { source sourceSets.main } }
+            mods { basesteam { source sourceSets.main } }
             environment 'target', forge36RunTargets[name]
             environment 'MCP_MAPPINGS', "${mapping_channel}_${mapping_version}"
             environment 'MCP_VERSION', mcp_version
@@ -170,10 +170,14 @@ repositories {
 // Local builds use the sibling FG7 output; CI supplies the same pinned jar via
 // -PpowerAdvantageDeobfJar after building the audited upstream commit.
 def defaultPowerAdvantageDeobfJar = file("../../PowerAdvantage/build/libs-dev/" \
-        + "PowerAdvantage-${project.poweradvantage_version}-deobf.jar")
+        + "basePower-${project.poweradvantage_version}-deobf.jar")
 def powerAdvantageDeobfJar = providers.gradleProperty('powerAdvantageDeobfJar')
         .map { file(it) }
         .getOrElse(defaultPowerAdvantageDeobfJar)
+
+tasks.named('test', Test) {
+    inputs.files('gradle.properties', 'build.gradle', '.github/workflows/ci.yml', '.github/workflows/codeql-analysis.yml')
+}
 if (!powerAdvantageDeobfJar.isFile()) {
     throw new GradleException("Missing PowerAdvantage deobf jar at ${powerAdvantageDeobfJar}. "
             + "Run gradlew.bat deobfJar in ../../PowerAdvantage first, or pass "
@@ -348,7 +352,7 @@ tasks.register('verifyReleaseConfiguration') {
         if (new JsonSlurper().parse(file('src/main/resources/pack.mcmeta')).pack.pack_format != 6) {
             throw new GradleException('Minecraft 1.16.5 resources must use pack format 6')
         }
-        if (project.mod_version != '2.2.8.116051') {
+        if (project.mod_version != '2.2.9.116051') {
             throw new GradleException("Unexpected SteamAdvantage release version: ${project.mod_version}")
         }
         if (project.minecraft_version != '1.16.5'
@@ -364,33 +368,35 @@ tasks.register('verifyReleaseConfiguration') {
                 || project.gradle_java_version != '17') {
             throw new GradleException('Unexpected release dispatcher target metadata')
         }
-        if (project.mod_id != 'steamadvantage'
-                || project.group.toString() != 'zone.moddev.mc.steamadvantage'
-                || base.archivesName.get() != 'SteamAdvantage'
+        if (project.mod_id != 'basesteam'
+                || project.group.toString() != 'zone.moddev.mc.basesteam'
+                || base.archivesName.get() != 'baseSteam'
                 || project.mod_license != 'GPL-3.0-only'
-                || project.curseforge_project_id != '240984') {
+                || project.curseforge_project_id != '1781373') {
             throw new GradleException('Unexpected Forge, Maven, archive, or CurseForge identity')
         }
-        if (project.cf_requirements != 'power-advantage,base-metals'
+        if (project.cf_requirements != 'basepower,base-metals'
                 || project.cf_optionals != ''
                 || project.cf_versions != '1.16.5') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.poweradvantage_version != '2.4.7.116051'
-                || project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/PowerAdvantage'
-                || project.poweradvantage_source_ref != 'bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7'
-                || project.poweradvantage_deobf_sha256 != '2FB923944A456B4F26AB2F9212C646469CE3F49BFD4DAE894C15559B48908386') {
+        if (project.poweradvantage_version != '2.4.8.116051'
+                || project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/basePower'
+                || project.poweradvantage_source_ref != '04a90df489180c69dd57f7cda9ff5ff7e3c456ba'
+                || project.poweradvantage_curse_file_id != '9501921'
+                || project.poweradvantage_release_sha256 != '408C6B9D5BF065E37B76B59AB3E6DD649DFE045638F197C63532281939D701C7'
+                || project.poweradvantage_deobf_sha256 != '156674F6DF6007D351AD419416344356F6586452077FCAE2E9BC9404EE14A14B') {
             throw new GradleException('Unexpected PowerAdvantage compile dependency identity')
         }
         String mainSource = file(
-                'src/main/java/zone/moddev/mc/steamadvantage/SteamAdvantage.java').getText('UTF-8')
-        if (!mainSource.contains('MODID = "steamadvantage"')
-                || !mainSource.contains('VERSION = "2.2.8.116051"')) {
+                'src/main/java/zone/moddev/mc/basesteam/SteamAdvantage.java').getText('UTF-8')
+        if (!mainSource.contains('MODID = "basesteam"')
+                || !mainSource.contains('VERSION = "2.2.9.116051"')) {
             throw new GradleException('SteamAdvantage source identity changed')
         }
         String metadata = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
-        ['modId="steamadvantage"', 'modId="poweradvantage"', 'modId="basemetals"',
-         'versionRange="[2.4.7.116051,3.0.0)"'].each { marker ->
+        ['modId="basesteam"', 'modId="basepower"', 'modId="basemetals"',
+         'versionRange="[2.4.8.116051,3.0.0)"'].each { marker ->
             if (!metadata.contains(marker)) {
                 throw new GradleException("Source mods.toml is missing ${marker}")
             }
@@ -416,8 +422,8 @@ tasks.register('verifyReleaseDependencies') {
             ['cyano/poweradvantage/api/PoweredEntity.class',
              'cyano/poweradvantage/api/GUIBlock.class',
              'cyano/poweradvantage/api/FluidCategoryRegistry.class',
-             'zone/moddev/mc/poweradvantage/conduitnetwork/ConduitRegistry.class',
-             'zone/moddev/mc/poweradvantage/init/Fluids.class'].each { required ->
+             'zone/moddev/mc/basepower/conduitnetwork/ConduitRegistry.class',
+             'zone/moddev/mc/basepower/init/Fluids.class'].each { required ->
                 if (zip.getEntry(required) == null) {
                     throw new GradleException("PowerAdvantage dependency is missing ${required}")
                 }
@@ -508,13 +514,13 @@ tasks.register('verifyReleaseArtifacts') {
         new ZipFile(mainJar).withCloseable { zip ->
             List<String> names = zip.entries().collect { it.name }
             ['META-INF/mods.toml', 'pack.mcmeta',
-             'zone/moddev/mc/steamadvantage/SteamAdvantage.class',
-             'zone/moddev/mc/steamadvantage/machines/SteamDrillTileEntity.class',
-             'zone/moddev/mc/steamadvantage/machines/SteamPumpTileEntity.class',
-             'zone/moddev/mc/steamadvantage/machines/GeothermalBoilerTileEntity.class',
-             'assets/steamadvantage/lang/en_us.json',
-             'data/steamadvantage/recipes/steam_pipe.json',
-             'data/steamadvantage/advancements/recipes/steam_pipe.json'].each { required ->
+             'zone/moddev/mc/basesteam/SteamAdvantage.class',
+             'zone/moddev/mc/basesteam/machines/SteamDrillTileEntity.class',
+             'zone/moddev/mc/basesteam/machines/SteamPumpTileEntity.class',
+             'zone/moddev/mc/basesteam/machines/GeothermalBoilerTileEntity.class',
+             'assets/basesteam/lang/en_us.json',
+             'data/basesteam/recipes/steam_pipe.json',
+             'data/basesteam/advancements/recipes/steam_pipe.json'].each { required ->
                 if (!names.contains(required)) {
                     throw new GradleException("Release jar is missing ${required}")
                 }
@@ -523,7 +529,7 @@ tasks.register('verifyReleaseArtifacts') {
              'steam_boiler_geothermal', 'steam_tank', 'steam_furnace', 'steam_crusher',
              'steam_drill', 'steam_elevator', 'steam_switch', 'steam_still', 'steam_pump',
              'steam_boiler_oil'].each { id ->
-                if (!names.contains("data/steamadvantage/loot_tables/blocks/${id}.json".toString())) {
+                if (!names.contains("data/basesteam/loot_tables/blocks/${id}.json".toString())) {
                     throw new GradleException("Release jar is missing native block loot for ${id}")
                 }
             }
@@ -534,7 +540,7 @@ tasks.register('verifyReleaseArtifacts') {
             }
             ['agent-notes/', '.codex/', 'src/test/', 'fernflower_abstract_parameter_names.txt',
               'cyano/poweradvantage/',
-              'zone/moddev/mc/poweradvantage/', 'zone/moddev/mc/basemetals/', 'cyano/basemetals/', 'com/mcmoddev/lib/',
+              'zone/moddev/mc/basepower/', 'zone/moddev/mc/basemetals/', 'cyano/basemetals/', 'com/mcmoddev/lib/',
               'cyano/orespawn/', 'com/mcmoddev/orespawn/', 'cofh/api/', 'reborncore/',
              'net/minecraft/', 'net/minecraftforge/'].each { forbidden ->
                 if (names.any { it.contains(forbidden) }) {
@@ -543,7 +549,7 @@ tasks.register('verifyReleaseArtifacts') {
             }
             String metadata = zip.getInputStream(zip.getEntry('META-INF/mods.toml'))
                     .getText(StandardCharsets.UTF_8.name())
-            if (!metadata.contains('modId="steamadvantage"')
+            if (!metadata.contains('modId="basesteam"')
                     || !metadata.contains("version=\"${project.mod_version}\"")) {
                 throw new GradleException('Packaged mods.toml identity or version is incorrect')
             }
@@ -569,8 +575,8 @@ tasks.register('verifyReleaseArtifacts') {
         }
 
         new ZipFile(new File(libs, expectedReleaseFiles.get()[1])).withCloseable { sourceZip ->
-            if (sourceZip.getEntry('zone/moddev/mc/steamadvantage/SteamAdvantage.java') == null
-                    || sourceZip.getEntry('zone/moddev/mc/steamadvantage/machines/SteamDrillTileEntity.java') == null) {
+            if (sourceZip.getEntry('zone/moddev/mc/basesteam/SteamAdvantage.java') == null
+                    || sourceZip.getEntry('zone/moddev/mc/basesteam/machines/SteamDrillTileEntity.java') == null) {
                 throw new GradleException('Sources jar is missing required SteamAdvantage sources')
             }
         }
@@ -670,7 +676,7 @@ publishing {
             pom {
                 name = 'Steam Advantage'
                 description = project.mod_description
-                url = 'https://github.com/MinecraftModDevelopmentMods/SteamAdvantage'
+                url = 'https://github.com/MinecraftModDevelopmentMods/baseSteam'
                 licenses {
                     license {
                         name = 'GNU General Public License, Version 3'
@@ -678,9 +684,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/MinecraftModDevelopmentMods/SteamAdvantage.git'
-                    developerConnection = 'scm:git:ssh://git@github.com/MinecraftModDevelopmentMods/SteamAdvantage.git'
-                    url = 'https://github.com/MinecraftModDevelopmentMods/SteamAdvantage'
+                    connection = 'scm:git:https://github.com/MinecraftModDevelopmentMods/baseSteam.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/MinecraftModDevelopmentMods/baseSteam.git'
+                    url = 'https://github.com/MinecraftModDevelopmentMods/baseSteam'
                 }
             }
         }
@@ -808,10 +814,10 @@ tasks.register('isolateEclipseProductionRuns') {
                     "key=\"MC_VERSION\" value=\"${project.minecraft_version}\"")
             if (launch.name in ['runClient.launch', 'runServer.launch', 'runData.launch']) {
                 // Eclipse compiles into bin/main, not Gradle's merged run output.
-                def launchXml = new groovy.xml.XmlSlurper().parseText(contents)
+                def launchXml = new groovy.xml.XmlParser().parseText(contents)
                 def modClasses = launchXml.mapAttribute.find {
-                    it.@key.text() == 'org.eclipse.debug.core.environmentVariables'
-                }.mapEntry.findAll { it.@key.text() == 'MOD_CLASSES' }
+                    it.@key == 'org.eclipse.debug.core.environmentVariables'
+                }.mapEntry.findAll { it.@key == 'MOD_CLASSES' }
                 if (modClasses.size() != 1) {
                     throw new GradleException("${launch.name} must define one MOD_CLASSES entry")
                 }
@@ -847,26 +853,32 @@ tasks.register('isolateEclipseProductionRuns') {
             }.findAll { File runtimeFile ->
                 !mainOutputs.contains(runtimeFile)
             }
-            List<String> launchLines = contents.readLines()
-            int buildshipContainerLine = launchLines.findIndexOf {
-                it.contains('org.eclipse.buildship.core.gradleclasspathcontainer')
+            def parser = new groovy.xml.XmlParser()
+            def launchXml = parser.parseText(contents)
+            def classpath = launchXml.listAttribute.find { it.@key == 'org.eclipse.jdt.launching.CLASSPATH' }
+            if (classpath == null) {
+                throw new GradleException("${name} is missing its explicit classpath")
             }
-            if (buildshipContainerLine < 0) {
-                throw new GradleException("${name} is missing the Buildship classpath container")
+            // A refresh can reuse an already isolated launch. Replace its old runtime
+            // archives too, but keep ForgeGradle's separate Slime Launcher entry.
+            def previousRuntime = classpath.listEntry.findAll { entry ->
+                def runtime = parser.parseText(entry.@value)
+                String archive = runtime.@externalArchive
+                runtime.@containerPath == 'org.eclipse.buildship.core.gradleclasspathcontainer'
+                        || (archive && !file(archive).name.startsWith('slime-launcher-'))
             }
-            List<String> runtimeEntries = productionRuntime.collect { File runtimeFile ->
-                String escapedPath = runtimeFile.canonicalPath
-                        .replace('&', '&amp;amp;')
-                        .replace('<', '&amp;lt;')
-                        .replace('>', '&amp;gt;')
-                ('    <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; '
-                        + 'standalone=&quot;no&quot;?&gt;&lt;runtimeClasspathEntry externalArchive=&quot;'
-                        + escapedPath
-                        + '&quot; type=&quot;2&quot; path=&quot;5&quot; /&gt;"/>')
+            if (previousRuntime.isEmpty()) {
+                throw new GradleException("${name} is missing its production runtime entries")
             }
-            launchLines.remove(buildshipContainerLine)
-            launchLines.addAll(buildshipContainerLine, runtimeEntries)
-            contents = launchLines.join('\n') + '\n'
+            int runtimeIndex = classpath.children().indexOf(previousRuntime.first())
+            previousRuntime.each { classpath.remove(it) }
+            def runtimeEntries = productionRuntime.collect { File runtimeFile ->
+                def archive = new Node(null, 'runtimeClasspathEntry',
+                        [externalArchive: runtimeFile.path, type: '2', path: '5'])
+                new Node(null, 'listEntry', [value: groovy.xml.XmlUtil.serialize(archive)])
+            }
+            classpath.children().addAll(runtimeIndex, runtimeEntries)
+            contents = groovy.xml.XmlUtil.serialize(launchXml)
 
             ['--cache', '--metadata', '--to-srg', '--to-obf'].each { option ->
                 String prefix = option + ' '
@@ -1022,7 +1034,7 @@ tasks.register('verifyModelAssets') {
             int separator = reference.indexOf(':')
             String namespace = separator >= 0 ? reference.substring(0, separator) : 'minecraft'
             String path = separator >= 0 ? reference.substring(separator + 1) : reference
-            if (namespace != project.mod_id && namespace != 'poweradvantage') return
+            if (namespace != project.mod_id && namespace != 'basepower') return
 
             String suffix = assetType == 'textures' ? '.png' : '.json'
             String targetPath = "assets/${namespace}/${assetType}/${path}${suffix}"
@@ -1141,9 +1153,9 @@ tasks.register('verifyRecipeTagGuards') {
                 throw new GradleException("${recipeFile.path} contains a non-object recipe condition")
             }
             Set<String> guards = conditions
-                    .findAll { it instanceof Map && it.type == 'poweradvantage:tag_not_empty' }
+                    .findAll { it instanceof Map && it.type == 'basepower:tag_not_empty' }
                     .collect { it.tag as String } as Set<String>
-            Set<String> emptyGuards = conditions.findAll { it.type == 'poweradvantage:tag_empty' }
+            Set<String> emptyGuards = conditions.findAll { it.type == 'basepower:tag_empty' }
                     .collect { it.tag as String } as Set<String>
             if (!(emptyGuards.intersect(guards)).isEmpty()) {
                 throw new GradleException("${recipeFile.path} requires the same tag to be empty and nonempty")

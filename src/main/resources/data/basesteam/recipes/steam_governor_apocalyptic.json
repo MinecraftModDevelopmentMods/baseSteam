@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " t ",
+    "srs",
+    "btb"
+  ],
+  "key": {
+    "t": {
+      "tag": "forge:sprockets"
+    },
+    "s": {
+      "tag": "forge:rods"
+    },
+    "r": {
+      "tag": "forge:rods"
+    },
+    "b": {
+      "tag": "forge:ingots/brass"
+    }
+  },
+  "result": {
+    "item": "basesteam:steam_governor"
+  },
+  "conditions": [
+    {
+      "type": "basesteam:recipe_mode",
+      "mode": "APOCALYPTIC"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:ingots/brass"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:rods"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "forge:sprockets"
+    }
+  ],
+  "group": "basesteam:steam_governor"
+}
