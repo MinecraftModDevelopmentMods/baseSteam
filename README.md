@@ -12,7 +12,7 @@ Back up your world and test the upgrade on a copy. Replace Steam Advantage and
 Power Advantage with baseSteam and basePower; do not install both sets of mods.
 The migration recognizes old Steam Advantage IDs and keeps the registry paths,
 machine settings and saved data used by earlier baseSteam versions. The
-Minecraft 1.20.1 world upgrade still needs verification for this candidate.
+combined world upgrade and restart checks are run from the basePower test rig.
 
 Existing `basesteam-common.toml` settings take precedence. When that file is
 absent, baseSteam can copy `steamadvantage-common.toml` or import settings from an
@@ -20,7 +20,7 @@ older `.cfg` file. The old config is left in place.
 
 ## Build Target
 
-Minecraft 1.20.1, Forge 47.4.0, official 1.20.1 mappings and MCP
+Minecraft 1.20.1, Forge 47.4.10, official 1.20.1 mappings and MCP
 20230612.114412. ForgeGradle 7.0.34 and Gradle 9.6.1 run on Java 17.
 Production compilation and launches use Temurin 17, class major 61.
 Mavenizer uses Java 25. The build requires the
