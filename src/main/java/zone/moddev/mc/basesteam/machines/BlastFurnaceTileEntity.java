@@ -141,8 +141,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 		if(output.isEmpty()) return false;
 		ItemStack outputSlot = inventory[slot+3];
 		if(outputSlot == null) return true;
-		return (ItemStack.isSame(output, outputSlot)
-				&& ItemStack.tagMatches(output, outputSlot)
+		return (ItemStack.isSameItemSameTags(output, outputSlot)
 				&& (output.getCount() + outputSlot.getCount()) <= outputSlot.getMaxStackSize());
 	}
 	

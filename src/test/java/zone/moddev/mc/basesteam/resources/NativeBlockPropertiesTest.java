@@ -12,6 +12,8 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -82,6 +84,15 @@ public class NativeBlockPropertiesTest {
             assertFalse("Native tags must not add a mandatory harvest tool or tier",
                     state.requiresCorrectToolForDrops());
         }
+    }
+
+    @Test public void retainsPistonReactionAndHiddenHelperLootPolicy() {
+        for (BlockState state : states()) {
+            assertFalse("A solid helper must not be washed away",
+                    state.canBeReplaced(net.minecraft.world.level.material.Fluids.WATER));
+            assertEquals(height < 0 ? PushReaction.BLOCK : PushReaction.NORMAL, state.getPistonPushReaction());
+        }
+        if (height >= 0) assertEquals(BuiltInLootTables.EMPTY, block.getLootTable());
     }
 
     @Test public void fullCollisionHelpersNeitherSuffocateNorBlockTheView() {

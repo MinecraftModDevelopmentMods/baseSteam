@@ -3,6 +3,8 @@ package zone.moddev.mc.basesteam.gui;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI.GUIContainer;
 import zone.moddev.mc.basepower.gui.FluidTankGUI;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +25,29 @@ public abstract class GUIHelper {
 		return newValue;
 	}
 	
+	public static void drawNeedle(GUIContainer container, float pivotX, float pivotY, float zLevel, float value) {
+		PoseStack pose = container.getMatrices();
+		pose.pushPose();
+		try {
+			positionNeedle(pose, pivotX, pivotY, zLevel, value);
+			container.blit(0, 0, 176, 0, 7, 35);
+		} finally {
+			pose.popPose();
+		}
+	}
+
+	static void positionNeedle(PoseStack pose, float pivotX, float pivotY, float zLevel, float value) {
+		pose.translate(pivotX, pivotY, zLevel);
+		pose.mulPose(Axis.ZP.rotationDegrees(needleRotation(value)));
+		pose.translate(-3.5F, -17.5F, 0.0F);
+	}
+
+	private static float needleRotation(float value) {
+		return (displayLevel(value) - 0.5F) * 180.0F;
+	}
+
+	/** @deprecated Use the screen-aware overload to draw with the machine texture. */
+	@Deprecated
 	public static void drawNeedle(float pivotX, float pivotY, float zLevel,
 			float value) {
 		value = displayLevel(value);
@@ -112,9 +137,7 @@ public abstract class GUIHelper {
 		if(barHeight > 0){
 			FluidTankGUI.drawFluidFilledRectangle(guiContainer,fs,x+xPos, y+yPos+barSlotHeight-h,w, h,z);
 		}
-			com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, displayImage);
-		
-		guiContainer.blit(x+xPos-texMarginW, y+yPos-texMarginH, texOverlayX, texOverlayY, texOverlayW, texOverlayH); // x, y, textureOffsetX, textureOffsetY, width, height)
+		guiContainer.blit(displayImage, x+xPos-texMarginW, y+yPos-texMarginH, texOverlayX, texOverlayY, texOverlayW, texOverlayH); // x, y, textureOffsetX, textureOffsetY, width, height)
 	}
 	
 

@@ -5,7 +5,6 @@ import cyano.poweradvantage.api.PoweredEntity;
 import zone.moddev.mc.basepower.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Explosion;
@@ -17,7 +16,7 @@ public class ElectricBoilerBlock  extends cyano.poweradvantage.api.simple.BlockS
 
 
 	public ElectricBoilerBlock() {
-		super(Material.PISTON, 0.75f, Power.steam_power, ElectricBoilerTileEntity.ELECTRIC_POWER, Fluids.fluidConduit_general);
+		super(machineProperties(0.75F), Power.steam_power, ElectricBoilerTileEntity.ELECTRIC_POWER, Fluids.fluidConduit_general);
 	}
 
 	@Override

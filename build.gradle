@@ -14,22 +14,8 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
-apply from: 'gradle/forge45-mavenizer.gradle'
+apply from: 'gradle/forge47-mavenizer.gradle'
 
-def mavenizerFixtureHashes = [
-        (file('ci-fixtures/tools/minecraft-source-compatibility.json')):
-                '33A3217261EBB8F37D45F50BD2F8CE70B221C014A5C15F4C5F8F9091AD6D1EC8',
-        (file('ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.patch')):
-                'D856190DEF5574716C5E4F4379912C451B1F5952B0B111576651A98EECF58544',
-        (file('ci-fixtures/tools/LICENSE-MAVENIZER.txt')):
-                '20C17D8B8C48A600800DFD14F95D5CB9FF47066A9641DDEAB48DC54AEC96E331'
-]
-mavenizerFixtureHashes.each { fixture, expected ->
-    if (!fixture.isFile() || MessageDigest.getInstance('SHA-256').digest(fixture.bytes)
-            .encodeHex().toString().toUpperCase(Locale.ROOT) != expected) {
-        throw new GradleException("Missing or invalid Forge 45 Mavenizer fixture: ${fixture.name}")
-    }
-}
 group = project.mod_group
 version = project.mod_version
 base.archivesName = 'baseSteam'
@@ -139,7 +125,7 @@ sourceSets.main.resources {
 def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
 def prepareForgeRunModClasses = tasks.register('prepareForgeRunModClasses', Sync) {
     group = 'ide'
-    description = 'Merges classes and processed resources for Forge 45 launches.'
+    description = 'Merges classes and processed resources for Forge 47 launches.'
     dependsOn tasks.named('classes')
     from sourceSets.main.output
     into forgeRunModClassesDirectory
@@ -177,10 +163,21 @@ repositories {
 
 // Only code and launch tasks require the exact jars; source/resource checks can run independently.
 def explicitJar = { String property -> providers.gradleProperty(property).map { file(it) }.getOrNull() }
-def powerAdvantageDeobfJar = explicitJar('powerAdvantageDeobfJar')
-def baseMetalsDeobfJar = explicitJar('baseMetalsDeobfJar')
-def oreSpawnDeobfJar = explicitJar('oreSpawnDeobfJar')
-def developmentJars = files([powerAdvantageDeobfJar, baseMetalsDeobfJar, oreSpawnDeobfJar].findAll { it != null })
+def powerRoot = '../../PowerAdvantage'
+def baseMetalsRoot = '../../../../BaseMetals/BaseMetals 1201/BaseMetals'
+def powerAdvantageDeobfJar = explicitJar('powerAdvantageDeobfJar') ?: file(
+        "${powerRoot}/build/libs-dev/basePower-${project.poweradvantage_version}-deobf.jar")
+def baseMetalsDeobfJar = explicitJar('baseMetalsDeobfJar') ?: file(
+        "${baseMetalsRoot}/build/libs-dev/BaseMetals-${project.basemetals_version}-deobf.jar")
+def oreSpawnRoot = '../../../../MinecraftMineralogy/OS1201/OreSpawn'
+def oreSpawnJar = { String variant ->
+    String directory = variant == 'Deobf' ? 'libs-dev' : 'libs'
+    String classifier = variant == 'Deobf' ? '-deobf' : ''
+    explicitJar("oreSpawn${variant}Jar") ?: file(
+            "${oreSpawnRoot}/build/${directory}/OreSpawn-${project.orespawn_version}${classifier}.jar")
+}
+def oreSpawnDeobfJar = oreSpawnJar('Deobf')
+def developmentJars = files(powerAdvantageDeobfJar, baseMetalsDeobfJar, oreSpawnDeobfJar)
 
 dependencies {
     implementation minecraft.dependency(
@@ -218,7 +215,9 @@ def committedPin = { String key, pattern ->
     }
     pinned
 }
-def forgeCapabilityBootstrapJar = providers.gradleProperty('forgeCapabilityBootstrapJar').map { file(it) }
+def forgeCapabilityBootstrapJar = providers.gradleProperty('forgeCapabilityBootstrapJar')
+        .map { file(it) }
+        .orElse(file("${powerRoot}/build/unit-bootstrap/forge-native-unit-bootstrap.jar"))
 tasks.withType(Test).configureEach {
     inputs.files(forgeCapabilityBootstrapJar)
     inputs.property('powerBootstrapSha256', providers.gradleProperty('poweradvantage_test_bootstrap_sha256'))
@@ -362,9 +361,9 @@ def expectedReleaseFiles = providers.provider {
 def preparedReleaseDir = providers.gradleProperty('preparedReleaseDir')
 
 def verifyPackFormats = { pack ->
-    if (pack.pack_format != 13 || pack['forge:server_data_pack_format'] != 12
+    if (pack.pack_format != 15 || pack['forge:server_data_pack_format'] != 15
             || pack.containsKey('forge:resource_pack_format') || pack.containsKey('forge:data_pack_format')) {
-        throw new GradleException('Minecraft 1.19.4 requires resource pack format 13 and data pack format 12')
+        throw new GradleException('Minecraft 1.20.1 requires resource and data pack format 15')
     }
 }
 
@@ -373,15 +372,15 @@ tasks.register('verifyReleaseConfiguration') {
     description = 'Validates release identity, target metadata, and dependency policy.'
     doLast {
         verifyPackFormats(new JsonSlurper().parse(file('src/main/resources/pack.mcmeta')).pack)
-        if (project.mod_version != '2.2.12.119041') {
+        if (project.mod_version != '2.2.13.120011') {
             throw new GradleException("Unexpected baseSteam release version: ${project.mod_version}")
         }
-        if (project.minecraft_version != '1.19.4' || project.minecraft_version_range != '[1.19.4]'
-                || project.forge_version != '45.4.0' || project.forge_version_range != '[45.4.0,46)'
-                || project.loader_version_range != '[45,46)'
+        if (project.minecraft_version != '1.20.1' || project.minecraft_version_range != '[1.20.1]'
+                || project.forge_version != '47.4.10' || project.forge_version_range != '[47.4.10,48)'
+                || project.loader_version_range != '[47,48)'
                 || project.mapping_channel != 'official'
-                || project.mapping_version != '1.19.4'
-                || project.mcp_version != '20230314.122934') {
+                || project.mapping_version != '1.20.1'
+                || project.mcp_version != '20230612.114412') {
             throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
         }
         if (project.loader_name != 'forge' || project.loader_code != '1'
@@ -401,27 +400,27 @@ tasks.register('verifyReleaseConfiguration') {
         }
         if (project.cf_requirements != 'basepower,base-metals'
                 || project.cf_optionals != ''
-                || project.cf_versions != '1.19.4') {
+                || project.cf_versions != '1.20.1') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.1.2.119041'
-                || project.orespawn_version != '4.1.0.119041') {
+        if (project.basemetals_version != '3.1.2.120011'
+                || project.orespawn_version != '4.1.0.120011') {
             throw new GradleException('Unexpected development API versions')
         }
-        if (project.poweradvantage_version != '2.4.11.119041'
+        if (project.poweradvantage_version != '2.4.12.120011'
                 || project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/basePower') {
             throw new GradleException('Unexpected basePower compile dependency identity')
         }
         String mainSource = file(
                 'src/main/java/zone/moddev/mc/basesteam/SteamAdvantage.java').getText('UTF-8')
         if (!mainSource.contains('MODID = "basesteam"')
-                || !mainSource.contains('VERSION = "2.2.12.119041"')) {
+                || !mainSource.contains('VERSION = "2.2.13.120011"')) {
             throw new GradleException('baseSteam source identity changed')
         }
         String metadata = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
         ['modId="basesteam"', 'displayName="baseSteam"',
-         'modId="basepower"\nmandatory=true\nversionRange="[2.4.11.119041,3.0.0)"',
-         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.119041,4.0.0)"'].each { marker ->
+         'modId="basepower"\nmandatory=true\nversionRange="[2.4.12.120011,3.0.0)"',
+         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.120011,4.0.0)"'].each { marker ->
             if (!metadata.contains(marker)) {
                 throw new GradleException("Source mods.toml is missing ${marker}")
             }
@@ -482,9 +481,9 @@ def auditCompanions = { boolean player ->
     String pin = player ? 'player' : 'deobf'
     committedPin('basemetals_source_commit', /[a-f0-9]{40}/)
     committedPin('orespawn_source_commit', /[a-f0-9]{40}/)
-    auditJar(explicitJar("baseMetals${variant}Jar"), "baseMetals${variant}Jar", "basemetals_${pin}_sha256",
+    auditJar(player ? explicitJar("baseMetals${variant}Jar") : baseMetalsDeobfJar, "baseMetals${variant}Jar", "basemetals_${pin}_sha256",
             'basemetals', project.basemetals_version, baseMetalsApi)
-    auditJar(explicitJar("oreSpawn${variant}Jar"), "oreSpawn${variant}Jar", "orespawn_${pin}_sha256",
+    auditJar(oreSpawnJar(variant), "oreSpawn${variant}Jar", "orespawn_${pin}_sha256",
             'orespawn', project.orespawn_version, oreSpawnApi)
 }
 
@@ -871,7 +870,7 @@ eclipse {
             model.entries.add(processed)
         }
     }
-    synchronizationTasks 'isolateEclipseProductionRuns'
+    synchronizationTasks 'verifyJavaSourceLayout', 'isolateEclipseProductionRuns'
 }
 
 tasks.named('eclipseClasspath') { dependsOn tasks.named('processResources') }
@@ -888,6 +887,8 @@ tasks.register('configureEclipseBuildship') {
                 'connection.gradle.user.home'   : gradle.gradleUserHomeDir.canonicalPath,
                 'connection.project.dir'        : '',
                 'gradle.user.home'               : gradle.gradleUserHomeDir.canonicalPath,
+                'java.home'                      : javaToolchains.launcherFor(java.toolchain)
+                        .get().metadata.installationPath.asFile.canonicalPath,
                 'override.workspace.settings'   : 'true'
         ].each { key, value -> preferences.setProperty(key, value) }
         preferencesFile.parentFile.mkdirs()
@@ -902,7 +903,7 @@ tasks.register('isolateEclipseProductionRuns') {
     group = 'ide'
     description = 'Normalizes ForgeGradle Eclipse launches for production-only execution.'
     dependsOn tasks.named('genEclipseRuns')
-    dependsOn tasks.named('configureEclipseBuildship')
+    dependsOn tasks.named('configureEclipseBuildship'), tasks.named('verifyNativeDevelopmentDependencies')
     dependsOn prepareEclipseResources
     doLast {
         obsoleteForgeGradle2EclipseLaunches.each { String name, String mainClass ->
@@ -1009,10 +1010,31 @@ tasks.register('isolateEclipseProductionRuns') {
     }
 }
 
+def verifyJavaSourceLayout = tasks.register('verifyJavaSourceLayout') {
+    group = 'verification'
+    description = 'Checks package paths in every configured Java source root for Eclipse.'
+    doLast {
+        sourceSets.each { sourceSet ->
+            sourceSet.java.srcDirs.each { root ->
+                fileTree(root) { include '**/*.java' }.each { source ->
+                    def relativePath = root.toPath().relativize(source.toPath())
+                    String expected = relativePath.parent?.collect { it.toString() }?.join('.') ?: ''
+                    def declaration = source.getText('UTF-8') =~ /(?m)^\s*package\s+([\w.]+)\s*;/
+                    String actual = declaration.find() ? declaration.group(1) : ''
+                    if (actual != expected) {
+                        throw new GradleException("${sourceSet.name}: ${relativePath} declares '${actual}', "
+                                + "but Eclipse expects '${expected}' under ${root}.")
+                    }
+                }
+            }
+        }
+    }
+}
+
 tasks.register('verifyEclipseProductionClasspath') {
     group = 'verification'
     description = 'Verifies the generated Eclipse project and production launches.'
-    dependsOn tasks.named('eclipse')
+    dependsOn tasks.named('eclipse'), verifyJavaSourceLayout
     dependsOn tasks.named('isolateEclipseProductionRuns')
     doLast {
         File preferencesFile = file('.settings/org.eclipse.buildship.core.prefs')
@@ -1086,7 +1108,7 @@ tasks.register('verifyEclipseProductionClasspath') {
             if (!arguments.contains('--main cpw.mods.bootstraplauncher.BootstrapLauncher')
                     || !vmArguments.contains('--add-opens java.base/java.lang.invoke=ALL-UNNAMED')
                     || contents.contains('net.minecraftforge.userdev.LaunchTesting')) {
-                throw new GradleException("${name} must retain the native Forge 45 bootstrap and Java 17 module access")
+                throw new GradleException("${name} must retain the native Forge 47 bootstrap and Java 17 module access")
             }
             if (launch.booleanAttribute.find {
                 it.@key.text() == 'org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE'
@@ -1146,7 +1168,7 @@ tasks.register('verifyEclipseProductionClasspath') {
                     || !arguments.contains("--fml.mcVersion ${project.minecraft_version}")
                     || !arguments.contains("--fml.forgeVersion ${project.forge_version}")
                     || !arguments.contains("--fml.mcpVersion ${project.mcp_version}")) {
-                throw new GradleException("${name} does not target the exact Forge 45 development runtime")
+                throw new GradleException("${name} does not target the exact Forge 47 development runtime")
             }
         }
     }
@@ -1334,6 +1356,7 @@ tasks.register('verifyRecipeTagGuards') {
 }
 
 tasks.named('check') {
+    dependsOn verifyJavaSourceLayout
     dependsOn tasks.named('verifyReleaseConfiguration')
     dependsOn tasks.named('verifyModelAssets')
     dependsOn tasks.named('verifyRepositoryHygiene')

@@ -1,7 +1,6 @@
 package zone.moddev.mc.basesteam.blocks;
 
 import cyano.poweradvantage.api.simple.BlockSimplePowerConduit;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -12,7 +11,7 @@ import zone.moddev.mc.basesteam.init.Power;
 
 public class SteamTrackBlock extends BlockSimplePowerConduit {
     public SteamTrackBlock() {
-        super(Properties.of(Material.PISTON).strength(0.75F).noOcclusion()
+        super(SteamBlockProperties.pistonLike().noOcclusion()
                         .isRedstoneConductor((state, world, pos) -> false)
                         .isSuffocating((state, world, pos) -> false)
                         .isViewBlocking((state, world, pos) -> false),

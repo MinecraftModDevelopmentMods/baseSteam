@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import static org.junit.Assert.*;
@@ -49,12 +50,24 @@ public class MusketTargetingContractTest {
         assertEquals(Vec3.ZERO, hit.get());
     }
 
-    @Test public void targetingUsesLoadedServerEntitiesAndTerrainBeforeEntitySelection() throws Exception {
-        ClassNode node = new ClassNode();
-        try (InputStream input = getClass().getResourceAsStream("/zone/moddev/mc/basesteam/items/MusketItem.class")) {
-            assertNotNull(input);
-            new ClassReader(input).accept(node, 0);
+    @Test public void nativeUseTickRetainsTheClientReloadSound() throws Exception {
+        MethodNode useTick = musketBytecode().methods.stream().filter(method -> method.name.equals("onUseTick"))
+                .findFirst().orElseThrow(() -> new AssertionError("Missing Minecraft's onUseTick override"));
+        boolean clientGate = false, loadGate = false, sound = false;
+        for (AbstractInsnNode instruction : useTick.instructions.toArray()) {
+            if (instruction instanceof FieldInsnNode field && field.name.equals("isClientSide")) clientGate = true;
+            if (!(instruction instanceof MethodInsnNode call)) continue;
+            if (call.name.equals("isNotLoaded")) loadGate = true;
+            if (call.name.equals("playSound")) {
+                assertTrue("Reload sound must be client-only and stop when loaded", clientGate && loadGate);
+                sound = true;
+            }
         }
+        assertTrue("Native use tick no longer plays reload feedback", sound);
+    }
+
+    @Test public void targetingUsesLoadedServerEntitiesAndTerrainBeforeEntitySelection() throws Exception {
+        ClassNode node = musketBytecode();
         MethodNode trace = node.methods.stream().filter(method -> method.name.equals("rayTraceBlocksAndEntities"))
                 .findFirst().orElseThrow(() -> new AssertionError("Missing targeting method"));
         boolean terrain = false, loadedEntities = false, boundedSelection = false, spectatorFilter = false;
@@ -72,6 +85,15 @@ public class MusketTargetingContractTest {
         assertTrue("Server targeting must use the loaded-entity collection", loadedEntities);
         assertTrue("Entity selection must be bounded by the actual terrain hit", boundedSelection);
         assertTrue("Loaded-entity iteration must preserve the previous spectator exclusion", spectatorFilter);
+    }
+
+    private ClassNode musketBytecode() throws Exception {
+        ClassNode node = new ClassNode();
+        try (InputStream input = getClass().getResourceAsStream("/zone/moddev/mc/basesteam/items/MusketItem.class")) {
+            assertNotNull(input);
+            new ClassReader(input).accept(node, 0);
+        }
+        return node;
     }
 
     private static AABB around(Vec3 center) {
