@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
@@ -8,7 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class GeothermalNativeTemperatureTest {
-    @BeforeClass public static void bootstrap() { net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap(); }
+    @BeforeClass public static void bootstrap() { NativeTestBootstrap.start(); }
 
     @Test public void nativeLavaTemperaturePreservesTheExistingHeatInput() {
         assertEquals(1300, Fluids.LAVA.getAttributes().getTemperature());

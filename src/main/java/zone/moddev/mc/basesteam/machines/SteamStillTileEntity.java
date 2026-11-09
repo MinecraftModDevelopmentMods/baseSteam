@@ -176,15 +176,14 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public CompoundTag save(final CompoundTag tagRoot) {
-		super.save(tagRoot);
+	protected void saveAdditional(final CompoundTag tagRoot) {
+		super.saveAdditional(tagRoot);
 		CompoundTag tankTag = new CompoundTag();
 		this.getOutputTank().writeToNBT(tankTag);
 		tagRoot.put("TankOut", tankTag);
 		CompoundTag tankTag2 = new CompoundTag();
 		this.getInputTank().writeToNBT(tankTag2);
 		tagRoot.put("TankIn", tankTag2);
-		return tagRoot;
 	}
 	/**
 	 * Handles data saving and loading

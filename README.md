@@ -1,18 +1,18 @@
 # baseSteam
 
-**Minecraft 1.17.1 (Forge), version 2.2.10.117011. Local candidate.**
+**Minecraft 1.18.2 (Forge), version 2.2.11.118021.**
 
 baseSteam, formerly Steam Advantage, adds boilers, steam-powered machines,
 pumps, storage, elevators and a blackpowder musket to basePower. Its items and
-blocks use the shared basePower creative tab. This version is not published.
+blocks use the shared basePower creative tab.
 
 ## Upgrading a World
 
 Back up your world and test the upgrade on a copy. Replace Steam Advantage and
 Power Advantage with baseSteam and basePower; do not install both sets of mods.
 The migration recognizes old Steam Advantage IDs and keeps the registry paths,
-machine settings and saved data used by earlier baseSteam versions. The
-Minecraft 1.17.1 world upgrade still needs verification for this candidate.
+machine settings and saved data used by earlier baseSteam versions. The Works
+rig checks copied legacy saves, running machinery and cold restarts.
 
 Existing `basesteam-common.toml` settings take precedence. When that file is
 absent, baseSteam can copy `steamadvantage-common.toml` or import settings from an
@@ -20,36 +20,38 @@ older `.cfg` file. The old config is left in place.
 
 ## Build Target
 
-Minecraft 1.17.1, Forge 37.1.1, official 1.17.1 mappings and MCP
-20210706.113038. ForgeGradle 7.0.34 and Gradle 9.6.1 run on Java 17.
-Production compilation and launches use Temurin 16.0.2+7, class major 60.
-Mavenizer uses Java 25. Java 8 is available only for older build utilities.
+Minecraft 1.18.2, Forge 40.3.0, official 1.18.2 mappings and MCP
+20220404.173914. ForgeGradle 7.0.34 and Gradle 9.6.1 run on Java 17.
+Production compilation and launches use Temurin 17, class major 61.
+The build-only Mavenizer fixture uses Java 25 and corrects the known Forge 40
+`Holder.Direct` decompile issue. Java 8 is only for older build utilities.
 
 The mod ID and resource namespace are `basesteam`; the Java implementation
 namespace is `zone.moddev.mc.basesteam`. The shared `cyano.poweradvantage.api`
 names remain in use.
 
-basePower 2.4.9.117011 is required. Base Metals 3.1.1.117011 remains optional
-in Forge; the CurseForge install metadata lists basePower and Base Metals.
-Build against the exact basePower source and development jar pinned in
-`gradle.properties`. The player jar is the published
-[basePower 2.4.9.117011 release](https://maven.moddev.zone/releases/zone/moddev/mc/basepower/basePower/2.4.9.117011/basePower-2.4.9.117011.jar).
-The Base Metals startup fix is also published as 3.1.1.117011. OreSpawn
-4.1.0.117011 remains in the dependency chain. No dependency is embedded.
+basePower 2.4.10.118021 is required. Base Metals 3.1.2.118021 remains optional
+in Forge and requires OreSpawn 4.1.0.118021 when installed. The CurseForge
+install metadata lists basePower and Base Metals. No dependency is embedded.
 
 ## Local Verification
 
 Use the checked-in Gradle wrapper and supply explicit paths to the development
-jars matching the pins in `gradle.properties`.
-Runtime jars are not interchangeable with development jars. Use the test-only
-Forge capability bootstrap from the same basePower source pin. Use a Steam-only
-Gradle user home; do not build against a sibling checkout's cache or mutable jar.
+jars matching the pins in `gradle.properties`. Use a Steam-only Gradle user
+home and the test-only Forge capability bootstrap. Player JARs are distinct
+from development and published JARs. Before a packaged smoke, run
+`verifyPlayerDependencies` with explicit `powerAdvantagePlayerJar`,
+`baseMetalsPlayerJar` and `oreSpawnPlayerJar` project properties.
+
+Use the source for the [basePower 2.4.10.118021 release](https://github.com/MinecraftModDevelopmentMods/basePower/releases/tag/2.4.10.118021)
+to build the development jar and the test bootstrap. Use the published jar
+for packaged testing; its checksum is pinned separately.
 
 For example, from the Steam checkout in PowerShell:
 
 ```powershell
 $env:JAVA_HOME = $env:JAVA17_HOME
-$jdks = @($env:JAVA17_HOME, $env:JAVA16_HOME, $env:JAVA25_HOME, $env:JAVA8_HOME) -join ','
+$jdks = @($env:JAVA17_HOME, $env:JAVA25_HOME, $env:JAVA8_HOME) -join ','
 $toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
   '-Porg.gradle.java.installations.auto-detect=false',
   '-Porg.gradle.java.installations.auto-download=false')
@@ -64,13 +66,12 @@ $env:GRADLE_USER_HOME = $env:BASESTEAM_GRADLE_USER_HOME
 ```
 
 On other platforms use `./gradlew`. The artifact family is
-`baseSteam-2.2.10.117011.jar`, plus sources and Javadoc. The development jar
+`baseSteam-2.2.11.118021.jar`, plus sources and Javadoc. The development jar
 stays under `build/libs-dev`.
 
 `node tools/verify-native-port.js` and `node tools/generate-recipe-unlocks.js --check`
-run without the dependency jars. The [port status](docs/PORT117-STATUS.md) separates
-these checks from the pending build and runtime gates and retains the earlier
-Steam Advantage evidence.
+run without the dependency jars. [1.18.2 port status](docs/PORT118-STATUS.md)
+tracks current checks. [1.17.1 port status](docs/PORT117-STATUS.md) is historical.
 
 ## Port Details
 
@@ -78,7 +79,8 @@ Native block-entity factories preserve their actual constructor position and
 block state. Loading NBT does not replace that position, including when a drill
 moves along a track. Power's shared native ticker retains per-tick work before
 the eight-tick power update on both logical sides. The drill-bit helper has its
-own native ticker.
+own native ticker. Minecraft 1.18.2 uses `saveAdditional` for native saves,
+and the drill-bit direction packet carries the native block-entity type.
 
 The port retains first-loaded-tick redstone sampling in the crusher and furnace,
 water-only boiler inputs, dirty-owner callbacks, finite energy and fluid

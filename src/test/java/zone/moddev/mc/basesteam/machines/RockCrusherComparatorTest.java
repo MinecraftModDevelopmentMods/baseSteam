@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.assertEquals;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -8,7 +9,7 @@ import org.junit.Test;
 
 public class RockCrusherComparatorTest {
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_CRUSHER == null)
             zone.moddev.mc.basesteam.init.Entities.STEAM_CRUSHER = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(RockCrusherTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
     }

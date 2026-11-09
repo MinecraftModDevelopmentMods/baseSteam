@@ -172,10 +172,9 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 
 	
 	@Override
-	public CompoundTag save(CompoundTag tagRoot){
-		super.save(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot){
+		super.saveAdditional(tagRoot);
 		tagRoot.putBoolean("up",above);
-		return tagRoot;
 	}
 	
 	@Override

@@ -39,8 +39,11 @@ public class NativeLootContractTest {
         }
     }
 
-    @Test public void packUsesNative117Format() throws Exception {
-        assertEquals(7, read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack").get("pack_format").getAsInt());
+    @Test public void packUsesNative118ResourceAndDataFormats() throws Exception {
+        JsonObject pack = read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack");
+        assertEquals(9, pack.get("pack_format").getAsInt());
+        assertEquals(8, pack.get("forge:resource_pack_format").getAsInt());
+        assertEquals(9, pack.get("forge:data_pack_format").getAsInt());
     }
 
     private static JsonObject read(Path path) throws Exception {

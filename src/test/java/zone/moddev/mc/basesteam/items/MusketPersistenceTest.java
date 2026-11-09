@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.items;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
@@ -10,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class MusketPersistenceTest {
     @BeforeClass public static void bootstrapNativeRegistries() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
     }
 
     @Test public void loadingCycleKeepsLegacyByteValuesAndOtherNbt() {

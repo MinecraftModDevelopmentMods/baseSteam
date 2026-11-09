@@ -57,6 +57,7 @@ public final class Blocks {
     private static boolean initialized;
     private Blocks() {}
 
+    /** Constructs blocks during the Forge block registry event. */
     public static synchronized void init() {
         if (initialized) return;
         ItemGroups.init();
@@ -98,7 +99,6 @@ public final class Blocks {
 
     @SubscribeEvent
     public static void registerBlockItems(RegistryEvent.Register<Item> event) {
-        init();
         for (Map.Entry<String, Block> entry : ALL_BLOCKS.entrySet()) {
             Item.Properties properties = new Item.Properties();
             if (!"pump_pipe_steam".equals(entry.getKey()) && !"drillbit".equals(entry.getKey())) {

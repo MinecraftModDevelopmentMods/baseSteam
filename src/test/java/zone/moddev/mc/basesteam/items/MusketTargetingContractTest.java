@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.items;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import java.io.InputStream;
 import java.util.Optional;
 import net.minecraft.core.Direction;
@@ -16,7 +17,7 @@ import static org.junit.Assert.*;
 
 public class MusketTargetingContractTest {
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
     }
 
     @Test public void nearerTerrainRejectsTargetsBehindItOnEveryAxis() {

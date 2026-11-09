@@ -1,4 +1,10 @@
-baseSteam 2.2.10.117011 (Minecraft 1.17.1)
+baseSteam 2.2.11.118021 (Minecraft 1.18.2)
+
+- Bring baseSteam to Minecraft 1.18.2, with the same recipes and steam machines.
+- Keep saved inventories, steam, drill state and musket wear when upgrading.
+- Use the released basePower 2.4.10.118021 and Base Metals 3.1.2 save hook.
+
+baseSteam 2.2.10.117011 (local Minecraft 1.17.1 candidate)
 
 - Steam Advantage is now baseSteam. Install it with basePower 2.4.9.117011 and find its blocks and items in the shared basePower creative tab.
 - Recognize older Steam Advantage world IDs while keeping baseSteam registry paths, machine data and legacy save repairs.

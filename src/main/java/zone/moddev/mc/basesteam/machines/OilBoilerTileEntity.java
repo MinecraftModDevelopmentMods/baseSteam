@@ -264,8 +264,8 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public CompoundTag save(final CompoundTag tagRoot) {
-		super.save(tagRoot);
+	protected void saveAdditional(final CompoundTag tagRoot) {
+		super.saveAdditional(tagRoot);
 		CompoundTag tankTag = new CompoundTag();
 		this.getWaterTank().writeToNBT(tankTag);
 		tagRoot.put("WaterTank", tankTag);
@@ -274,7 +274,6 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 		tagRoot.put("FuelTank", tankTag2);
 		if(this.burnTime > 0)tagRoot.putInt("BurnTime", this.burnTime);
 		if(this.totalBurnTime > 0)tagRoot.putInt("BurnTimeTotal", this.totalBurnTime);
-		return tagRoot;
 	}
 	/**
 	 * Handles data saving and loading

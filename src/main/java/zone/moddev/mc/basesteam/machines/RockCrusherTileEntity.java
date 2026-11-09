@@ -199,10 +199,9 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	}
 	
 	@Override
-	public CompoundTag save(CompoundTag tagRoot){
-		super.save(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot){
+		super.saveAdditional(tagRoot);
 		tagRoot.putShort("progress",(short)progress);
-		return tagRoot;
 	}
 	
 	@Override

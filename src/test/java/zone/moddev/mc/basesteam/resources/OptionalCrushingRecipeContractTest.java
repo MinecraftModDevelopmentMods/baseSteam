@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.resources;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -24,8 +25,7 @@ public class OptionalCrushingRecipeContractTest {
             "steam_furnace", "steam_governor", "steam_tank"};
 
     @BeforeClass public static void bootstrapNativeRegistries() {
-        net.minecraft.SharedConstants.tryDetectVersion();
-        net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
     }
 
     private static JsonObject json(String text) {

@@ -22,10 +22,12 @@ for (const name of files(resources).filter(name => /\.(json|mcmeta)$/.test(name)
   assert(!/steamadvantage|poweradvantage/.test(name + text), name);
   json.set(name, JSON.parse(text));
 }
-assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {pack_format: 7, description: 'baseSteam'});
+assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {
+  pack_format: 9, 'forge:resource_pack_format': 8, 'forge:data_pack_format': 9, description: 'baseSteam'
+});
 const metadata = read(`${resources}/META-INF/mods.toml`);
 assert.match(metadata, /modId="basesteam"/);
-assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[2\.4\.9\.117011,3\.0\.0\)"/);
+assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[2\.4\.10\.118021,3\.0\.0\)"/);
 assert.match(metadata, /modId="basemetals"\r?\nmandatory=false/);
 assert.doesNotMatch(metadata, /dependencies\.steamadvantage|modId="(?:steamadvantage|poweradvantage)"/);
 
@@ -85,5 +87,5 @@ for (const id of pickaxe.values.map(value => value.split(':')[1]).filter(id => !
 }
 const tests = files('src/test/java').filter(name => name.endsWith('.java'));
 const testCount = tests.reduce((sum, name) => sum + (read(name).match(/@Test\b/g) || []).length, 0);
-console.log(`BASESTEAM_NATIVE117_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
+console.log(`BASESTEAM_NATIVE118_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
 console.log('Source checks only. Compilation, executed tests, packaged runtime and manual acceptance are separate.');

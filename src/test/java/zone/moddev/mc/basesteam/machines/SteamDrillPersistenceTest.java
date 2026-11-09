@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 public class SteamDrillPersistenceTest {
     @BeforeClass public static void bootstrapNativeRegistries() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
     }
 
     @Test public void retainsLegacyProgressUntilWorldIsAttached() {
@@ -98,7 +99,7 @@ public class SteamDrillPersistenceTest {
         }
         int methods = 0, cachedFacingReads = 0;
         for (MethodNode method : node.methods) {
-            if (!method.name.equals("save")) continue;
+            if (!method.name.equals("saveAdditional")) continue;
             methods++;
             for (AbstractInsnNode instruction : method.instructions.toArray()) {
                 if (instruction instanceof FieldInsnNode

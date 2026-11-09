@@ -189,8 +189,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			return false;
 		}
 		SteamDrillTileEntity te = (SteamDrillTileEntity)movedTile;
-		CompoundTag dataTransfer = new CompoundTag();
-		this.save(dataTransfer);
+		CompoundTag dataTransfer = saveWithFullMetadata();
 		dataTransfer.putInt("x", nextPos.getX());
 		dataTransfer.putInt("y", nextPos.getY());
 		dataTransfer.putInt("z", nextPos.getZ());
@@ -470,8 +469,8 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag tagRoot){
-		super.save(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot){
+		super.saveAdditional(tagRoot);
 		tagRoot.putShort("progress",(short)progress);
 		// getFacing refreshes this during normal ticks. World lookups here can
 		// synchronously reload a chunk while its unload-save is in progress.
@@ -482,7 +481,6 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			tagRoot.putInt("targetZ", targetBlockCoord.getZ());
 			if(savedTargetState != null) tagRoot.put("TargetState", savedTargetState.copy());
 		}
-		return tagRoot;
 	}
 	
 	@Override

@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.blocks;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
 import org.junit.Test;
@@ -7,7 +8,7 @@ import static org.junit.Assert.*;
 
 public class DrillBitPersistenceTest {
     @org.junit.BeforeClass public static void bootstrapNativeRegistries() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
     }
 
     @Test public void allSixDirectionsSurviveNativeUpdatePackets() {
@@ -20,6 +21,23 @@ public class DrillBitPersistenceTest {
             restored.onDataPacket(null, tile.getUpdatePacket());
             assertEquals(direction.getAxis(), restored.getDirection());
             assertEquals(direction.get3DDataValue(), restored.getUpdatePacket().getTag().getByte("dir"));
+        }
+    }
+
+    @Test public void allSixDirectionsSurviveNativeSaveAndChunkUpdateTag() {
+        for (Direction direction : Direction.values()) {
+            DrillBitTileEntity tile = new DrillBitTileEntity();
+            tile.setDirection(direction);
+
+            CompoundTag saved = tile.saveWithoutMetadata();
+            assertEquals(direction.get3DDataValue(), saved.getByte("dir"));
+            DrillBitTileEntity restored = new DrillBitTileEntity();
+            restored.load(saved);
+            assertEquals(direction.get3DDataValue(), restored.getUpdateTag().getByte("dir"));
+
+            DrillBitTileEntity client = new DrillBitTileEntity();
+            client.handleUpdateTag(tile.getUpdateTag());
+            assertEquals(direction.get3DDataValue(), client.getUpdatePacket().getTag().getByte("dir"));
         }
     }
 

@@ -25,7 +25,7 @@ public class Enchantments {
 
 	@SubscribeEvent
 	public static void registerEnchantments(RegistryEvent.Register<Enchantment> event) {
-		createEnchantments();
+		init();
 		event.getRegistry().registerAll(high_explosive, powderless, rapid_reload, recoil);
 	}
 

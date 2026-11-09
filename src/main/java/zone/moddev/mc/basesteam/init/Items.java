@@ -23,9 +23,10 @@ public final class Items {
 
     private Items() {}
 
+    /** Constructs items during the Forge item registry event. */
     public static synchronized void init() {
         if (initialized) return;
-        Blocks.init();
+        ItemGroups.init();
         steam_governor = add("steam_governor", new Item(properties()));
         steam_drill_bit = add("steam_drill_bit", new Item(properties()));
         blackpowder_cartridge = add("blackpowder_cartridge", new Item(properties()));
