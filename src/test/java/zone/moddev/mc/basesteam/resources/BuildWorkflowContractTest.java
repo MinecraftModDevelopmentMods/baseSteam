@@ -53,9 +53,17 @@ public class BuildWorkflowContractTest {
             assertTrue(name, source.contains("mavenizer_init=\"$GITHUB_WORKSPACE/gradle/forge45-mavenizer.init.gradle\""));
             assertTrue(name, source.contains("mavenizer_script=\"$GITHUB_WORKSPACE/gradle/forge45-mavenizer.gradle\""));
             assertFalse(name, source.contains("$power/gradle/forge45-mavenizer"));
-            assertEquals(name, 2L, source.lines().filter(line -> line.contains(
-                    "-I \"$mavenizer_init\" \"-Pforge45MavenizerScript=$mavenizer_script\"")).count());
-            assertEquals(name, 2L, source.lines().filter(line -> line.contains("\"-Pforge45MavenizerJar=$mavenizer\"")).count());
+            assertTrue(name, source.contains(
+                    "(cd \"$basemetals\" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)"));
+            String initArgs = "-I \"$mavenizer_init\" \"-Pforge45MavenizerScript=$mavenizer_script\"";
+            String toolArg = "\"-Pforge45MavenizerJar=$mavenizer\"";
+            int powerStart = source.indexOf("(cd \"$power\"");
+            int powerEnd = source.indexOf("\n          powerjar=", powerStart);
+            assertTrue(name, powerStart >= 0 && powerEnd > powerStart);
+            String powerBuild = source.substring(powerStart, powerEnd);
+            assertTrue(name, powerBuild.contains(initArgs) && powerBuild.contains(toolArg));
+            assertEquals(name, 1L, source.lines().filter(line -> line.contains(initArgs)).count());
+            assertEquals(name, 1L, source.lines().filter(line -> line.contains(toolArg)).count());
             assertTrue(name, source.contains("\"-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}\""));
             for (String line : source.split("\\R")) {
                 if (line.contains("./gradlew ") && !line.contains("chmod")) {
