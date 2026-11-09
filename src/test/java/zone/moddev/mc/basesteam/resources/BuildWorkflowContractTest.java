@@ -8,6 +8,8 @@ import static org.junit.Assert.*;
 
 public class BuildWorkflowContractTest {
     @Test public void everyHostedBuildUsesPinnedToolchainProjectProperties() throws Exception {
+        assertTrue(Files.isRegularFile(Paths.get("gradle/forge45-mavenizer.init.gradle")));
+        assertTrue(Files.isRegularFile(Paths.get("gradle/forge45-mavenizer.gradle")));
         java.util.Properties pins = new java.util.Properties();
         try (java.io.Reader reader = Files.newBufferedReader(Paths.get("gradle.properties"), StandardCharsets.UTF_8)) {
             pins.load(reader);
@@ -48,8 +50,11 @@ public class BuildWorkflowContractTest {
             assertTrue(name, source.contains("341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE"));
             int toolCheck = source.indexOf("| sha256sum -c -");
             assertTrue(name, toolCheck >= 0 && toolCheck < source.indexOf("(cd \"$basemetals\""));
-            assertTrue(name, source.contains("-I \"$power/gradle/forge45-mavenizer.init.gradle\""));
-            assertTrue(name, source.contains("\"-Pforge45MavenizerScript=$power/gradle/forge45-mavenizer.gradle\""));
+            assertTrue(name, source.contains("mavenizer_init=\"$GITHUB_WORKSPACE/gradle/forge45-mavenizer.init.gradle\""));
+            assertTrue(name, source.contains("mavenizer_script=\"$GITHUB_WORKSPACE/gradle/forge45-mavenizer.gradle\""));
+            assertFalse(name, source.contains("$power/gradle/forge45-mavenizer"));
+            assertEquals(name, 2L, source.lines().filter(line -> line.contains(
+                    "-I \"$mavenizer_init\" \"-Pforge45MavenizerScript=$mavenizer_script\"")).count());
             assertEquals(name, 2L, source.lines().filter(line -> line.contains("\"-Pforge45MavenizerJar=$mavenizer\"")).count());
             assertTrue(name, source.contains("\"-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}\""));
             for (String line : source.split("\\R")) {

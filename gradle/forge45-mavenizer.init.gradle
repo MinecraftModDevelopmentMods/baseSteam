@@ -1,0 +1,12 @@
+// Configure the pinned dependency builds without editing their checkouts.
+gradle.beforeProject { Project p ->
+    if (p == p.rootProject) {
+        p.pluginManager.withPlugin('net.minecraftforge.gradle') {
+            def script = p.providers.gradleProperty('forge45MavenizerScript').get()
+            if (!p.providers.gradleProperty('forge45MavenizerJar').isPresent()) {
+                throw new GradleException('Supply -Pforge45MavenizerJar=<absolute-path> for a pinned dependency build.')
+            }
+            p.apply(from: p.file(script))
+        }
+    }
+}

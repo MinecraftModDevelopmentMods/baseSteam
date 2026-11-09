@@ -14,14 +14,9 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
-def mavenizerFixture = providers.gradleProperty('forge45MavenizerJar').map { file(it) }.getOrElse(
-        file('../../../../MinecraftMineralogy/OS119/OreSpawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar'))
-if (!mavenizerFixture.isFile()) {
-    throw new GradleException("Missing Forge 45 Mavenizer fixture: ${mavenizerFixture}. "
-            + 'Supply the pinned OreSpawn tool via -Pforge45MavenizerJar=<absolute-path>.')
-}
+apply from: 'gradle/forge45-mavenizer.gradle'
+
 def mavenizerFixtureHashes = [
-        (mavenizerFixture): '341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE',
         (file('ci-fixtures/tools/minecraft-source-compatibility.json')):
                 '33A3217261EBB8F37D45F50BD2F8CE70B221C014A5C15F4C5F8F9091AD6D1EC8',
         (file('ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.patch')):
@@ -35,15 +30,6 @@ mavenizerFixtureHashes.each { fixture, expected ->
         throw new GradleException("Missing or invalid Forge 45 Mavenizer fixture: ${fixture.name}")
     }
 }
-fgtools.configure('mavenizer') {
-    classpath.from(mavenizerFixture)
-    mainClass.set('net.minecraftforge.mcmaven.cli.Main')
-    javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
-        vendor = JvmVendorSpec.ADOPTIUM
-    })
-}
-
 group = project.mod_group
 version = project.mod_version
 base.archivesName = 'baseSteam'

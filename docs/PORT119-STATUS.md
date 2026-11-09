@@ -18,9 +18,9 @@ build-only input from the pinned OreSpawn checkout, checked by SHA-256.
 Java 25 is not a production toolchain. Use a separate Steam Gradle user home or the
 agreed warm cache with distinct project state.
 
-Hosted builds also require the coordinated basePower pin to carry the Forge
-45 Mavenizer adapter used by the immutable Base Metals checkout. The local
-artifact pin is not a claim that the hosted dependency chain is ready.
+CI and CodeQL apply Steam's Forge 45 Mavenizer adapter to the immutable
+basePower and Base Metals checkouts. This does not require the pinned Power
+runtime source to contain the adapter and does not change either dependency pin.
 
 ## Compatibility
 
