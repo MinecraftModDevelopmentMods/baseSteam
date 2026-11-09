@@ -31,10 +31,11 @@ names remain in use.
 
 basePower 2.4.9.117011 is required. Base Metals 3.1.1.117011 remains optional
 in Forge; the CurseForge install metadata lists basePower and Base Metals.
-Use the exact basePower source and development jar pinned in `gradle.properties`.
-The Base Metals development pin there is local and unpushed,
-so hosted verification cannot check it out yet. OreSpawn 4.1.0.117011 is
-unchanged in the development dependency chain. No dependency is embedded.
+Build against the exact basePower source and development jar pinned in
+`gradle.properties`. The player jar is the published
+[basePower 2.4.9.117011 release](https://maven.moddev.zone/releases/zone/moddev/mc/basepower/basePower/2.4.9.117011/basePower-2.4.9.117011.jar).
+The Base Metals startup fix is also published as 3.1.1.117011. OreSpawn
+4.1.0.117011 remains in the dependency chain. No dependency is embedded.
 
 ## Local Verification
 

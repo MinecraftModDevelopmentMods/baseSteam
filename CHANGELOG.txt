@@ -1,10 +1,11 @@
-baseSteam 2.2.10.117011 (local Minecraft 1.17.1 candidate)
+baseSteam 2.2.10.117011 (Minecraft 1.17.1)
 
 - Steam Advantage is now baseSteam. Install it with basePower 2.4.9.117011 and find its blocks and items in the shared basePower creative tab.
 - Recognize older Steam Advantage world IDs while keeping baseSteam registry paths, machine data and legacy save repairs.
 - Carry over Steam Advantage common settings without overwriting an existing baseSteam config.
 - Keep Minecraft 1.17.1 machine behavior, models, GUIs, drops and recipe unlocks unchanged.
 - Fix repeated Eclipse project refreshes without changing the game launch runtime.
+- Build and test against the published basePower 2.4.9.117011 release.
 
 Steam Advantage 2.2.9.117011 (local 1.17.1 port candidate)
 
