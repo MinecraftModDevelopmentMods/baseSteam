@@ -3,9 +3,10 @@
 ## Forge 45 (Minecraft 1.19.4)
 
 The source patch and target-rule manifest match the Base Metals 1.19.4
-fixture. The binary derivative is not tracked here. The build uses
-ForgeGradle's Mavenizer by default; to use the compatibility derivative,
-pass `-Pforge45MavenizerJar=<absolute-path>`. The build verifies its bytes.
+fixture. The binary derivative is not tracked here. The build requires the
+verified JAR from the local OreSpawn 1.19.4 checkout, or an explicit
+`-Pforge45MavenizerJar=<absolute-path>`. CI gets it from the pinned OreSpawn
+checkout. There is no stock Mavenizer fallback.
 The derivative is based on MinecraftForge MinecraftMavenizer 0.5.21 at
 `6968241ce7a0a902cdc1c534b976e8373a423091`. Its LGPL-2.1 license is in
 `LICENSE-MAVENIZER.txt`.

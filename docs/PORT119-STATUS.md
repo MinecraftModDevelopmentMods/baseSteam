@@ -12,11 +12,15 @@
 
 The [official Forge listing](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.19.4.html)
 identifies 45.4.0 as the recommended 1.19.4 Forge. ForgeGradle 7 configuration
-and its Java 25 Mavenizer follow the local Forge 45.4.0 builds. The optional
+and its Java 25 Mavenizer follow the local Forge 45.4.0 builds. The required
 [compatibility derivative](../ci-fixtures/tools/README.md) is an external
-build-only input, checked by SHA-256 when explicitly supplied. Java 25 is
-not a production toolchain. Use a separate Steam Gradle user home or the
+build-only input from the pinned OreSpawn checkout, checked by SHA-256.
+Java 25 is not a production toolchain. Use a separate Steam Gradle user home or the
 agreed warm cache with distinct project state.
+
+Hosted builds also require the coordinated basePower pin to carry the Forge
+45 Mavenizer adapter used by the immutable Base Metals checkout. The local
+artifact pin is not a claim that the hosted dependency chain is ready.
 
 ## Compatibility
 

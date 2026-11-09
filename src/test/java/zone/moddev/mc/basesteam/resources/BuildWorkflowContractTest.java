@@ -44,6 +44,14 @@ public class BuildWorkflowContractTest {
             assertFalse(name, source.contains("-Dorg.gradle.java.installations."));
             assertTrue(name, source.contains("jar unitBootstrapJar verifyReleaseDependencies"));
             assertTrue(name, source.contains("-PforgeCapabilityBootstrapJar=${{ steps.dependencies.outputs.bootstrap }}"));
+            assertTrue(name, source.contains("mavenizer=\"$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar\""));
+            assertTrue(name, source.contains("341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE"));
+            int toolCheck = source.indexOf("| sha256sum -c -");
+            assertTrue(name, toolCheck >= 0 && toolCheck < source.indexOf("(cd \"$basemetals\""));
+            assertTrue(name, source.contains("-I \"$power/gradle/forge45-mavenizer.init.gradle\""));
+            assertTrue(name, source.contains("\"-Pforge45MavenizerScript=$power/gradle/forge45-mavenizer.gradle\""));
+            assertEquals(name, 2L, source.lines().filter(line -> line.contains("\"-Pforge45MavenizerJar=$mavenizer\"")).count());
+            assertTrue(name, source.contains("\"-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}\""));
             for (String line : source.split("\\R")) {
                 if (line.contains("./gradlew ") && !line.contains("chmod")) {
                     assertTrue(name + ": " + line, line.contains("./gradlew $MMD_GRADLE_TOOLCHAINS "));

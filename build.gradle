@@ -14,8 +14,14 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
-def mavenizerFixture = providers.gradleProperty('forge45MavenizerJar').map { file(it) }.getOrNull()
+def mavenizerFixture = providers.gradleProperty('forge45MavenizerJar').map { file(it) }.getOrElse(
+        file('../../../../MinecraftMineralogy/OS119/OreSpawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar'))
+if (!mavenizerFixture.isFile()) {
+    throw new GradleException("Missing Forge 45 Mavenizer fixture: ${mavenizerFixture}. "
+            + 'Supply the pinned OreSpawn tool via -Pforge45MavenizerJar=<absolute-path>.')
+}
 def mavenizerFixtureHashes = [
+        (mavenizerFixture): '341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE',
         (file('ci-fixtures/tools/minecraft-source-compatibility.json')):
                 '33A3217261EBB8F37D45F50BD2F8CE70B221C014A5C15F4C5F8F9091AD6D1EC8',
         (file('ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.patch')):
@@ -23,9 +29,6 @@ def mavenizerFixtureHashes = [
         (file('ci-fixtures/tools/LICENSE-MAVENIZER.txt')):
                 '20C17D8B8C48A600800DFD14F95D5CB9FF47066A9641DDEAB48DC54AEC96E331'
 ]
-if (mavenizerFixture != null) {
-    mavenizerFixtureHashes[mavenizerFixture] = '341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE'
-}
 mavenizerFixtureHashes.each { fixture, expected ->
     if (!fixture.isFile() || MessageDigest.getInstance('SHA-256').digest(fixture.bytes)
             .encodeHex().toString().toUpperCase(Locale.ROOT) != expected) {
@@ -33,10 +36,8 @@ mavenizerFixtureHashes.each { fixture, expected ->
     }
 }
 fgtools.configure('mavenizer') {
-    if (mavenizerFixture != null) {
-        classpath.from(mavenizerFixture)
-        mainClass.set('net.minecraftforge.mcmaven.cli.Main')
-    }
+    classpath.from(mavenizerFixture)
+    mainClass.set('net.minecraftforge.mcmaven.cli.Main')
     javaLauncher.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
         vendor = JvmVendorSpec.ADOPTIUM

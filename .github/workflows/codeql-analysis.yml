@@ -102,12 +102,22 @@ jobs:
           test "$(git -C "$orespawn" rev-parse HEAD)" = "$ORESPAWN_SOURCE_REF"
           test "$(git -C "$power" rev-parse HEAD)" = "$POWERADVANTAGE_SOURCE_REF"
           test "$(git -C "$basemetals" rev-parse HEAD)" = "$BASEMETALS_SOURCE_REF"
+          mavenizer="$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar"
+          printf '%s  %s\n' '341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE' "$mavenizer" | sha256sum -c -
+          if [[ ! -f "$power/gradle/forge45-mavenizer.init.gradle" || ! -f "$power/gradle/forge45-mavenizer.gradle" ]]; then
+            echo "::error::The pinned basePower checkout does not contain the Forge 45 Mavenizer adapter."
+            exit 1
+          fi
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew" "$power/gradlew"
           (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
-          (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
+          (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar \
+            -I "$power/gradle/forge45-mavenizer.init.gradle" \
+            "-Pforge45MavenizerScript=$power/gradle/forge45-mavenizer.gradle" \
+            "-Pforge45MavenizerJar=$mavenizer" --no-daemon --stacktrace)
           osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.119041-deobf.jar"
           bmjar="$basemetals/build/libs-dev/BaseMetals-3.1.2.119041-deobf.jar"
           (cd "$power" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar unitBootstrapJar verifyReleaseDependencies \
+            "-Pforge45MavenizerJar=$mavenizer" \
             -PbaseMetalsDeobfJar="$bmjar" -PoreSpawnDeobfJar="$osjar" \
             --no-daemon --stacktrace)
           powerjar="$power/build/libs-dev/basePower-2.4.11.119041-deobf.jar"
@@ -117,6 +127,7 @@ jobs:
           echo "basemetals=$bmjar" >> "$GITHUB_OUTPUT"
           echo "power=$powerjar" >> "$GITHUB_OUTPUT"
           echo "bootstrap=$bootstrap" >> "$GITHUB_OUTPUT"
+          echo "mavenizer=$mavenizer" >> "$GITHUB_OUTPUT"
       - name: Initialize CodeQL
         uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4
         with:
@@ -125,6 +136,7 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew $MMD_GRADLE_TOOLCHAINS clean classes --rerun-tasks --no-build-cache --no-daemon --stacktrace \
+            "-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}" \
             -PforgeCapabilityBootstrapJar=${{ steps.dependencies.outputs.bootstrap }} \
             -PpowerAdvantageDeobfJar=${{ steps.dependencies.outputs.power }} \
             -PbaseMetalsDeobfJar=${{ steps.dependencies.outputs.basemetals }} \

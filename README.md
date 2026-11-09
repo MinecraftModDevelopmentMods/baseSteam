@@ -23,9 +23,10 @@ older `.cfg` file. The old config is left in place.
 Minecraft 1.19.4, Forge 45.4.0, official 1.19.4 mappings and MCP
 20230314.122934. ForgeGradle 7.0.34 and Gradle 9.6.1 run on Java 17.
 Production compilation and launches use Temurin 17, class major 61.
-Mavenizer uses Java 25. For Forge 45's duplicate record accessors, the build
-accepts a [checksum-verified compatibility JAR](ci-fixtures/tools/README.md)
-via `-Pforge45MavenizerJar=<absolute-path>`; it is not tracked here.
+Mavenizer uses Java 25. The build requires the
+[checksum-verified Forge 45 compatibility JAR](ci-fixtures/tools/README.md)
+from the local OreSpawn 1.19.4 checkout or `-Pforge45MavenizerJar=<absolute-path>`.
+It is not tracked here.
 Java 8 is only for older build utilities.
 
 The mod ID and resource namespace are `basesteam`; the Java implementation
