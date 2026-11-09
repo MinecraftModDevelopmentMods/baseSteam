@@ -1,0 +1,6 @@
+{
+  "type": "basemetals:crushing",
+  "ingredient": { "item": "basesteam:steam_furnace" },
+  "result": { "item": "basesteam:steam_governor", "count": 2 },
+  "conditions": [{ "type": "forge:mod_loaded", "modid": "basemetals" }, { "type": "basesteam:recipe_mode", "mode": "APOCALYPTIC" }]
+}

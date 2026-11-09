@@ -1,0 +1,22 @@
+{
+  "replace": false,
+  "values": [
+    "basesteam:steam_pipe",
+    "basesteam:steam_track",
+    "basesteam:steam_boiler_coal",
+    "basesteam:steam_boiler_electric",
+    "basesteam:steam_boiler_geothermal",
+    "basesteam:steam_tank",
+    "basesteam:steam_furnace",
+    "basesteam:steam_crusher",
+    "basesteam:steam_drill",
+    "basesteam:steam_elevator",
+    "basesteam:steam_switch",
+    "basesteam:steam_still",
+    "basesteam:steam_pump",
+    "basesteam:steam_boiler_oil",
+    "basesteam:platform",
+    "basesteam:drillbit",
+    "basesteam:pump_pipe_steam"
+  ]
+}

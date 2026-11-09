@@ -1,3 +1,35 @@
+baseSteam 2.2.10.117011 (Minecraft 1.17.1)
+
+- Steam Advantage is now baseSteam. Install it with basePower 2.4.9.117011 and find its blocks and items in the shared basePower creative tab.
+- Recognize older Steam Advantage world IDs while keeping baseSteam registry paths, machine data and legacy save repairs.
+- Carry over Steam Advantage common settings without overwriting an existing baseSteam config.
+- Keep Minecraft 1.17.1 machine behavior, models, GUIs, drops and recipe unlocks unchanged.
+- Fix repeated Eclipse project refreshes without changing the game launch runtime.
+- Build and test against the published basePower 2.4.9.117011 release.
+
+Steam Advantage 2.2.9.117011 (local 1.17.1 port candidate)
+
+- Target Minecraft 1.17.1 / Forge 37.1.1, official mappings and MCP 20210706.113038.
+- Use Java 16 production bytecode with Java 17 Gradle and Java 25 Mavenizer.
+- Preserve stable steamadvantage IDs, NBT, recipes, machine costs and the legacy Power API names.
+- Use native position/state factories and tag-only loading; moving drills retain destination constructor state.
+- Keep shared machine tick ordering and add the native drill-bit helper ticker.
+- Port render buffers, renderer registration, model predicates, config events and native source-fluid pickup.
+- Add native pickaxe tags without new tool tiers, and retain self-drops and recipe unlocks.
+- Use the 1.17 ingredient-predicate format so unrelated items do not unlock recipes.
+- Skip the nine optional Base Metals crushing recipes when Base Metals is absent, including APOCALYPTIC mode; retain their inputs, outputs and quantities.
+- Stop musket terrain rays at unloaded chunk boundaries; retain loaded-player sounds and last-cartridge firing.
+- Read native lava temperature without changing vanilla heat input or machine ratios.
+- Use the published Base Metals raw-metal crushing recipes without overriding their quantities.
+- Retain all 1.16 regression coverage and add native factory, position, helper-ticker and chunk-boundary tests.
+- Pin the coordinated local Power source/API checkpoint and pass 199 Java tests, release/resource audits, Javadoc and Eclipse configuration checks.
+- Track combined Power, Steam and Electric status in Power Advantage's docs/1.17/CURRENT-QUALIFICATION.md; overall qualification remains open.
+- Use Power's shared machine-persistence checkpoint; Steam's machine Java is unchanged and full runtime qualification remains pending.
+- Pin Power's native registry-alias correction without changing Steam's production Java or public identities.
+- Rebuild offline with all tasks forced and retain identical production, sources, Javadoc and development jar bytes.
+- Retain failed receipts separately; packaged runtime and client-launch acceptance remain open, and no historical pass qualifies this port.
+- Keep manual gameplay, multiplayer, migration acceptance and publication approval as separate gates.
+
 Steam Advantage 2.2.8.116051 (local port candidate)
 
 - Read live redstone before the crusher and furnace resume after loading, preserving saved work and the first-tick steam heat bonus without changing the normal polling interval.

@@ -1,7 +1,0 @@
-{
-    "parent": "block/cube_all",
-    "textures": {
-        "all": "steamadvantage:blocks/steam_switch_on",
-        "particle": "steamadvantage:materials/bolted_iron"
-    }
-}

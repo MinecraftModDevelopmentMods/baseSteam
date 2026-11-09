@@ -1,0 +1,6 @@
+{
+  "type": "basemetals:crushing",
+  "ingredient": { "item": "basesteam:steam_elevator" },
+  "result": { "item": "basesteam:steam_governor", "count": 3 },
+  "conditions": [{ "type": "forge:mod_loaded", "modid": "basemetals" }, { "type": "basesteam:recipe_mode", "mode": "APOCALYPTIC" }]
+}

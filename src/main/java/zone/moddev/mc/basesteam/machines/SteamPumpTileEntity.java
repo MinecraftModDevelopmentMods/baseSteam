@@ -1,0 +1,473 @@
+package zone.moddev.mc.basesteam.machines;
+
+import zone.moddev.mc.basepower.util.FluidIdHelper;
+
+import zone.moddev.mc.basesteam.util.LegacyFluidHandler;
+
+import cyano.poweradvantage.api.ConduitType;
+import cyano.poweradvantage.api.PowerRequest;
+import zone.moddev.mc.basepower.conduitnetwork.ConduitRegistry;
+import zone.moddev.mc.basepower.init.Fluids;
+import zone.moddev.mc.basepower.util.FluidHandlerHelper;
+import zone.moddev.mc.basesteam.init.Power;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.BucketPickup;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.material.Fluid;
+import cyano.poweradvantage.api.fluid.FluidStack;
+import cyano.poweradvantage.api.fluid.FluidTank;
+import cyano.poweradvantage.api.fluid.FluidTankInfo;
+import cyano.poweradvantage.api.fluid.IAdvantageFluidHandler;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static zone.moddev.mc.basesteam.util.SoundHelper.playSoundAtTileEntity;
+
+@SuppressWarnings("deprecation")
+public class SteamPumpTileEntity extends cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine implements LegacyFluidHandler{
+
+	private final FluidTank tank;
+	public static final float ENERGY_COST_PIPE = 5f;
+	public static final float ENERGY_COST_VERTICAL = 1f;
+	public static final float ENERGY_COST_PUMP = 32f;
+	public static final byte PUMP_INTERVAL = 32;
+	public static final byte PIPE_INTERVAL = 11;
+	private static final int limit = 5 * 5 * 5; // do not search more than this many block at a time
+
+
+
+	private final int[] dataSyncArray = new int[4];
+	private byte timeUntilNextPump = PUMP_INTERVAL;
+
+	/** Detached convenience constructor for tests; native factories always pass position and state. */
+	public SteamPumpTileEntity() {
+		this(net.minecraft.core.BlockPos.ZERO, new SteamPumpBlock().defaultBlockState());
+	}
+
+	public SteamPumpTileEntity(net.minecraft.core.BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+		super(zone.moddev.mc.basesteam.init.Entities.STEAM_PUMP, pos, state, new ConduitType[]{Power.steam_power,Fluids.fluidConduit_general}, new float[]{300f,1000f}, "tile.basesteam.steam_pump.name");
+		tank = new FluidTank(FluidTank.BUCKET_VOLUME);
+	}
+
+	private boolean redstone = true;
+
+	private int timeToSound = 0;
+
+	@Override
+	public void tickUpdate(boolean isServerWorld) {
+		if(isServerWorld){
+			if(!redstone){
+				if(timeUntilNextPump > 0) timeUntilNextPump--;
+				if(timeUntilNextPump == 0 && getTank().getFluidAmount() <= 0){
+					Level w = getLevel();
+					boolean success = false;
+					BlockPos target = this.getBlockPos().below();
+					while(target.getY() > 0 && w.getBlockState(target).getBlock() == zone.moddev.mc.basesteam.init.Blocks.pump_pipe_steam){
+						target = target.below();
+					}
+					if(target.getY() > 0 && w.isEmptyBlock(target) && getEnergy(Power.steam_power) >= ENERGY_COST_PIPE){
+						// place pipe
+						w.setBlockAndUpdate(target, zone.moddev.mc.basesteam.init.Blocks.pump_pipe_steam.defaultBlockState());
+						this.subtractEnergy(ENERGY_COST_PIPE, Power.steam_power);
+						timeUntilNextPump = PIPE_INTERVAL;
+						playSoundAtTileEntity( SoundEvents.STONE_PLACE, SoundSource.BLOCKS, 0.3f, 1f, this);
+					} else {
+						// pump fluids
+						BlockPos fluidSource = null;
+						Set<BlockPos> searchSpace = new HashSet<>(limit + 1); // pre-allocate max memory usage
+						fluidSource = scan(searchSpace,target.below(), limit);
+						if(fluidSource == null) fluidSource = scan(searchSpace,target.north(), limit);
+						if(fluidSource == null) fluidSource = scan(searchSpace,target.west(), limit);
+						if(fluidSource == null) fluidSource = scan(searchSpace,target.south(), limit);
+						if(fluidSource == null) fluidSource = scan(searchSpace,target.east(), limit);
+						if(fluidSource != null){
+							float cost = ENERGY_COST_PUMP+ENERGY_COST_VERTICAL*(getBlockPos().getY()-fluidSource.getY());
+							// Found a fluid to suck-up!
+							BlockState blockstate = w.getBlockState(fluidSource);
+							Fluid f = getFluid(blockstate);
+							if(f != null && getEnergy(Power.steam_power) >= cost
+									&& getTank().fill(new FluidStack(f,FluidTank.BUCKET_VOLUME), false) == FluidTank.BUCKET_VOLUME){
+								Fluid collected = pickupSource(w, fluidSource, blockstate);
+								if(collected != net.minecraft.world.level.material.Fluids.EMPTY){
+									this.getTank().fill(new FluidStack(collected,FluidTank.BUCKET_VOLUME), true);
+									this.subtractEnergy(cost, Power.steam_power);
+									success = true;
+								}
+							}
+						}
+						timeUntilNextPump = PUMP_INTERVAL;
+					}
+					if(success){
+						playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
+						playSoundAtTileEntity( SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.3f, 1f, this);
+						timeToSound = 14;
+					}
+				}
+			}
+			if(timeToSound == 1){
+				playSoundAtTileEntity( SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.3f, 1f, this);
+				playSoundAtTileEntity( SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1f, 1f, this);
+			}
+			if(timeToSound > 0) timeToSound--;
+			energyDecay();
+		}
+	}
+
+
+
+	private Fluid getFluid(BlockState blockstate) {
+		return blockstate.getFluidState().isEmpty() ? null : blockstate.getFluidState().getType();
+	}
+
+	static Fluid pickupSource(LevelAccessor world, BlockPos pos, BlockState state) {
+		if(!state.getFluidState().isSource() || !(state.getBlock() instanceof BucketPickup)){
+			return net.minecraft.world.level.material.Fluids.EMPTY;
+		}
+		// Native pickup preserves waterlogged hosts; unsupported blocks have no destructive fallback.
+		ItemStack collected = ((BucketPickup)state.getBlock()).pickupBlock(world, pos, state);
+		return collected.isEmpty() ? net.minecraft.world.level.material.Fluids.EMPTY : state.getFluidState().getType();
+	}
+
+
+
+	private BlockPos scan(Set<BlockPos> searchSpace, BlockPos coord, int limit) {
+		if(isFluidBlock(coord) == false) return null;
+		do{
+			if(isSourceBlock(coord)){
+				return coord;
+			} else {
+				searchSpace.add(coord);
+				BlockPos next;
+				boolean nomore = true;
+				for(Direction dir : Direction.values()){
+					next = coord.relative(dir);
+					if(!searchSpace.contains(next) && isFluidBlock(next)){
+						coord = next;
+						nomore = false;
+						break;
+					}
+				}
+				if(nomore){
+					return null;
+				}
+			}
+		} while(searchSpace.size() < limit);
+		return null;
+	}
+
+	private boolean isSourceBlock( BlockPos coord){
+		return getLevel().getFluidState(coord).isSource();
+	}
+
+
+
+	private boolean isFluidBlock(BlockPos coord) {
+		Level w = getLevel();
+		if(w.hasChunkAt(coord) == false) return false;
+		return !w.getFluidState(coord).isEmpty();
+	}
+
+
+
+	private boolean hasRedstoneSignal() {
+		return getLevel().hasNeighborSignal(getBlockPos());
+	}
+
+
+	private void energyDecay() {
+		if(getEnergy(Power.steam_power) > 0){
+			subtractEnergy(Power.ENERGY_LOST_PER_TICK,Power.steam_power);
+		}
+	}
+
+
+
+	private float oldEnergy = 0;
+	private int oldFluid = 0;
+	@Override
+	public void powerUpdate(){
+		// deliberately NOT calling super.powerUpdate()
+		if(this.getTank().getFluidAmount() > 0){
+			FluidStack fluid = getTank().getFluid();
+			ConduitType type = Fluids.fluidToConduitType(fluid.getFluid());
+			float availableAmount = getTank().getFluidAmount();
+			float delta = ConduitRegistry.transmitPowerToConsumers(availableAmount, zone.moddev.mc.basepower.init.Fluids.fluidConduit_general, type,
+					PowerRequest.LAST_PRIORITY, getLevel(), getBlockPos(), this);
+			if(delta > 0){
+				getTank().drain(Math.max((int)delta,1),true); // no free energy!
+			} else {
+				// try passing to a fluid handler
+				for(int i = 1; i < Direction.values().length; i++){
+					if(getTank().getFluidAmount() <= 0) break;
+					Direction dir = Direction.values()[i];
+					BlockPos nPos = getBlockPos().relative(dir);
+					BlockEntity neighbor = getLevel().getBlockEntity(nPos);
+					IAdvantageFluidHandler handler = FluidHandlerHelper.getHandler(neighbor, dir.getOpposite());
+					if(handler != null){
+						int d = handler.fill(dir.getOpposite(), fluid, true);
+						if(d > 0) getTank().drain(d,true);
+						fluid = getTank().getFluid();
+					}
+				}
+			}
+		}
+		// powerUpdate occurs once every 8 world ticks and is scheduled such that neighboring
+		// machines don't powerUpdate in the same world tick. To reduce network congestion,
+		// I'm doing the synchonization logic here instead of in the tickUpdate method
+		boolean updateFlag = false;
+
+		if(oldEnergy != getEnergy(Power.steam_power)){
+			oldEnergy = getEnergy(Power.steam_power);
+			updateFlag = true;
+		}
+		if(oldFluid != getTank().getFluidAmount()){
+			oldFluid = getTank().getFluidAmount();
+			updateFlag = true;
+		}
+
+		redstone = hasRedstoneSignal();
+
+		if(updateFlag){
+			super.sync();
+		}
+	}
+
+
+
+	public float getSteamLevel(){
+		return this.getEnergy(Power.steam_power) / this.getEnergyCapacity(Power.steam_power);
+	}
+
+
+	public FluidTank getTank(){
+		return tank;
+	}
+
+	@Override
+	protected ItemStack[] getInventory() {
+		return null;
+	}
+
+	@Override
+	public int[] getDataFieldArray() {
+		return dataSyncArray;
+	}
+
+	@Override
+	public void prepareDataFieldsForSync() {
+		dataSyncArray[0] = Float.floatToRawIntBits(this.getEnergy(Power.steam_power));
+		dataSyncArray[1] = this.getTank().getFluidAmount();
+		dataSyncArray[2] = (this.getTank().getFluidAmount() > 0 ? FluidIdHelper.getFluidId(this.getTank().getFluid().getFluid()) : FluidIdHelper.getFluidId(net.minecraft.world.level.material.Fluids.WATER));
+		dataSyncArray[3] = this.timeUntilNextPump;
+	}
+
+	@Override
+	public void onDataFieldUpdate() {
+		this.setEnergy(Float.intBitsToFloat(dataSyncArray[0]), Power.steam_power);
+		this.getTank().setFluid(new FluidStack(FluidIdHelper.getFluid(dataSyncArray[2]),dataSyncArray[1]));
+		this.timeUntilNextPump = (byte)dataSyncArray[3];
+	}
+
+
+	/**
+	 * Handles data saving and loading
+	 * @param tagRoot An NBT tag
+	 */
+	@Override
+	public CompoundTag save(final CompoundTag tagRoot) {
+		super.save(tagRoot);
+		CompoundTag tankTag = new CompoundTag();
+		this.getTank().writeToNBT(tankTag);
+		tagRoot.put("Tank", tankTag);
+		tagRoot.putByte("NextPump", (byte)this.timeUntilNextPump);
+		return tagRoot;
+	}
+	/**
+	 * Handles data saving and loading
+	 * @param tagRoot An NBT tag
+	 */
+	@Override
+	public void load(final CompoundTag tagRoot) {
+		super.load(tagRoot);
+		String tankKey = tagRoot.contains("Tank") ? "Tank" : "TankOut";
+		if (tagRoot.contains(tankKey)) {
+			CompoundTag tankTag = tagRoot.getCompound(tankKey);
+			getTank().readFromNBT(tankTag);
+			if(tankTag.contains("Empty")){
+				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
+				getTank().setFluid(null);
+			}
+		}
+
+		if (tagRoot.contains("NextPump")) {
+			this.timeUntilNextPump = tagRoot.getByte("NextPump");
+		}
+	}
+
+	public int getComparatorOutput() {
+		return 15 * getTank().getFluidAmount() / getTank().getCapacity();
+	}
+
+	///// Overrides to make this a multi-type block /////
+
+
+	@Override
+	public boolean isPowerSink(ConduitType type){
+		return ConduitType.areSameType(Power.steam_power, type);
+	}
+
+	@Override
+	public boolean isPowerSource(ConduitType type){
+		return zone.moddev.mc.basepower.init.Fluids.isFluidType(type);
+	}
+	/**
+	 * Adds "energy" as a fluid to the FluidTank returned by getTank(). This implementation ignores
+	 * all non-fluid energy types.
+	 * @param amount amount of energy/fluid to add
+	 * @param type the type of energy/fluid being added.
+	 * @return The amount that was actually added
+	 */
+	@Override
+	public float addEnergy(float amount, ConduitType type){
+		if(Fluids.isFluidType(type)){
+			if(amount > 0 && this.canFill(null, Fluids.conduitTypeToFluid(type))){
+				return this.fill(null, new FluidStack(Fluids.conduitTypeToFluid(type),(int)amount), true);
+			} else if (amount < 0 && this.canDrain(null, Fluids.conduitTypeToFluid(type))){
+				FluidStack drained = this.drain(null, Math.max(1, (int)-amount), true);
+				return drained == null ? 0 : -drained.amount;
+			}
+		}
+		return super.addEnergy(amount, type);
+	}
+
+	/**
+	 * Subtracts "energy" as a fluid to the FluidTank returned by getTank(). This implementation
+	 * ignores all non-fluid energy types.
+	 * @param amount amount of energy/fluid to add
+	 * @param type the type of energy/fluid being added.
+	 * @return The amount that was actually added
+	 */
+	@Override
+	public float subtractEnergy(float amount, ConduitType type){
+		return addEnergy(-1*amount,type);
+	}
+
+	@Override
+	public PowerRequest getPowerRequest(ConduitType offer) {
+		if(redstone) return PowerRequest.REQUEST_NOTHING;
+		if(Fluids.isFluidType(offer)){
+			return PowerRequest.REQUEST_NOTHING;
+		} else  if(ConduitType.areSameType(offer, Power.steam_power)){
+			return new PowerRequest(PowerRequest.MEDIUM_PRIORITY,this.getEnergyCapacity(Power.steam_power) - this.getEnergy(Power.steam_power), this);
+		}
+		return PowerRequest.REQUEST_NOTHING;
+	}
+
+
+
+	///// end multi-type overrides /////
+
+
+
+	///// IFluidHandler /////
+
+	/**
+	 * Implementation of IFluidHandler
+	 * @param face Face of the block being polled
+	 * @param fluid The fluid being added/removed
+	 * @param forReal if true, then the fluid in the tank will change
+	 */
+	@Override
+	public int fill(Direction face, FluidStack fluid, boolean forReal) {
+		if(fluid == null) return 0;
+		if(getTank().getFluidAmount() <= 0 || getTank().getFluid().getFluid().equals(fluid.getFluid())){
+			return getTank().fill(fluid, forReal);
+		}
+		return 0;
+	}
+	/**
+	 * Implementation of IFluidHandler
+	 * @param face Face of the block being polled
+	 * @param fluid The fluid being added/removed
+	 * @param forReal if true, then the fluid in the tank will change
+	 */
+	@Override
+	public FluidStack drain(Direction face, FluidStack fluid, boolean forReal) {
+		if(getTank().getFluidAmount() > 0 && getTank().getFluid().getFluid().equals(fluid.getFluid())){
+			return getTank().drain(fluid.amount,forReal);
+		} else {
+			return new FluidStack(getTank().getFluid().getFluid(),0);
+		}
+	}
+	/**
+	 * Implementation of IFluidHandler
+	 * @param face Face of the block being polled
+	 * @param amount The amount of fluid being added/removed
+	 * @param forReal if true, then the fluid in the tank will change
+	 */
+	@Override
+	public FluidStack drain(Direction face, int amount, boolean forReal) {
+		if(getTank().getFluidAmount() > 0 ){
+			return getTank().drain(amount,forReal);
+		} else {
+			return null;
+		}
+	}
+	/**
+	 * Implementation of IFluidHandler
+	 * @param face Face of the block being polled
+	 * @param fluid The fluid being added/removed
+	 */
+	@Override
+	public boolean canFill(Direction face, Fluid fluid) {
+		if(fluid == null) return false;
+		if(getTank().getFluidAmount() <= 0) return true;
+		return getTank().getFluidAmount() <= getTank().getCapacity() && fluid.equals(getTank().getFluid().getFluid());
+	}
+	/**
+	 * Implementation of IFluidHandler
+	 * @param face Face of the block being polled
+	 * @param fluid The fluid being added/removed
+	 */
+	@Override
+	public boolean canDrain(Direction face, Fluid fluid) {
+		if(fluid == null) return false;
+		return getTank().getFluidAmount() > 0 && fluid.equals(getTank().getFluid().getFluid());
+	}
+
+	/**
+	 * Implementation of IFluidHandler
+	 * @param face Face of the block being polled
+	 * @return array of FluidTankInfo describing all of the FluidTanks
+	 */
+	@Override
+	public FluidTankInfo[] getTankInfo(Direction face) {
+		FluidTankInfo[] arr = new FluidTankInfo[1];
+		arr[0] = getTank().getInfo();
+		return arr;
+	}
+
+	///// end of IFluidHandler methods /////
+
+	@Override
+	public boolean canPlaceItem(final int slot, final ItemStack item) {
+		return false; // no inventory
+	}
+
+
+
+	@Override
+	public boolean stillValid(Player player) {
+		return true;
+	}
+}

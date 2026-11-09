@@ -1,0 +1,7 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "basesteam:blocks/steam_switch_off",
+        "particle": "basesteam:materials/bolted_iron"
+    }
+}

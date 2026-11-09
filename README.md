@@ -1,105 +1,116 @@
-# SteamAdvantage
+# baseSteam
 
-**Minecraft 1.16.5 source port candidate, version 2.2.8.116051.**
-This source port remains pending manual acceptance and publication approval.
-The follow-up checks use finite supplies and ordinary server ticks to measure
-actual machine output, energy use, blocked routes and saved state. They also
-cover fluid pickup without destroying waterlogged blocks. Rendered GUI checks
-require machine names and inventory labels as well as correctly placed controls.
-The shared record below identifies the current jars and each completed run;
-earlier results are retained separately rather than counted again.
-Earlier-candidate results and accepted 1.15 results do not qualify this candidate.
+**Minecraft 1.17.1 (Forge), version 2.2.10.117011. Local candidate.**
 
-The [shared test record](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.16.5/docs/1.16/CURRENT-QUALIFICATION.md)
-records the exact jars, completed checks and remaining limits.
+baseSteam, formerly Steam Advantage, adds boilers, steam-powered machines,
+pumps, storage, elevators and a blackpowder musket to basePower. Its items and
+blocks use the shared basePower creative tab. This version is not published.
 
-Steam Advantage adds steam-powered machines and infrastructure to Power Advantage.
+## Upgrading a World
+
+Back up your world and test the upgrade on a copy. Replace Steam Advantage and
+Power Advantage with baseSteam and basePower; do not install both sets of mods.
+The migration recognizes old Steam Advantage IDs and keeps the registry paths,
+machine settings and saved data used by earlier baseSteam versions. The
+Minecraft 1.17.1 world upgrade still needs verification for this candidate.
+
+Existing `basesteam-common.toml` settings take precedence. When that file is
+absent, baseSteam can copy `steamadvantage-common.toml` or import settings from an
+older `.cfg` file. The old config is left in place.
 
 ## Build Target
 
-The `master-1.16.5` target uses Minecraft 1.16.5, Forge 36.2.34,
-official 1.16.5 mappings, and MCP config 20210115.111550.
-ForgeGradle 7.0.34 and Gradle 9.6.1 run on Temurin 17.0.1+12.
-Compilation and Minecraft launches use Temurin 8.0.502+7 and Java 8 bytecode;
-Mavenizer uses Temurin 25.0.3+9.0.LTS.
+Minecraft 1.17.1, Forge 37.1.1, official 1.17.1 mappings and MCP
+20210706.113038. ForgeGradle 7.0.34 and Gradle 9.6.1 run on Java 17.
+Production compilation and launches use Temurin 16.0.2+7, class major 60.
+Mavenizer uses Java 25. Java 8 is available only for older build utilities.
 
-Power Advantage 2.4.7.116051 remains a separate required mod. The pinned compile
-dependency uses source `bcb75bfa91c14751ebf1e31865e1ec0ffa82c0b7`.
-Its development jar SHA-256 is
-`2FB923944A456B4F26AB2F9212C646469CE3F49BFD4DAE894C15559B48908386`.
-These exact pins are recorded in `gradle.properties` and audited during builds.
-Use an immutable development jar through `-PpowerAdvantageDeobfJar=<path>`.
-Release audits reject missing, placeholder, or mismatched pins. These source pins
-do not grant publication approval.
+The mod ID and resource namespace are `basesteam`; the Java implementation
+namespace is `zone.moddev.mc.basesteam`. The shared `cyano.poweradvantage.api`
+names remain in use.
 
-Power's migration hook preserves legacy Forge swimming speed, nametag distance,
-gravity and reach attributes, including their values and modifiers. Steam uses
-that shared hook without duplicating the conversion.
+basePower 2.4.9.117011 is required. Base Metals 3.1.1.117011 remains optional
+in Forge; the CurseForge install metadata lists basePower and Base Metals.
+Build against the exact basePower source and development jar pinned in
+`gradle.properties`. The player jar is the published
+[basePower 2.4.9.117011 release](https://maven.moddev.zone/releases/zone/moddev/mc/basepower/basePower/2.4.9.117011/basePower-2.4.9.117011.jar).
+The Base Metals startup fix is also published as 3.1.1.117011. OreSpawn
+4.1.0.117011 remains in the dependency chain. No dependency is embedded.
 
-Earlier dependency-candidate build and runtime receipts remain historical evidence
-for their original inputs. They do not qualify the current candidate. Automated
-build and test results, bounded runtime checks, and manual acceptance are separate
-gates.
+## Local Verification
 
-The supplied native development dependencies are Base Metals 3.1.1.116051
-(source `995f6cc4dd2d5eecc628a42e5c43fa5390c24bca`) and OreSpawn 4.1.0.116051
-(source `a113e5d767169189f0e35ade1e173a12d550b00e`). Their exact jar hashes
-are recorded in `gradle.properties`. None of the dependencies is embedded.
+Use the checked-in Gradle wrapper and supply explicit paths to the development
+jars matching the pins in `gradle.properties`.
+Runtime jars are not interchangeable with development jars. Use the test-only
+Forge capability bootstrap from the same basePower source pin. Use a Steam-only
+Gradle user home; do not build against a sibling checkout's cache or mutable jar.
 
-With matching native development jars available:
+For example, from the Steam checkout in PowerShell:
 
-```text
-gradlew.bat compileJava compileTestJava -PpowerAdvantageDeobfJar=<path>
+```powershell
+$env:JAVA_HOME = $env:JAVA17_HOME
+$jdks = @($env:JAVA17_HOME, $env:JAVA16_HOME, $env:JAVA25_HOME, $env:JAVA8_HOME) -join ','
+$toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
+  '-Porg.gradle.java.installations.auto-detect=false',
+  '-Porg.gradle.java.installations.auto-download=false')
+$env:GRADLE_USER_HOME = $env:BASESTEAM_GRADLE_USER_HOME
+./gradlew.bat @toolchains check build deobfJar javadoc `
+  verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums `
+  verifyEclipseProductionClasspath `
+  "-PpowerAdvantageDeobfJar=$env:POWERADVANTAGE_DEOBF_JAR" `
+  "-PbaseMetalsDeobfJar=$env:BASEMETALS_DEOBF_JAR" `
+  "-PoreSpawnDeobfJar=$env:ORESPAWN_DEOBF_JAR" `
+  "-PforgeCapabilityBootstrapJar=$env:FORGE_CAPABILITY_BOOTSTRAP_JAR"
 ```
 
-Alternative layouts may also pass `-PbaseMetalsDeobfJar=<path>` and
-`-PoreSpawnDeobfJar=<path>`. Explicit toolchain installations can be supplied
-through Gradle project properties. Do not use a dependency from an older target.
+On other platforms use `./gradlew`. The artifact family is
+`baseSteam-2.2.10.117011.jar`, plus sources and Javadoc. The development jar
+stays under `build/libs-dev`.
 
-With the exact dependency jars pinned, the full build gates are:
+`node tools/verify-native-port.js` and `node tools/generate-recipe-unlocks.js --check`
+run without the dependency jars. The [port status](docs/PORT117-STATUS.md) separates
+these checks from the pending build and runtime gates and retains the earlier
+Steam Advantage evidence.
 
-```text
-gradlew.bat clean check build javadoc verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums verifyEclipseProductionClasspath
-```
+## Port Details
 
-A compilation pass is not a test pass, release-audit pass, or runtime acceptance.
-Shared Gradle caches require exclusive ownership; do not run competing builds
-against the same cache or checkout.
+Native block-entity factories preserve their actual constructor position and
+block state. Loading NBT does not replace that position, including when a drill
+moves along a track. Power's shared native ticker retains per-tick work before
+the eight-tick power update on both logical sides. The drill-bit helper has its
+own native ticker.
 
-## Compatibility
+The port retains first-loaded-tick redstone sampling in the crusher and furnace,
+water-only boiler inputs, dirty-owner callbacks, finite energy and fluid
+accounting, persistence aliases, helper state and GUI caption rows. Native
+PoseStack and vertex consumers retain the drill geometry, UVs and animation.
+Musket terrain traversal stops before unloaded chunks; sound dispatch still
+uses loaded server players.
 
-Runtime identities remain `steamadvantage:*`; the implementation namespace remains
-`zone.moddev.mc.steamadvantage`. Registry names, tile IDs, resources, recipes,
-trade ranges, machine costs, output quantities, and persistent NBT remain stable.
+Native pickaxe tags cover the metal machines and helpers without introducing
+new minimum tool tiers or changing drop requirements. Ordinary blocks retain
+their self-drop tables; hidden helpers still have no item form or drops.
+Recipe ingredients, processing costs and quantities are unchanged. Recipe-book
+advancements use native singleton `items` predicates; the ignored legacy `item`
+field must not turn an ingredient discovery into an unrestricted predicate.
+Optional Base Metals crushing recipes also require `forge:mod_loaded` before
+their recipe-mode condition, so APOCALYPTIC loads safely without that serializer.
 
-The native port uses world-only conduit callbacks. Power Advantage owns registry-key
-dimension handling, shared capability invalidation/revival, fluid adapters, and base
-tile lifecycle. Steam uses native `load(BlockState, CompoundNBT)` and
-`save(CompoundNBT)`, retaining deferred drill targets, cached facing, progress,
-inventory, energy, legacy tank aliases, and musket loaded-state bytes.
-Saving a drill must not reacquire its world or neighbouring chunks.
+Steam reads Base Metals' crushing recipes without overriding their balance.
+Geothermal heat uses native Forge lava temperature, retaining the existing
+1300 K input and resulting heat value.
 
-Client setup registers native item model predicates, drill rendering, and the
-track's cutout layer. Native block predicates preserve non-occlusion and prevent
-full-collision tracks and platforms from conducting redstone. Existing renderer
-geometry, UVs, lighting, and animation axes are retained.
+## Acceptance Still Required
 
-Every crafting variant has ingredient-triggered recipe-book discovery.
-Regenerate unlock JSON after recipe changes with
-`node tools/generate-recipe-unlocks.js`. Processing recipes remain outside the
-crafting book. Recipe conditions are registered on the queued setup thread.
+Historical results from earlier versions do not qualify this candidate.
+Compilation, Java tests, repeat Eclipse refresh, packaged server/client checks,
+world migration and manual gameplay are separate gates.
 
-Unit tests cover native properties, exact levels and costs, persistence,
-world-only callbacks, recipe discovery, and resources. They do not establish
-in-world GUIs, sounds, interactions, multiplayer behavior, or arbitrary modpacks.
+Manual testing must cover all boilers, crusher and furnace reload/redstone,
+drills in six directions and track moves with inventory and energy, helper
+rotation and cleanup, pumps, stills, elevator rides, GUI captions and controls,
+musket last-cartridge firing, terrain boundaries, sounds and enchantments,
+multiplayer synchronization and capability unload/reload.
 
-Power Advantage supplies the combined-mod runtime harness and shared legacy
-migration hook. Upgrade testing must use disposable whole-world copies with
-pinned inputs. Preserve original worlds and backups; never open a world in an
-older Minecraft version after upgrading it. Manual acceptance and publication
-approval remain separate from automated evidence.
-
-The shared [machine operating checks](https://github.com/MinecraftModDevelopmentMods/PowerAdvantage/blob/master-1.16.5/docs/1.16/OPERATING-TESTS.md)
-exercise finite boiler, processing, pumping, storage, elevator and musket jobs.
-They check real output and resource use, including failed jobs and complete
-server restarts. Live player controls and rendering still need a walkthrough.
+Use disposable whole-world copies for upgrades. Preserve original worlds and
+backups; never reopen an upgraded world with an older Minecraft version.
