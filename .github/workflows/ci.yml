@@ -113,6 +113,13 @@ jobs:
           powerjar="$power/build/libs-dev/basePower-2.4.10.118021-deobf.jar"
           bootstrap="$power/build/unit-bootstrap/forge-native-unit-bootstrap.jar"
           test -f "$osjar" && test -f "$bmjar" && test -f "$powerjar" && test -f "$bootstrap"
+          version="$(sed -n 's/^poweradvantage_version=//p' gradle.properties | tr -d '\r')"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.118021$ ]]
+          release="$RUNNER_TEMP/basePower-$version.jar"
+          curl --fail --silent --show-error --location --retry 3 --output "$release" \
+            "https://maven.moddev.zone/releases/zone/moddev/mc/basepower/basePower/$version/basePower-$version.jar"
+          power_release_sha=$(sed -n 's/^poweradvantage_player_sha256=//p' gradle.properties | tr -d '\r')
+          printf '%s  %s\n' "$power_release_sha" "$release" | sha256sum --check
           echo "orespawn=$osjar" >> "$GITHUB_OUTPUT"
           echo "basemetals=$bmjar" >> "$GITHUB_OUTPUT"
           echo "power=$powerjar" >> "$GITHUB_OUTPUT"
