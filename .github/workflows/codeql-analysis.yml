@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [master-1.17.1, 'feature/**']
+    branches: [master-1.18.2, feature/basesteam-1.18.2-port]
   pull_request:
-    branches: [master-1.17.1]
+    branches: [master-1.18.2]
   schedule:
     - cron: '53 7 * * 4'
 
@@ -28,22 +28,29 @@ jobs:
           power_ref=$(sed -n 's/^poweradvantage_source_ref=//p' gradle.properties | tr -d '\r')
           power_hash=$(sed -n 's/^poweradvantage_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$power_ref" =~ ^[a-f0-9]{40}$ || ! "$power_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact basePower 1.17 dependency pin is pending."
+            echo "::error::The exact basePower 1.18 dependency pin is pending."
             exit 1
           fi
           bm_ref=$(sed -n 's/^basemetals_source_commit=//p' gradle.properties | tr -d '\r')
           bm_hash=$(sed -n 's/^basemetals_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$bm_ref" =~ ^[a-f0-9]{40}$ || ! "$bm_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact Base Metals 1.17 dependency pin is pending."
+            echo "::error::The exact Base Metals 1.18 dependency pin is pending."
             exit 1
           fi
+          os_ref=$(sed -n 's/^orespawn_source_commit=//p' gradle.properties | tr -d '\r')
+          os_hash=$(sed -n 's/^orespawn_deobf_sha256=//p' gradle.properties | tr -d '\r')
+          if [[ ! "$os_ref" =~ ^[a-f0-9]{40}$ || ! "$os_hash" =~ ^[A-F0-9]{64}$ ]]; then
+            echo "::error::The exact OreSpawn 1.18 dependency pin is pending."
+            exit 1
+          fi
+          echo "ORESPAWN_SOURCE_REF=$os_ref" >> "$GITHUB_ENV"
           echo "POWERADVANTAGE_SOURCE_REF=$power_ref" >> "$GITHUB_ENV"
           echo "BASEMETALS_SOURCE_REF=$bm_ref" >> "$GITHUB_ENV"
       - name: Check out pinned OreSpawn
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/OreSpawn
-          ref: b56e2b62a1a6ea4d1dd96f8646a87801a817dbdf
+          ref: ${{ env.ORESPAWN_SOURCE_REF }}
           path: .ci-dependencies/OreSpawn
       - name: Use canonical LF dependency inputs
         # Use the same source bytes on hosted and local dependency builds.
@@ -54,7 +61,7 @@ jobs:
           repository: MinecraftModDevelopmentMods/BaseMetals
           ref: ${{ env.BASEMETALS_SOURCE_REF }}
           path: .ci-dependencies/BaseMetals
-      - name: Check out basePower 1.17.1
+      - name: Check out basePower 1.18.2
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/basePower
@@ -70,11 +77,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '8.0.502+7'
-      - name: Install pinned Java 16 production toolchain
-        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
-        with:
-          distribution: temurin
-          java-version: '16.0.2+7'
       - name: Install Java 17 for Gradle
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
@@ -84,12 +86,12 @@ jobs:
         # These are Gradle project properties, not JVM system properties.
         shell: bash
         run: >-
-          echo "MMD_GRADLE_TOOLCHAINS=-Porg.gradle.java.installations.paths=$JAVA_HOME,$JAVA_HOME_16_X64,$JAVA_HOME_8_X64,$JAVA_HOME_25_X64
+          echo "MMD_GRADLE_TOOLCHAINS=-Porg.gradle.java.installations.paths=$JAVA_HOME,$JAVA_HOME_8_X64,$JAVA_HOME_25_X64
           -Porg.gradle.java.installations.auto-detect=false
           -Porg.gradle.java.installations.auto-download=false" >> "$GITHUB_ENV"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
-      - name: Build 1.17.1 dependency chain
+      - name: Build 1.18.2 dependency chain
         id: dependencies
         shell: bash
         run: |
@@ -97,17 +99,18 @@ jobs:
           orespawn="$GITHUB_WORKSPACE/.ci-dependencies/OreSpawn"
           basemetals="$GITHUB_WORKSPACE/.ci-dependencies/BaseMetals"
           power="$GITHUB_WORKSPACE/.ci-dependencies/basePower"
+          test "$(git -C "$orespawn" rev-parse HEAD)" = "$ORESPAWN_SOURCE_REF"
           test "$(git -C "$power" rev-parse HEAD)" = "$POWERADVANTAGE_SOURCE_REF"
           test "$(git -C "$basemetals" rev-parse HEAD)" = "$BASEMETALS_SOURCE_REF"
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew" "$power/gradlew"
           (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
           (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
-          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.117011-deobf.jar"
-          bmjar="$basemetals/build/libs-dev/BaseMetals-3.1.1.117011-deobf.jar"
+          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.118021-deobf.jar"
+          bmjar="$basemetals/build/libs-dev/BaseMetals-3.1.2.118021-deobf.jar"
           (cd "$power" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar unitBootstrapJar verifyReleaseDependencies \
             -PbaseMetalsDeobfJar="$bmjar" -PoreSpawnDeobfJar="$osjar" \
             --no-daemon --stacktrace)
-          powerjar="$power/build/libs-dev/basePower-2.4.9.117011-deobf.jar"
+          powerjar="$power/build/libs-dev/basePower-2.4.10.118021-deobf.jar"
           bootstrap="$power/build/unit-bootstrap/forge-native-unit-bootstrap.jar"
           test -f "$osjar" && test -f "$bmjar" && test -f "$powerjar" && test -f "$bootstrap"
           echo "orespawn=$osjar" >> "$GITHUB_OUTPUT"

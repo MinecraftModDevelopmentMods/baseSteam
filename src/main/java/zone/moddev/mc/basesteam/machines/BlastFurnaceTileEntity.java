@@ -269,11 +269,10 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	
 
 	@Override
-	public CompoundTag save(CompoundTag tagRoot){
-		super.save(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot){
+		super.saveAdditional(tagRoot);
 		prepareDataFieldsForSync();
 		tagRoot.putIntArray("Data", getDataFieldArray());
-		return tagRoot;
 	}
 	
 	@Override

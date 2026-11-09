@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -25,7 +26,7 @@ public class WaterBoilerFluidBoundaryTest {
     private FluidTank tank;
     public WaterBoilerFluidBoundaryTest(Class<?> type) { this.type = type; }
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL == null)
             zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(CoalBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_ELECTRIC == null)

@@ -20,11 +20,7 @@ import cyano.poweradvantage.api.migration.LegacyConfigMigration;
 import cyano.poweradvantage.api.migration.LegacyConfigMigration.Mapping;
 import cyano.poweradvantage.api.migration.LegacyConfigMigration.ValueType;
 import zone.moddev.mc.basesteam.config.SteamAdvantageConfig;
-import zone.moddev.mc.basesteam.init.Blocks;
-import zone.moddev.mc.basesteam.init.Enchantments;
-import zone.moddev.mc.basesteam.init.Entities;
 import zone.moddev.mc.basesteam.init.GUI;
-import zone.moddev.mc.basesteam.init.Items;
 import zone.moddev.mc.basesteam.init.Recipes;
 import zone.moddev.mc.basesteam.init.TreasureChests;
 import zone.moddev.mc.basesteam.init.Villages;
@@ -32,12 +28,12 @@ import zone.moddev.mc.basesteam.migration.SteamLegacyMigrations;
 import zone.moddev.mc.basesteam.migration.SteamConfigMigration;
 import zone.moddev.mc.basesteam.recipe.RecipeConditions;
 
-/** Forge 1.17 entry point for baseSteam. */
+/** Forge 1.18.2 entry point for baseSteam. */
 @Mod(SteamAdvantage.MODID)
 public final class SteamAdvantage {
     public static final String MODID = "basesteam";
     public static final String NAME = "baseSteam";
-    public static final String VERSION = "2.2.10.117011";
+    public static final String VERSION = "2.2.11.118021";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static float MUSKET_DAMAGE = 20.0F;
@@ -47,11 +43,6 @@ public final class SteamAdvantage {
 
     public SteamAdvantage() {
         SteamLegacyMigrations.register();
-        Blocks.init();
-        Items.init();
-        Entities.init();
-        Enchantments.init();
-        GUI.init();
 
         migrateLegacyConfiguration();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SteamAdvantageConfig.SPEC);
@@ -90,6 +81,7 @@ public final class SteamAdvantage {
     private void commonSetup(FMLCommonSetupEvent event) {
         // CraftingHelper's shared condition map is not safe during parallel loading.
         event.enqueueWork(RecipeConditions::register);
+        event.enqueueWork(GUI::init);
         SteamAdvantageConfig.apply();
         Recipes.init();
         TreasureChests.init(FMLPaths.CONFIGDIR.get());

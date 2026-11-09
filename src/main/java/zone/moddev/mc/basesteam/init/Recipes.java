@@ -12,8 +12,6 @@ public class Recipes {
 	public static void init(){
 		if(initDone) return;
 		
-		Blocks.init();
-		Items.init();
 		
 		
 		

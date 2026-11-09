@@ -284,13 +284,12 @@ public class SteamPumpTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public CompoundTag save(final CompoundTag tagRoot) {
-		super.save(tagRoot);
+	protected void saveAdditional(final CompoundTag tagRoot) {
+		super.saveAdditional(tagRoot);
 		CompoundTag tankTag = new CompoundTag();
 		this.getTank().writeToNBT(tankTag);
 		tagRoot.put("Tank", tankTag);
 		tagRoot.putByte("NextPump", (byte)this.timeUntilNextPump);
-		return tagRoot;
 	}
 	/**
 	 * Handles data saving and loading

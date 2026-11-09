@@ -1,3 +1,9 @@
+baseSteam 2.2.11.118021 (local Minecraft 1.18.2 candidate)
+
+- Target Minecraft 1.18.2 / Forge 40.3.0 and Java 17 with basePower 2.4.10.118021.
+- Use native block-entity saves and update packets and native musket item tags.
+- Keep Steam registry names, legacy state keys, and recipe data unchanged.
+
 baseSteam 2.2.10.117011 (local Minecraft 1.17.1 candidate)
 
 - Steam Advantage is now baseSteam. Install it with basePower 2.4.9.117011 and find its blocks and items in the shared basePower creative tab.

@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import java.io.InputStream;
 import java.lang.reflect.Proxy;
 import net.minecraft.world.level.block.Block;
@@ -29,7 +30,7 @@ public class SteamOperationalPumpSourceTest {
     private static final BlockPos SOURCE = new BlockPos(8, 80, 8);
 
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
     }
 
     @Test public void nativePickupRetainsTheSlabAndOnlyClearsItsWater() {

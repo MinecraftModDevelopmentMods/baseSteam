@@ -78,10 +78,9 @@ public class DrillBitTileEntity extends BlockEntity{
 	}
 	
 	@Override
-	public CompoundTag save(CompoundTag root){
-		super.save(root);
+	protected void saveAdditional(CompoundTag root){
+		super.saveAdditional(root);
 		writeDirectionToNBT(root);
-		return root;
 	}
 	
 
@@ -93,7 +92,7 @@ public class DrillBitTileEntity extends BlockEntity{
 
 	@Override
 	public CompoundTag getUpdateTag() {
-		return save(new CompoundTag());
+		return saveWithoutMetadata();
 	}
 
 	/**
@@ -103,7 +102,7 @@ public class DrillBitTileEntity extends BlockEntity{
 	public ClientboundBlockEntityDataPacket getUpdatePacket(){
 		CompoundTag nbtTag = new CompoundTag();
 		writeDirectionToNBT(nbtTag);
-		return new ClientboundBlockEntityDataPacket(this.getBlockPos(), 0, nbtTag);
+		return ClientboundBlockEntityDataPacket.create(this, tile -> nbtTag);
 	}
 	/**
 	 * Receives the network packet made by <code>getDescriptionPacket()</code>

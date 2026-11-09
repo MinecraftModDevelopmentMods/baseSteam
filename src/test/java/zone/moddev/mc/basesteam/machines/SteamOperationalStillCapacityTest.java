@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import cyano.poweradvantage.api.fluid.FluidStack;
 import java.lang.reflect.Method;
 import net.minecraft.world.level.block.Blocks;
@@ -15,7 +16,7 @@ import static org.junit.Assert.*;
 /** Pure capacity planning; native operating regressions live in SteamOperationalCases. */
 public class SteamOperationalStillCapacityTest {
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
         if (Entities.STEAM_STILL == null) {
             Entities.STEAM_STILL = BlockEntityType.Builder.of(SteamStillTileEntity::new, Blocks.STONE).build(null);
         }

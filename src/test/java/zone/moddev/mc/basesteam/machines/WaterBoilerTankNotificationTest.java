@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 import cyano.poweradvantage.api.IPowerMachine;
 import zone.moddev.mc.basepower.init.Fluids;
@@ -23,7 +24,7 @@ public class WaterBoilerTankNotificationTest {
     private Probe probe;
     public WaterBoilerTankNotificationTest(String type) { this.type = type; }
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_ELECTRIC == null)
             zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_ELECTRIC = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(ElectricBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_GEOTHERMAL == null)

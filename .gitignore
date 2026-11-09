@@ -34,6 +34,7 @@
 *.class
 *.jar
 !/gradle/wrapper/gradle-wrapper.jar
+!/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-1.18.jar
 *.zip
 
 # Machine-specific agent context

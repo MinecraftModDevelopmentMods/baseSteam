@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 import java.lang.reflect.Field;
 import net.minecraft.core.BlockPos;
@@ -10,7 +11,7 @@ import org.junit.Test;
 
 public class RockCrusherReloadRedstoneTest {
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_CRUSHER == null)
             zone.moddev.mc.basesteam.init.Entities.STEAM_CRUSHER = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(RockCrusherTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_FURNACE == null)

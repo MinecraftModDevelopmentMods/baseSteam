@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 
 import cyano.poweradvantage.api.ConduitType;
@@ -13,7 +14,7 @@ import org.junit.Test;
 /** Save-notification unit witness; actual disk persistence is checked by the native restart rig. */
 public class CoalBoilerFillPersistenceTest {
     @BeforeClass public static void bootstrap() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
         if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL == null)
             zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(CoalBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
     }

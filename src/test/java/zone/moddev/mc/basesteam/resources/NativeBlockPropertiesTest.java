@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.resources;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.server.Bootstrap;
 import net.minecraft.world.level.EmptyBlockGetter;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,7 +35,7 @@ public class NativeBlockPropertiesTest {
     @Parameterized.Parameter(1) public int height;
     private Block block;
 
-    @BeforeClass public static void bootstrapNativeRegistries() { net.minecraft.SharedConstants.tryDetectVersion(); Bootstrap.bootStrap(); }
+    @BeforeClass public static void bootstrapNativeRegistries() { NativeTestBootstrap.start(); }
 
     @Before public void createNativeBlockAndStateCaches() {
         block = height < 0 ? new SteamTrackBlock() : new PlatformBlock();

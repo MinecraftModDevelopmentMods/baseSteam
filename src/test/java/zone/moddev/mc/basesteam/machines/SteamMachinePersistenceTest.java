@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import cyano.poweradvantage.api.fluid.FluidStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +17,7 @@ import static org.junit.Assert.*;
 
 public class SteamMachinePersistenceTest {
     @BeforeClass public static void bootstrapNativeTypes() {
-        net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap();
+        NativeTestBootstrap.start();
         Entities.STEAM_BOILER_COAL = type("steam_boiler_coal", CoalBoilerTileEntity::new);
         Entities.STEAM_BOILER_ELECTRIC = type("steam_boiler_electric", ElectricBoilerTileEntity::new);
         Entities.STEAM_BOILER_GEOTHERMAL = type("steam_boiler_geothermal", GeothermalBoilerTileEntity::new);
@@ -57,7 +58,7 @@ public class SteamMachinePersistenceTest {
         tag.putInt("BurnTimeTotal", 1600);
         CoalBoilerTileEntity coal = new CoalBoilerTileEntity();
         coal.load(tag);
-        CompoundTag saved = coal.save(new CompoundTag());
+        CompoundTag saved = coal.saveWithFullMetadata();
         assertEquals("basesteam:steam_boiler_coal", saved.getString("id"));
         assertEquals(127, saved.getInt("BurnTime"));
         assertEquals(1600, saved.getInt("BurnTimeTotal"));
@@ -69,7 +70,7 @@ public class SteamMachinePersistenceTest {
         ElectricBoilerTileEntity electric = new ElectricBoilerTileEntity();
         electric.load(tag);
         ElectricBoilerTileEntity electricRestored = new ElectricBoilerTileEntity();
-        electricRestored.load(electric.save(new CompoundTag()));
+        electricRestored.load(electric.saveWithoutMetadata());
         assertEquals(37.5F, electricRestored.getEnergy(Power.steam_power), 0.0F);
         assertEquals(60.0F, electricRestored.getEnergy(ElectricBoilerTileEntity.ELECTRIC_POWER), 0.0F);
         assertEquals(1500, electricRestored.getTank().getFluidAmount());
@@ -81,7 +82,7 @@ public class SteamMachinePersistenceTest {
         tag.putByte("NextPump", (byte) 11);
         SteamPumpTileEntity pump = new SteamPumpTileEntity();
         pump.load(tag);
-        CompoundTag saved = pump.save(new CompoundTag());
+        CompoundTag saved = pump.saveWithoutMetadata();
         assertEquals(750, saved.getCompound("Tank").getInt("Amount"));
         assertEquals(11, saved.getByte("NextPump"));
         SteamPumpTileEntity pumpRestored = new SteamPumpTileEntity();
@@ -91,10 +92,10 @@ public class SteamMachinePersistenceTest {
         tag.putFloat("Tempoerature", 412.5F);
         GeothermalBoilerTileEntity geothermal = new GeothermalBoilerTileEntity();
         geothermal.load(tag);
-        assertEquals(412.5F, geothermal.save(new CompoundTag()).getFloat("Temperature"), 0.0F);
+        assertEquals(412.5F, geothermal.saveWithoutMetadata().getFloat("Temperature"), 0.0F);
         tag.putFloat("Temperature", 500.0F);
         geothermal.load(tag);
-        assertEquals(500.0F, geothermal.save(new CompoundTag()).getFloat("Temperature"), 0.0F);
+        assertEquals(500.0F, geothermal.saveWithoutMetadata().getFloat("Temperature"), 0.0F);
     }
 
     @Test public void stillKeepsSeparateTanksAndExplicitlyEmptyReloads() {
@@ -104,7 +105,7 @@ public class SteamMachinePersistenceTest {
         SteamStillTileEntity still = new SteamStillTileEntity();
         still.load(tag);
         SteamStillTileEntity restored = new SteamStillTileEntity();
-        restored.load(still.save(new CompoundTag()));
+        restored.load(still.saveWithoutMetadata());
         assertEquals(625, restored.getInputTank().getFluidAmount());
         assertEquals(375, restored.getOutputTank().getFluidAmount());
         assertEquals(37.5F, restored.getEnergy(Power.steam_power), 0.0F);

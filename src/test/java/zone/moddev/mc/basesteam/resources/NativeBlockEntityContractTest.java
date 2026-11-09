@@ -1,5 +1,6 @@
 package zone.moddev.mc.basesteam.resources;
 
+import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -18,7 +19,7 @@ import zone.moddev.mc.basesteam.machines.*;
 import static org.junit.Assert.*;
 
 public class NativeBlockEntityContractTest {
-    @BeforeClass public static void bootstrap() { net.minecraft.SharedConstants.tryDetectVersion(); net.minecraft.server.Bootstrap.bootStrap(); }
+    @BeforeClass public static void bootstrap() { NativeTestBootstrap.start(); }
 
     @Test public void everyProductionFactoryOwnsItsActualNativePositionAndState() {
         BlockPos pos = new BlockPos(2053, 81, -2049);

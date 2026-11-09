@@ -53,6 +53,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 
 @SuppressWarnings("deprecation")
 public class MusketItem extends net.minecraft.world.item.Item{
@@ -62,8 +63,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	public static final double MAX_RANGE = 64;
 	private static final int maxUseTime = 7200;
 
-	private static final ResourceLocation BLACKPOWDER_AMMO_TAG = new ResourceLocation("forge", "ammo/blackpowder");
-	private static final ResourceLocation STEEL_INGOT_TAG = new ResourceLocation("forge", "ingots/steel");
+	private static final TagKey<Item> BLACKPOWDER_AMMO_TAG = ItemTags.create(new ResourceLocation("forge", "ammo/blackpowder"));
+	private static final TagKey<Item> STEEL_INGOT_TAG = ItemTags.create(new ResourceLocation("forge", "ingots/steel"));
 
 	public MusketItem(Item.Properties properties){
 		super(properties.defaultDurability(250));
@@ -324,7 +325,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
 				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
 				if (inventoryStack.isEmpty()) continue;
-				if (ItemTags.getAllTags().getTagOrEmpty(BLACKPOWDER_AMMO_TAG).contains(inventoryStack.getItem())) return true;
+				if (inventoryStack.is(BLACKPOWDER_AMMO_TAG)) return true;
 			}
 		}
 		return false;
@@ -340,7 +341,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
 				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
 				if (inventoryStack.isEmpty()) continue;
-				if (ItemTags.getAllTags().getTagOrEmpty(BLACKPOWDER_AMMO_TAG).contains(inventoryStack.getItem())) {
+				if (inventoryStack.is(BLACKPOWDER_AMMO_TAG)) {
 					inventoryStack.shrink(1);
 					if (inventoryStack.isEmpty()) playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
 					return;
@@ -439,7 +440,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	@Override public boolean isValidRepairItem(ItemStack srcItemStack, ItemStack rawMaterial)
 	{
 		// repair with steel ingots
-		return ItemTags.getAllTags().getTagOrEmpty(STEEL_INGOT_TAG).contains(rawMaterial.getItem());
+		return rawMaterial.is(STEEL_INGOT_TAG);
 	}
 	
 	@Override

@@ -10,8 +10,6 @@ public class GUI {
 	public static void init(){
 		if(initDone) return;
 		
-		Blocks.init();
-		Entities.init();
 
 		Blocks.steam_boiler_coal.setGuiID(MachineGUIRegistry.addGUI(new CoalBoilerGUI()),PowerAdvantage.getInstance());
 		Blocks.steam_tank.setGuiID(MachineGUIRegistry.addGUI(new SteamTankGUI()),PowerAdvantage.getInstance());
