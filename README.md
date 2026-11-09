@@ -1,10 +1,10 @@
 # baseSteam
 
-**Minecraft 1.19.4 (Forge), version 2.2.12.119041. Local port.**
+**Minecraft 1.19.4 (Forge), version 2.2.12.119041.**
 
 baseSteam, formerly Steam Advantage, adds boilers, steam-powered machines,
 pumps, storage, elevators and a blackpowder musket to basePower. Its items and
-blocks use the shared basePower creative tab. This version is not published.
+blocks use the shared basePower creative tab.
 
 ## Upgrading a World
 
@@ -12,7 +12,7 @@ Back up your world and test the upgrade on a copy. Replace Steam Advantage and
 Power Advantage with baseSteam and basePower; do not install both sets of mods.
 The migration recognizes old Steam Advantage IDs and keeps the registry paths,
 machine settings and saved data used by earlier baseSteam versions. The
-Minecraft 1.19.4 world upgrade still needs verification for this candidate.
+upgrade tests run existing boilers, pumps and drills after a full restart.
 
 Existing `basesteam-common.toml` settings take precedence. When that file is
 absent, baseSteam can copy `steamadvantage-common.toml` or import settings from an
@@ -41,13 +41,13 @@ install metadata lists basePower and Base Metals. No dependency is embedded.
 
 Use the checked-in Gradle wrapper and supply explicit paths to the development
 jars matching the pins in `gradle.properties`. Use a Steam-only Gradle user
-home and the test-only Forge capability bootstrap. Player JARs are distinct
-from development and published JARs. Before a packaged smoke, run
+home and the test-only Forge capability bootstrap. Use the published player
+jars for packaged tests, not the development jars. Before a packaged smoke, run
 `verifyPlayerDependencies` with explicit `powerAdvantagePlayerJar`,
 `baseMetalsPlayerJar` and `oreSpawnPlayerJar` project properties.
 
-Use the coordinated basePower 1.19.4 candidate and matching frozen JARs.
-Pending pins fail closed. No 1.18.2 artifacts may satisfy the 1.19.4 audits.
+Use the released basePower 2.4.11.119041 and the exact dependencies in
+`gradle.properties`. The 1.18.2 jars cannot substitute for these inputs.
 
 For example, from the Steam checkout in PowerShell:
 

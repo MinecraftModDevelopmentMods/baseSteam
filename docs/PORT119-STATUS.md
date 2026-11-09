@@ -1,4 +1,4 @@
-# baseSteam 1.19.4 local port
+# baseSteam 1.19.4 port
 
 - Source: accepted 1.18.2 `d10c56cf021e6bd701e973cda90358495844a45f`,
   cloned locally with `--no-hardlinks` onto
@@ -6,7 +6,9 @@
 - Target: baseSteam `2.2.12.119041`, basePower `2.4.11.119041`,
   Minecraft `1.19.4`, Forge `45.4.0`, official mappings,
   MCP `20230314.122934`, Temurin 17, ForgeGradle `7.0.34`, and Gradle `9.6.1`.
-- No external publication, tag, deployment, upstream change or protected world.
+- The release uses basePower `2.4.11.119041` and the published Base Metals
+  migration fix. Earlier checkpoints below describe the local port before
+  those dependency releases. All upgrade tests use copies.
 
 ## Tooling
 
@@ -21,7 +23,7 @@ agreed warm cache with distinct project state.
 CI and CodeQL apply Steam's Forge 45 Mavenizer adapter only to the pinned
 basePower checkout, which predates the tool setup. The pinned Base Metals
 checkout already verifies and configures its own tool, so it builds normally.
-Neither dependency pin changes.
+The dependency commits and artifact checksums are in `gradle.properties`.
 
 ## Compatibility
 

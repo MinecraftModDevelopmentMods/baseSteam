@@ -124,11 +124,30 @@ jobs:
           echo "power=$powerjar" >> "$GITHUB_OUTPUT"
           echo "bootstrap=$bootstrap" >> "$GITHUB_OUTPUT"
           echo "mavenizer=$mavenizer" >> "$GITHUB_OUTPUT"
+      - name: Download the released player jars
+        id: player
+        shell: bash
+        run: |
+          set -euo pipefail
+          directory="$RUNNER_TEMP/base-steam-published"
+          mkdir "$directory"
+          fetch() {
+            curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
+              --output "$directory/$1.jar" "$2"
+            echo "$1=$directory/$1.jar" >> "$GITHUB_OUTPUT"
+          }
+          maven="https://maven.moddev.zone/releases/zone/moddev/mc"
+          fetch power "$maven/basepower/basePower/2.4.11.119041/basePower-2.4.11.119041.jar?ci=$GITHUB_RUN_ID"
+          fetch metals "$maven/basemetals/BaseMetals/3.1.2.119041/BaseMetals-3.1.2.119041.jar?ci=$GITHUB_RUN_ID"
+          fetch orespawn 'https://www.curseforge.com/api/v1/mods/245586/files/9171353/download'
       - name: Build and audit release artifacts
         run: >-
-          ./gradlew $MMD_GRADLE_TOOLCHAINS clean check build javadoc verifyReleaseDependencies verifyReleaseArtifacts
+          ./gradlew $MMD_GRADLE_TOOLCHAINS clean check build javadoc verifyReleaseDependencies verifyPlayerDependencies verifyReleaseArtifacts
           writeReleaseChecksums verifyEclipseProductionClasspath
           "-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}"
+          "-PpowerAdvantagePlayerJar=${{ steps.player.outputs.power }}"
+          "-PbaseMetalsPlayerJar=${{ steps.player.outputs.metals }}"
+          "-PoreSpawnPlayerJar=${{ steps.player.outputs.orespawn }}"
           -PforgeCapabilityBootstrapJar=${{ steps.dependencies.outputs.bootstrap }}
           -PpowerAdvantageDeobfJar=${{ steps.dependencies.outputs.power }}
           -PbaseMetalsDeobfJar=${{ steps.dependencies.outputs.basemetals }}
