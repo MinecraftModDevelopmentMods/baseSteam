@@ -933,6 +933,17 @@ tasks.register('isolateEclipseProductionRuns') {
                 String mainOutput = file('bin/main').absolutePath
                 String eclipseModClasses = "${project.mod_id}%%${mainOutput}"
                 modClasses[0].@value = eclipseModClasses
+                def vmArguments = launchXml.stringAttribute.find { it.@key == 'org.eclipse.jdt.launching.VM_ARGUMENTS' }
+                if (vmArguments != null) {
+                    // ForgeGradle leaves these path arguments bare even when a directory contains spaces.
+                    vmArguments.@value = (vmArguments.@value as String)
+                            .replaceAll(/(?<!\S)(-DlegacyClassPath\.file=[^"].*?)(?=\s+-[A-Za-z]|$)/) { full, argument ->
+                                "\"${argument}\""
+                            }
+                            .replaceAll(/(?<!\S)-p\s+([^"\s].*?)(?=\s+--add-modules\b)/) { full, argument ->
+                                "-p \"${argument}\""
+                            }
+                }
                 contents = groovy.xml.XmlUtil.serialize(launchXml)
             }
             launch.setText(contents.replace('\r\n', '\n'), 'UTF-8')
@@ -1105,6 +1116,11 @@ tasks.register('verifyEclipseProductionClasspath') {
             String vmArguments = launch.stringAttribute.find {
                 it.@key.text() == 'org.eclipse.jdt.launching.VM_ARGUMENTS'
             }.@value.text()
+            def legacyFile = vmArguments =~ /(?:^|\s)"-DlegacyClassPath\.file=([^"]+)"(?=\s|$)/
+            if (!legacyFile.find() || !file(legacyFile.group(1)).isFile()
+                    || !(vmArguments =~ /(?:^|\s)-p\s+"[^"]+"/).find()) {
+                throw new GradleException("${name} must quote the Forge classpath and module paths")
+            }
             if (!arguments.contains('--main cpw.mods.bootstraplauncher.BootstrapLauncher')
                     || !vmArguments.contains('--add-opens java.base/java.lang.invoke=ALL-UNNAMED')
                     || contents.contains('net.minecraftforge.userdev.LaunchTesting')) {
