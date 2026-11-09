@@ -23,11 +23,11 @@ for (const name of files(resources).filter(name => /\.(json|mcmeta)$/.test(name)
   json.set(name, JSON.parse(text));
 }
 assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {
-  pack_format: 9, 'forge:resource_pack_format': 8, 'forge:data_pack_format': 9, description: 'baseSteam'
+  pack_format: 13, 'forge:server_data_pack_format': 12, description: 'baseSteam'
 });
 const metadata = read(`${resources}/META-INF/mods.toml`);
 assert.match(metadata, /modId="basesteam"/);
-assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[2\.4\.10\.118021,3\.0\.0\)"/);
+assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[2\.4\.11\.119041,3\.0\.0\)"/);
 assert.match(metadata, /modId="basemetals"\r?\nmandatory=false/);
 assert.doesNotMatch(metadata, /dependencies\.steamadvantage|modId="(?:steamadvantage|poweradvantage)"/);
 
@@ -67,7 +67,15 @@ for (const name of files(machines).filter(name => name.endsWith('Block.java'))) 
 for (const file of ['Blocks', 'Items']) {
   const text = read(`${java}/init/${file}.java`);
   assert(text.includes('import zone.moddev.mc.basepower.init.ItemGroups;'));
-  assert(text.includes('.tab(ItemGroups.tab_powerAdvantage)'));
+  assert(text.includes('ItemGroups.show(item)'));
+  assert(!text.includes('.tab('));
+}
+assert.match(read(`${java}/init/Blocks.java`),
+  /if \(!"pump_pipe_steam"\.equals\(id\) && !"drillbit"\.equals\(id\)\) ItemGroups\.show\(item\)/);
+for (const id of ['steam_machine', 'musket']) {
+  assert.deepEqual(json.get(`${data}/damage_type/${id}.json`),
+    { message_id: id, scaling: 'never', exhaustion: 0.1 });
+  assert.equal(typeof json.get(`${assets}/lang/en_us.json`)[`death.attack.${id}`], 'string');
 }
 const migration = read(`${java}/migration/SteamLegacyMigrations.java`);
 assert.match(migration, /LEGACY_MODID = "steamadvantage"/);
@@ -87,5 +95,5 @@ for (const id of pickaxe.values.map(value => value.split(':')[1]).filter(id => !
 }
 const tests = files('src/test/java').filter(name => name.endsWith('.java'));
 const testCount = tests.reduce((sum, name) => sum + (read(name).match(/@Test\b/g) || []).length, 0);
-console.log(`BASESTEAM_NATIVE118_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
+console.log(`BASESTEAM_NATIVE119_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
 console.log('Source checks only. Compilation, executed tests, packaged runtime and manual acceptance are separate.');

@@ -131,13 +131,12 @@ public class SteamMachinePersistenceTest {
 
     private static <T extends BlockEntity> BlockEntityType<T> type(String id, BlockEntityType.BlockEntitySupplier<T> factory) {
         ForgeRegistry<BlockEntityType<?>> registry =
-                (ForgeRegistry<BlockEntityType<?>>) ForgeRegistries.BLOCK_ENTITIES;
+                (ForgeRegistry<BlockEntityType<?>>) ForgeRegistries.BLOCK_ENTITY_TYPES;
         boolean locked = registry.isLocked();
         registry.unfreeze();
         try {
             BlockEntityType<T> type = BlockEntityType.Builder.of(factory, Blocks.STONE).build(null);
-            type.setRegistryName(new ResourceLocation("basesteam", id));
-            registry.register(type);
+            registry.register(new ResourceLocation("basesteam", id), type);
             return type;
         } finally {
             if (locked) registry.freeze();

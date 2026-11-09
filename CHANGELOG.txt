@@ -1,3 +1,9 @@
+baseSteam 2.2.12.119041 (local Minecraft 1.19.4 port)
+
+- Target Minecraft 1.19.4 / Forge 45.4.0 and Java 17 with basePower 2.4.11.119041.
+- Adapt native registrations, rendering, damage, sound, fuel and recipe calls.
+- Retain Steam save IDs, machine data and optional Base Metals recipes.
+
 baseSteam 2.2.11.118021 (local Minecraft 1.18.2 candidate)
 
 - Target Minecraft 1.18.2 / Forge 40.3.0 and Java 17 with basePower 2.4.10.118021.

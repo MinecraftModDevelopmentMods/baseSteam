@@ -15,7 +15,7 @@ public class MusketLoadedChunkBoundaryTest {
                     pos -> pos.getX() >= 0 && pos.getX() < 16 && pos.getZ() >= 0 && pos.getZ() < 16
                             && pos.getY() >= 64 && pos.getY() < 96);
             assertTrue(direction.toString(), origin.distanceToSqr(actual) < origin.distanceToSqr(end));
-            BlockPos stopped = new BlockPos(actual);
+            BlockPos stopped = BlockPos.containing(actual);
             assertTrue(stopped.getX() >= 0 && stopped.getX() < 16);
             assertTrue(stopped.getZ() >= 0 && stopped.getZ() < 16);
             assertTrue(stopped.getY() >= 64 && stopped.getY() < 96);

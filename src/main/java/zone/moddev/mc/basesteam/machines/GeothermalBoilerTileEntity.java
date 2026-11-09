@@ -123,7 +123,7 @@ public class GeothermalBoilerTileEntity extends cyano.poweradvantage.api.simple.
 		if(b == net.minecraft.world.level.block.Blocks.FIRE){
 			return 200;
 		} else if(bs.getFluidState().getType().isSame(net.minecraft.world.level.material.Fluids.LAVA)) {
-			return (bs.getFluidState().getType().getAttributes().getTemperature() - 372) * 0.5f;
+			return (bs.getFluidState().getType().getFluidType().getTemperature() - 372) * 0.5f;
 		} else {
 			return 0;
 		}

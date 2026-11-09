@@ -56,7 +56,7 @@ public class SoundHelperLoadedPlayersTest {
                         assertTrue(method.name + " rejects a false native spectator predicate",
                                 guard instanceof JumpInsnNode && guard.getOpcode() == Opcodes.IFEQ);
                     }
-                    if (call.owner.equals("net/minecraft/network/protocol/game/ClientboundCustomSoundPacket") && call.name.equals("<init>")) {
+                    if (call.owner.equals("net/minecraft/network/protocol/game/ClientboundSoundPacket") && call.name.equals("<init>")) {
                         packet = method.instructions.indexOf(instruction);
                     }
                 }
@@ -95,7 +95,7 @@ public class SoundHelperLoadedPlayersTest {
                 if (call.name.equals("getBoundingBox")) bounds++;
                 if (call.owner.equals("net/minecraft/world/phys/AABB") && call.name.equals("intersects")
                         && call.desc.equals("(Lnet/minecraft/world/phys/AABB;)Z")) intersections++;
-                if (call.owner.equals("net/minecraft/network/protocol/game/ClientboundCustomSoundPacket") && call.name.equals("<init>")) soundPackets++;
+                if (call.owner.equals("net/minecraft/network/protocol/game/ClientboundSoundPacket") && call.name.equals("<init>")) soundPackets++;
             } else if (instruction instanceof LdcInsnNode) {
                 Object value = ((LdcInsnNode) instruction).cst;
                 if (value instanceof Double && ((Double) value).doubleValue() == radius) correctRadius = true;

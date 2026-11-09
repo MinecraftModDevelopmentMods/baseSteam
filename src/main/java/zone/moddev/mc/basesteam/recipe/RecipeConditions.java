@@ -41,12 +41,12 @@ public final class RecipeConditions {
         private final RecipeMode mode;
         private ModeCondition(RecipeMode mode) { this.mode = mode; }
         @Override public ResourceLocation getID() { return ID; }
-        @Override public boolean test() { return PowerAdvantage.recipeMode == mode; }
+        @Override public boolean test(IContext context) { return PowerAdvantage.recipeMode == mode; }
     }
 
     private static final class MusketCondition implements ICondition {
         private static final ResourceLocation ID = new ResourceLocation(SteamAdvantage.MODID, "musket_enabled");
         @Override public ResourceLocation getID() { return ID; }
-        @Override public boolean test() { return SteamAdvantage.MUSKET_ENABLE; }
+        @Override public boolean test(IContext context) { return SteamAdvantage.MUSKET_ENABLE; }
     }
 }

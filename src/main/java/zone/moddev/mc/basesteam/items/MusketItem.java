@@ -46,9 +46,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -168,14 +166,16 @@ public class MusketItem extends net.minecraft.world.item.Item{
 			return;
 		}
 		final float explodeFactor = 0.75f;
+		// TNT keeps the old BREAK behavior by default; BLOCK now decays drops by default.
+		final Level.ExplosionInteraction explosionInteraction = Level.ExplosionInteraction.TNT;
 		if(rayTrace instanceof EntityHitResult){
 			Entity e = ((EntityHitResult) rayTrace).getEntity();
-			e.hurt(Power.musket_damage, getShotDamage());
+			e.hurt(Power.musketDamage(world), getShotDamage());
 			if(EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack) > 0){
 				int lvl = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
 				world.explode(playerEntity, e.getX(), e.getY()+0.5, e.getZ(),
 						explodeFactor * lvl, 
-						Explosion.BlockInteraction.BREAK);
+						explosionInteraction);
 				AABB fireArea = new AABB(e.getX()-lvl, e.getY()-lvl, e.getZ()-lvl,
 						e.getX()+lvl, e.getY()+lvl, e.getZ()+lvl);
 				List<LivingEntity> collateralDamage = world.getEntitiesOfClass(LivingEntity.class, fireArea);
@@ -208,7 +208,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 				int lvl = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
 				world.explode(playerEntity, rayTrace.getLocation().x, rayTrace.getLocation().y, rayTrace.getLocation().z,
 						explodeFactor * lvl, 
-						Explosion.BlockInteraction.BREAK);
+						explosionInteraction);
 				AABB fireArea = new AABB(rayTrace.getLocation().x-lvl, rayTrace.getLocation().y-lvl, rayTrace.getLocation().z-lvl,
 						rayTrace.getLocation().x+lvl, rayTrace.getLocation().y+lvl, rayTrace.getLocation().z+lvl);
 				List<LivingEntity> collateralDamage = world.getEntitiesOfClass(LivingEntity.class, fireArea);
@@ -356,7 +356,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		Vec3 rayDirection = source.getLookAngle();
 		Vec3 loadedEnd = loadedRayEnd(rayOrigin, rayOrigin.add(rayDirection.scale(maxRange)), w::hasChunkAt);
 		if(loadedEnd.equals(rayOrigin)) return BlockHitResult.miss(rayOrigin,
-				net.minecraft.core.Direction.getNearest(rayDirection.x, rayDirection.y, rayDirection.z), new BlockPos(rayOrigin));
+				net.minecraft.core.Direction.getNearest(rayDirection.x, rayDirection.y, rayDirection.z), BlockPos.containing(rayOrigin));
 		BlockHitResult terrainHit = w.clip(new ClipContext(rayOrigin, loadedEnd,
 				ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, source));
 		Vec3 rayEnd = terrainHit.getLocation();
@@ -382,7 +382,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 
 	static Vec3 loadedRayEnd(Vec3 origin, Vec3 end, java.util.function.Predicate<BlockPos> loaded) {
-		if(!loaded.test(new BlockPos(origin))) return origin;
+		if(!loaded.test(BlockPos.containing(origin))) return origin;
 		// Reuse native voxel traversal so even a grazing diagonal cannot enter an unloaded chunk.
 		Vec3 boundary = net.minecraft.world.level.BlockGetter.traverseBlocks(origin, end, loaded,
 				(test, pos) -> test.test(pos) ? null : new AABB(pos).clip(origin, end).orElse(origin),
@@ -446,12 +446,12 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	@Override
 	public void appendHoverText(ItemStack stack, Level world, List<Component> list, net.minecraft.world.item.TooltipFlag flag){
 		super.appendHoverText(stack,world,list,flag);
-		list.add(new TranslatableComponent("tooltip.musket.damage", (int)MusketItem.getShotDamage()));
+		list.add(Component.translatable("tooltip.musket.damage", (int)MusketItem.getShotDamage()));
 		if(isLoaded(stack)){
-			list.add(new TranslatableComponent("tooltip.musket.loaded"));
+			list.add(Component.translatable("tooltip.musket.loaded"));
 		} else {
-			list.add(new TranslatableComponent("tooltip.musket.unloaded"));
-			list.add(new TranslatableComponent("tooltip.musket.ammo", new TranslatableComponent("item.basesteam.blackpowder_cartridge")));
+			list.add(Component.translatable("tooltip.musket.unloaded"));
+			list.add(Component.translatable("tooltip.musket.ammo", Component.translatable("item.basesteam.blackpowder_cartridge")));
 		}
 	}
 

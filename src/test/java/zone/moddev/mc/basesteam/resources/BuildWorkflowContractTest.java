@@ -13,7 +13,8 @@ public class BuildWorkflowContractTest {
             pins.load(reader);
         }
         for (String key : new String[] {"poweradvantage_source_ref", "poweradvantage_deobf_sha256",
-                "poweradvantage_player_sha256", "basemetals_source_commit", "basemetals_deobf_sha256",
+                "poweradvantage_player_sha256", "poweradvantage_test_bootstrap_sha256",
+                "poweradvantage_test_bootstrap_source_sha256", "basemetals_source_commit", "basemetals_deobf_sha256",
                 "basemetals_player_sha256", "orespawn_source_commit", "orespawn_deobf_sha256",
                 "orespawn_player_sha256"}) {
             assertTrue(key, pins.getProperty(key, "").matches(
@@ -28,14 +29,14 @@ public class BuildWorkflowContractTest {
             assertTrue(name, source.contains("basePower-" + pins.getProperty("poweradvantage_version") + "-deobf.jar"));
             assertTrue(name, source.contains("ref: ${{ env.ORESPAWN_SOURCE_REF }}"));
             assertTrue(name, source.contains("ref: ${{ env.POWERADVANTAGE_SOURCE_REF }}"));
-            assertTrue(name, source.contains("The exact basePower 1.18 dependency pin is pending."));
-            assertTrue(name, source.contains("The exact Base Metals 1.18 dependency pin is pending."));
-            assertTrue(name, source.contains("The exact OreSpawn 1.18 dependency pin is pending."));
+            assertTrue(name, source.contains("The exact basePower 1.19 dependency pin is pending."));
+            assertTrue(name, source.contains("The exact Base Metals 1.19 dependency pin is pending."));
+            assertTrue(name, source.contains("The exact OreSpawn 1.19 dependency pin is pending."));
             assertTrue(name, source.contains("^[a-f0-9]{40}$"));
             assertTrue(name, source.contains("^[A-F0-9]{64}$"));
             int pinCheck = source.indexOf("Validate coordinated dependency pins");
             assertTrue(name, pinCheck >= 0 && pinCheck < source.indexOf("Check out pinned Base Metals")
-                    && pinCheck < source.indexOf("Check out basePower 1.18.2"));
+                    && pinCheck < source.indexOf("Check out basePower 1.19.4"));
             assertFalse(name, source.contains("-Ppoweradvantage_source_ref="));
             assertTrue(name, source.contains("-Porg.gradle.java.installations.paths="));
             assertTrue(name, source.contains("-Porg.gradle.java.installations.auto-detect=false"));

@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -208,8 +207,8 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	}
 	
 	private void decrementFuel() {
-		if(inventory[0].getCount() == 1 && inventory[0].getItem().getContainerItem(inventory[0]) != null){
-			inventory[0] = inventory[0].getItem().getContainerItem(inventory[0]);
+		if(inventory[0].getCount() == 1){
+			inventory[0] = inventory[0].getCraftingRemainingItem();
 		} else {
 			this.removeItem(0, 1);
 		}
@@ -337,7 +336,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 		SimpleContainer inventory = new SimpleContainer(1);
 		inventory.setItem(0, input);
 		return getLevel().getRecipeManager().getRecipeFor(RecipeType.SMELTING, inventory, getLevel())
-				.map(recipe -> recipe.assemble(inventory)).orElse(ItemStack.EMPTY);
+				.map(recipe -> recipe.assemble(inventory, getLevel().registryAccess())).orElse(ItemStack.EMPTY);
 	}
 
 

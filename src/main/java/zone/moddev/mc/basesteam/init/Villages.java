@@ -1,7 +1,7 @@
 package zone.moddev.mc.basesteam.init;
 
 import java.util.List;
-import java.util.Random;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerTrades;
@@ -50,7 +50,7 @@ public final class Villages {
         };
     }
 
-    private static int randomPrice(Random random, int min, int max) {
+    private static int randomPrice(RandomSource random, int min, int max) {
         return min + random.nextInt(max - min + 1);
     }
 

@@ -1,8 +1,10 @@
 package zone.moddev.mc.basesteam.util;
 
+import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.sounds.SoundSource;
@@ -30,8 +32,9 @@ public class SoundHelper {
 			if(!(candidate instanceof ServerPlayer) || !EntitySelector.NO_SPECTATORS.test(candidate)
 					|| !area.intersects(candidate.getBoundingBox())) continue;
 			ServerPlayer player = (ServerPlayer) candidate;
-			if(player.connection != null) player.connection.send(new ClientboundCustomSoundPacket(sound.getRegistryName(), soundType,
-					new Vec3(x, y, z), volume, pitch));
+			if(player.connection != null) player.connection.send(new ClientboundSoundPacket(
+					BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), soundType, x, y, z, volume, pitch,
+					ThreadLocalRandom.current().nextLong()));
 		}
 	}
 
@@ -45,8 +48,9 @@ public class SoundHelper {
 			if(!(candidate instanceof ServerPlayer) || !EntitySelector.NO_SPECTATORS.test(candidate)
 					|| !area.intersects(candidate.getBoundingBox())) continue;
 			ServerPlayer player = (ServerPlayer) candidate;
-			if(player.connection != null) player.connection.send(new ClientboundCustomSoundPacket(sound.getRegistryName(), soundType,
-					new Vec3(x, y, z), volume, pitch));
+			if(player.connection != null) player.connection.send(new ClientboundSoundPacket(
+					BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), soundType, x, y, z, volume, pitch,
+					ThreadLocalRandom.current().nextLong()));
 		}
 	}
 }

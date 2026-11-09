@@ -4,9 +4,11 @@ package zone.moddev.mc.basesteam.init;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.machines.BlastFurnaceTileEntity;
@@ -41,7 +43,8 @@ public final class Entities {
     public static void init() {}
 
     @SubscribeEvent
-    public static void register(RegistryEvent.Register<BlockEntityType<?>> event) {
+    public static void register(RegisterEvent event) {
+        if (!ForgeRegistries.Keys.BLOCK_ENTITY_TYPES.equals(event.getRegistryKey())) return;
         STEAM_BOILER_COAL = register(event, "steam_boiler_coal", CoalBoilerTileEntity::new, Blocks.steam_boiler_coal);
         STEAM_BOILER_ELECTRIC = register(event, "steam_boiler_electric", ElectricBoilerTileEntity::new, Blocks.steam_boiler_electric);
         STEAM_BOILER_GEOTHERMAL = register(event, "steam_boiler_geothermal", GeothermalBoilerTileEntity::new, Blocks.steam_boiler_geothermal);
@@ -57,10 +60,9 @@ public final class Entities {
     }
 
     private static <T extends BlockEntity> BlockEntityType<T> register(
-            RegistryEvent.Register<BlockEntityType<?>> event, String id, BlockEntityType.BlockEntitySupplier<T> factory, Block block) {
+            RegisterEvent event, String id, BlockEntityType.BlockEntitySupplier<T> factory, Block block) {
         BlockEntityType<T> type = BlockEntityType.Builder.<T>of(factory, block).build(null);
-        type.setRegistryName(SteamAdvantage.MODID, id);
-        event.getRegistry().register(type);
+        event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, new ResourceLocation(SteamAdvantage.MODID, id), () -> type);
         return type;
     }
 }

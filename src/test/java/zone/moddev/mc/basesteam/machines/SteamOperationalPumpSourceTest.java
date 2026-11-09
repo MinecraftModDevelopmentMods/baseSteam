@@ -47,6 +47,7 @@ public class SteamOperationalPumpSourceTest {
         for (Block block : new Block[]{Blocks.WATER, Blocks.LAVA}) {
             BlockState source = block.defaultBlockState();
             PickupWorld world = new PickupWorld(source);
+            assertTrue(source.getFluidState().isSource());
             assertSame(source.getFluidState().getType(), SteamPumpTileEntity.pickupSource(world.world, SOURCE, source));
             assertEquals(1, world.writes);
             assertEquals(Blocks.AIR.defaultBlockState(), world.state);
@@ -58,8 +59,8 @@ public class SteamOperationalPumpSourceTest {
             @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
         };
         BlockState source = host.defaultBlockState();
-        assertTrue(source.getFluidState().isSource());
         PickupWorld world = new PickupWorld(source);
+        assertTrue(source.getFluidState().isSource());
         assertSame(Fluids.EMPTY, SteamPumpTileEntity.pickupSource(world.world, SOURCE, source));
         assertSame(source, world.state);
         assertEquals(0, world.writes);
@@ -68,12 +69,16 @@ public class SteamOperationalPumpSourceTest {
     @Test public void flowingAndRefusedSourcesCannotProduceABucket() {
         BlockState flowing = Blocks.WATER.defaultBlockState().setValue(BlockStateProperties.LEVEL, 1);
         PickupWorld world = new PickupWorld(flowing);
+        assertFalse(flowing.getFluidState().isEmpty());
+        assertFalse(flowing.getFluidState().isSource());
         assertSame(Fluids.EMPTY, SteamPumpTileEntity.pickupSource(world.world, SOURCE, flowing));
         assertEquals(0, world.writes);
         RefusingSource host = new RefusingSource();
         BlockState refused = host.defaultBlockState();
         PickupWorld refusedWorld = new PickupWorld(refused);
+        assertTrue(refused.getFluidState().isSource());
         assertSame(Fluids.EMPTY, SteamPumpTileEntity.pickupSource(refusedWorld.world, SOURCE, refused));
+        assertEquals(1, host.pickups);
         assertSame(refused, refusedWorld.state);
         assertEquals(0, refusedWorld.writes);
     }
@@ -124,9 +129,13 @@ public class SteamOperationalPumpSourceTest {
     }
 
     private static final class RefusingSource extends Block implements BucketPickup {
+        private int pickups;
         private RefusingSource() { super(Block.Properties.of(Material.STONE)); }
         @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
-        @Override public net.minecraft.world.item.ItemStack pickupBlock(LevelAccessor world, BlockPos pos, BlockState state) { return net.minecraft.world.item.ItemStack.EMPTY; }
+        @Override public net.minecraft.world.item.ItemStack pickupBlock(LevelAccessor world, BlockPos pos, BlockState state) {
+            pickups++;
+            return net.minecraft.world.item.ItemStack.EMPTY;
+        }
         @Override public java.util.Optional<net.minecraft.sounds.SoundEvent> getPickupSound() { return java.util.Optional.empty(); }
     }
 
@@ -136,12 +145,15 @@ public class SteamOperationalPumpSourceTest {
         private final LevelAccessor world;
 
         private PickupWorld(BlockState initial) {
+            // Forge initializes BlockState's cached fluid in the post-registration bake.
+            initial.initCache();
             state = initial;
             world = (LevelAccessor) Proxy.newProxyInstance(LevelAccessor.class.getClassLoader(), new Class<?>[]{LevelAccessor.class},
                     (proxy, method, arguments) -> {
                         if (method.getName().equals("setBlock")) {
                             assertEquals(SOURCE, arguments[0]);
                             state = (BlockState) arguments[1];
+                            state.initCache();
                             writes++;
                             return true;
                         }

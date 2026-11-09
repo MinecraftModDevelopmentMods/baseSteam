@@ -7,7 +7,8 @@ import zone.moddev.mc.basesteam.enchantments.RapidReloadEnchantment;
 import zone.moddev.mc.basesteam.enchantments.RecoilEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -24,9 +25,15 @@ public class Enchantments {
 	}
 
 	@SubscribeEvent
-	public static void registerEnchantments(RegistryEvent.Register<Enchantment> event) {
+	public static void registerEnchantments(RegisterEvent event) {
+		if (!ForgeRegistries.Keys.ENCHANTMENTS.equals(event.getRegistryKey())) return;
 		init();
-		event.getRegistry().registerAll(high_explosive, powderless, rapid_reload, recoil);
+		event.register(ForgeRegistries.Keys.ENCHANTMENTS, registry -> {
+			registry.register(new ResourceLocation(SteamAdvantage.MODID, "high_explosive"), high_explosive);
+			registry.register(new ResourceLocation(SteamAdvantage.MODID, "powderless"), powderless);
+			registry.register(new ResourceLocation(SteamAdvantage.MODID, "rapid_reload"), rapid_reload);
+			registry.register(new ResourceLocation(SteamAdvantage.MODID, "recoil"), recoil);
+		});
 	}
 
 	private static void createEnchantments() {
@@ -36,9 +43,5 @@ public class Enchantments {
 		rapid_reload = new RapidReloadEnchantment();
 		recoil = new RecoilEnchantment();
 
-		high_explosive.setRegistryName(new ResourceLocation(SteamAdvantage.MODID, "high_explosive"));
-		powderless.setRegistryName(new ResourceLocation(SteamAdvantage.MODID, "powderless"));
-		rapid_reload.setRegistryName(new ResourceLocation(SteamAdvantage.MODID, "rapid_reload"));
-		recoil.setRegistryName(new ResourceLocation(SteamAdvantage.MODID, "recoil"));
 	}
 }
