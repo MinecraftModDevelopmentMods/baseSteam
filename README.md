@@ -1,18 +1,18 @@
 # baseSteam
 
-**Minecraft 1.18.2 (Forge), version 2.2.11.118021. Local candidate.**
+**Minecraft 1.18.2 (Forge), version 2.2.11.118021.**
 
 baseSteam, formerly Steam Advantage, adds boilers, steam-powered machines,
 pumps, storage, elevators and a blackpowder musket to basePower. Its items and
-blocks use the shared basePower creative tab. This version is not published.
+blocks use the shared basePower creative tab.
 
 ## Upgrading a World
 
 Back up your world and test the upgrade on a copy. Replace Steam Advantage and
 Power Advantage with baseSteam and basePower; do not install both sets of mods.
 The migration recognizes old Steam Advantage IDs and keeps the registry paths,
-machine settings and saved data used by earlier baseSteam versions. The
-Minecraft 1.18.2 world upgrade still needs verification for this candidate.
+machine settings and saved data used by earlier baseSteam versions. The Works
+rig checks copied legacy saves, running machinery and cold restarts.
 
 Existing `basesteam-common.toml` settings take precedence. When that file is
 absent, baseSteam can copy `steamadvantage-common.toml` or import settings from an
@@ -43,8 +43,9 @@ from development and published JARs. Before a packaged smoke, run
 `verifyPlayerDependencies` with explicit `powerAdvantagePlayerJar`,
 `baseMetalsPlayerJar` and `oreSpawnPlayerJar` project properties.
 
-Use the coordinated basePower 1.18.2 source pin and matching frozen JARs.
-The build rejects the earlier API-only checkpoint.
+Use the source for the [basePower 2.4.10.118021 release](https://github.com/MinecraftModDevelopmentMods/basePower/releases/tag/2.4.10.118021)
+to build the development jar and the test bootstrap. Use the published jar
+for packaged testing; its checksum is pinned separately.
 
 For example, from the Steam checkout in PowerShell:
 

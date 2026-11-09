@@ -1,8 +1,8 @@
-baseSteam 2.2.11.118021 (local Minecraft 1.18.2 candidate)
+baseSteam 2.2.11.118021 (Minecraft 1.18.2)
 
-- Target Minecraft 1.18.2 / Forge 40.3.0 and Java 17 with basePower 2.4.10.118021.
-- Use native block-entity saves and update packets and native musket item tags.
-- Keep Steam registry names, legacy state keys, and recipe data unchanged.
+- Bring baseSteam to Minecraft 1.18.2, with the same recipes and steam machines.
+- Keep saved inventories, steam, drill state and musket wear when upgrading.
+- Use the released basePower 2.4.10.118021 and Base Metals 3.1.2 save hook.
 
 baseSteam 2.2.10.117011 (local Minecraft 1.17.1 candidate)
 
