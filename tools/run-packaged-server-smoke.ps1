@@ -97,7 +97,8 @@ try {
     Set-Content -LiteralPath (Join-Path $run 'eula.txt') -Value 'eula=true' -Encoding ascii
     Set-Content -LiteralPath (Join-Path $run 'server.properties') -Encoding ascii -Value @(
         'server-ip=127.0.0.1', 'server-port=0', 'level-name=steam-smoke',
-        'level-type=minecraft:flat', 'generate-structures=false', 'view-distance=2', 'simulation-distance=2'
+        'level-type=minecraft:flat', 'generate-structures=false', 'view-distance=2', 'simulation-distance=2',
+        'generator-settings={"layers":[{"height":1,"block":"minecraft:bedrock"},{"height":2,"block":"minecraft:dirt"},{"height":1,"block":"minecraft:grass_block"}],"biome":"minecraft:plains"}'
     )
     $start = [System.Diagnostics.ProcessStartInfo]::new($java)
     $start.WorkingDirectory = $run
@@ -125,7 +126,7 @@ try {
     if (!$process.WaitForExit(60000) -or $process.ExitCode -ne 0) { throw 'Forge did not stop cleanly.' }
     $log = Get-Content -Raw -LiteralPath $latest
     if ($log -notmatch "baseSteam $([regex]::Escape($pins.mod_version)) common setup complete" -or
-            $log -match 'NoClassDefFoundError|Failed to create mod instance|Exception caught during firing event|Failed to load registries|(?:Parsing error|Couldn.t parse|Failed to parse)[^\r\n]*basesteam:') {
+            $log -match '\[[^\]\r\n]*/(?:ERROR|FATAL)\]|NoClassDefFoundError') {
         throw 'Missing Steam setup or a relevant loader/data error appeared in the server log.'
     }
     $receipt.status = 'PACKAGED_DEDICATED_SERVER_PASS'

@@ -16,6 +16,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.item.ItemStack;
@@ -112,6 +113,11 @@ public final class SteamNativeGameTests {
     public static void nativeResourcesLoadWithExpectedIds(GameTestHelper helper) {
         var level = helper.getLevel();
         var registries = level.registryAccess();
+        var fragile = TagKey.create(Registries.BLOCK, id("musket_fragile"));
+        helper.assertTrue(net.minecraft.world.level.block.Blocks.SHORT_GRASS.defaultBlockState().is(fragile),
+                "The 1.20.6 short grass ID must bind the fragile block tag");
+        helper.assertTrue(!net.minecraft.world.level.block.Blocks.STONE.defaultBlockState().is(fragile),
+                "The fragile block tag must not include solid stone");
         var manager = level.getServer().getAdvancements();
         helper.assertTrue(manager.get(id("recipes/steam_pipe")) != null, "Missing Steam pipe recipe advancement");
         var unlock = manager.get(id("recipes/musket_right_normal")).value();

@@ -184,7 +184,8 @@ tasks.withType(JavaExec).configureEach {
         if (gameTest) doLast {
             // Forge can exit zero after a loader failure; require the actual test result.
             File receipt = new File(workingDir, 'logs/latest.log')
-            if (!receipt.isFile() || !receipt.getText('UTF-8').contains('All 4 required tests passed')) {
+            String output = receipt.isFile() ? receipt.getText('UTF-8') : ''
+            if (!output.contains('All 4 required tests passed') || (output =~ /\[[^\]\r\n]*\/(?:ERROR|FATAL)\]/).find()) {
                 throw new GradleException("The four Steam GameTests did not pass; see ${receipt}")
             }
         }

@@ -58,6 +58,12 @@ any 1.20.1 or newer 1.20.6 mod artifacts.
   despite the launcher returning zero. The new task gate requires the actual
   four-test pass marker and a fresh run ID. The crash is under
   `build/steam-gametest-provisional-c/crash-reports`.
+- `evidence/packaged-server-provisional-a`: the real packaged Forge server
+  reached Steam common setup, `Done`, and a clean stop without a client-side
+  class error. Its original startup-only receipt is preserved, but the full
+  log rejects this as a clean data smoke: Forge could not bind the fragile
+  block tag because Minecraft renamed `grass` to `short_grass`. The smoke
+  now fails on error logs and the registry test checks every required ID.
 
 The isolated data checks use Forge 50.2.0 classes but do not start the Forge
 mod loader or qualify Steam's production classes. The GameTest fixtures are
