@@ -65,15 +65,15 @@ public class SteamLegacyMigrationsTest {
                 "steam_boiler_geothermal", "steam_tank", "steam_furnace", "steam_crusher", "steam_drill",
                 "drillbit", "platform", "steam_elevator", "steam_switch", "pump_pipe_steam", "steam_still",
                 "steam_pump", "steam_boiler_oil"}) {
-            ResourceLocation current = new ResourceLocation("basesteam", path);
-            assertEquals(current, LegacyMigrationApi.blockTarget(new ResourceLocation("steamadvantage", path)));
+            ResourceLocation current = ResourceLocation.fromNamespaceAndPath("basesteam", path);
+            assertEquals(current, LegacyMigrationApi.blockTarget(ResourceLocation.fromNamespaceAndPath("steamadvantage", path)));
             assertTrue(path, LegacyMigrationApi.blockStateCodecs().containsKey(current));
         }
-        ResourceLocation oldMusket = new ResourceLocation("steamadvantage:musket");
-        assertEquals(new ResourceLocation("basesteam:musket"), LegacyMigrationApi.itemTarget(oldMusket));
+        ResourceLocation oldMusket = ResourceLocation.parse("steamadvantage:musket");
+        assertEquals(ResourceLocation.parse("basesteam:musket"), LegacyMigrationApi.itemTarget(oldMusket));
         assertTrue(LegacyMigrationApi.isDurableItem(oldMusket));
-        assertEquals(new ResourceLocation("basesteam:rapid_reload"),
-                LegacyMigrationApi.registryTarget(new ResourceLocation("steamadvantage:rapid_reload")));
+        assertEquals(ResourceLocation.parse("basesteam:rapid_reload"),
+                LegacyMigrationApi.registryTarget(ResourceLocation.parse("steamadvantage:rapid_reload")));
     }
 
     @Test public void repairsOldKeysForBothNamespacesWithoutDependingOnRemapOrder() {

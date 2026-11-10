@@ -1,49 +1,44 @@
 package zone.moddev.mc.basesteam.resources;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Handle;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import static org.junit.Assert.*;
 
 public class RecipeRegistrationThreadTest {
-    @Test public void sharedForgeConditionsAreRegisteredAfterParallelSetup() throws Exception {
+    private static final String CONDITIONS = "zone/moddev/mc/basesteam/recipe/RecipeConditions";
+
+    @Test public void codecRegistrationUsesTheForgeModEventBusExactlyOnce() throws Exception {
+        ClassNode mod = read("zone/moddev/mc/basesteam/SteamAdvantage");
+        assertEquals(1L, mod.methods.stream().filter(method -> method.name.equals("<init>"))
+                .flatMap(RecipeRegistrationThreadTest::calls)
+                .filter(call -> call.owner.equals(CONDITIONS) && call.name.equals("register")
+                        && call.desc.equals("(Lnet/minecraftforge/eventbus/api/IEventBus;)V"))
+                .count());
+        assertFalse(mod.methods.stream().filter(method -> method.name.equals("commonSetup"))
+                .flatMap(RecipeRegistrationThreadTest::calls).anyMatch(call -> call.owner.equals(CONDITIONS)));
+        ClassNode conditions = read(CONDITIONS);
+        assertTrue(conditions.methods.stream().filter(method -> method.name.equals("register"))
+                .flatMap(RecipeRegistrationThreadTest::calls)
+                .anyMatch(call -> call.owner.equals("net/minecraftforge/registries/DeferredRegister")
+                        && call.name.equals("register")));
+    }
+
+    private static java.util.stream.Stream<MethodInsnNode> calls(MethodNode method) {
+        return Arrays.stream(method.instructions.toArray()).filter(MethodInsnNode.class::isInstance)
+                .map(MethodInsnNode.class::cast);
+    }
+
+    private static ClassNode read(String name) throws Exception {
         ClassNode node = new ClassNode();
-        try (InputStream input = getClass().getResourceAsStream("/zone/moddev/mc/basesteam/SteamAdvantage.class")) {
+        try (InputStream input = RecipeRegistrationThreadTest.class.getResourceAsStream("/" + name + ".class")) {
             assertNotNull(input);
             new ClassReader(input).accept(node, 0);
         }
-        String conditions = "zone/moddev/mc/basesteam/recipe/RecipeConditions";
-        int queued = 0;
-        for (MethodNode method : node.methods) {
-            boolean registrationRunnable = false;
-            for (AbstractInsnNode instruction : method.instructions.toArray()) {
-                if (instruction instanceof MethodInsnNode) {
-                    MethodInsnNode call = (MethodInsnNode) instruction;
-                    assertFalse("Forge's condition HashMap is not safe during parallel loading",
-                            call.owner.equals(conditions) && call.name.equals("register"));
-                    if (call.owner.equals("net/minecraftforge/fml/event/lifecycle/FMLCommonSetupEvent")
-                            && call.name.equals("enqueueWork") && registrationRunnable) {
-                        assertEquals("Register conditions during common setup", "commonSetup", method.name);
-                        queued++;
-                        registrationRunnable = false;
-                    }
-                }
-                if (instruction instanceof InvokeDynamicInsnNode) {
-                    for (Object argument : ((InvokeDynamicInsnNode) instruction).bsmArgs) {
-                        if (argument instanceof Handle && ((Handle) argument).getOwner().equals(conditions)
-                                && ((Handle) argument).getName().equals("register")) {
-                            registrationRunnable = true;
-                        }
-                    }
-                }
-            }
-        }
-        assertEquals("Queue registration exactly once on Forge's loading thread", 1, queued);
+        return node;
     }
 }

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,7 +36,7 @@ public final class Villages {
         if (profession == VillagerProfession.CLERIC) {
             event.getTrades().get(3).add((trader, random) -> {
                 int enchantmentLevel = 5 + random.nextInt(15);
-                ItemStack musket = EnchantmentHelper.enchantItem(random,
+                ItemStack musket = EnchantmentHelper.enchantItem(trader.level().enabledFeatures(), random,
                         new ItemStack(Items.blackpowder_musket), enchantmentLevel, false);
                 int price = Math.min(randomPrice(random, 15, 25) + enchantmentLevel, 64);
                 return offer(price, musket);
@@ -55,6 +56,6 @@ public final class Villages {
     }
 
     private static MerchantOffer offer(int emeralds, ItemStack output) {
-        return new MerchantOffer(new ItemStack(net.minecraft.world.item.Items.EMERALD, emeralds), output, 7, 1, 0.0F);
+        return new MerchantOffer(new ItemCost(net.minecraft.world.item.Items.EMERALD, emeralds), output, 7, 1, 0.0F);
     }
 }

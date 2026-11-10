@@ -129,7 +129,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	@Override
 	public void setPlacedBy(final Level world, final BlockPos coord, final BlockState bs,
 			final LivingEntity placer, final ItemStack srcItemStack) {
-		if (srcItemStack.hasCustomHoverName()) {
+		if (srcItemStack.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) {
 			final BlockEntity tileEntity = world.getBlockEntity(coord);
 			if (tileEntity instanceof PoweredEntity){
 				((PoweredEntity)tileEntity).setCustomInventoryName(srcItemStack.getDisplayName().getString());

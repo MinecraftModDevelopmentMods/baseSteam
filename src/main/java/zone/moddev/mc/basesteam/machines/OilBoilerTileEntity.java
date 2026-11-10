@@ -12,6 +12,7 @@ import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basepower.registry.FuelRegistry;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.init.Power;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -263,8 +264,8 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void saveAdditional(final CompoundTag tagRoot) {
-		super.saveAdditional(tagRoot);
+	protected void saveAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
+		super.saveAdditional(tagRoot, registries);
 		CompoundTag tankTag = new CompoundTag();
 		this.getWaterTank().writeToNBT(tankTag);
 		tagRoot.put("WaterTank", tankTag);
@@ -279,8 +280,8 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public void load(final CompoundTag tagRoot) {
-		super.load(tagRoot);
+	protected void loadAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
+		super.loadAdditional(tagRoot, registries);
 		if (tagRoot.contains("WaterTank")) {
 			CompoundTag tankTag = tagRoot.getCompound("WaterTank");
 			getWaterTank().readFromNBT(tankTag);

@@ -19,25 +19,28 @@
     }
   },
   "result": {
-    "item": "basesteam:steam_drill"
+    "id": "basesteam:steam_drill"
   },
-  "conditions": [
-    {
-      "type": "basesteam:recipe_mode",
-      "mode": "NORMAL"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:frames/steel"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:governors"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:plates/iron"
-    }
-  ],
+  "forge:condition": {
+    "type": "forge:and",
+    "values": [
+      {
+        "type": "basesteam:recipe_mode",
+        "mode": "NORMAL"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:frames/steel"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:governors"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:plates/iron"
+      }
+    ]
+  },
   "group": "basesteam:steam_drill"
 }

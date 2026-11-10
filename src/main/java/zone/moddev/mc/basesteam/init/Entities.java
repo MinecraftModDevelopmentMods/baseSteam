@@ -62,7 +62,7 @@ public final class Entities {
     private static <T extends BlockEntity> BlockEntityType<T> register(
             RegisterEvent event, String id, BlockEntityType.BlockEntitySupplier<T> factory, Block block) {
         BlockEntityType<T> type = BlockEntityType.Builder.<T>of(factory, block).build(null);
-        event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, new ResourceLocation(SteamAdvantage.MODID, id), () -> type);
+        event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), () -> type);
         return type;
     }
 }

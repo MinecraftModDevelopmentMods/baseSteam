@@ -2,6 +2,7 @@ package zone.moddev.mc.basesteam.machines;
 
 import cyano.poweradvantage.api.ConduitType;
 import zone.moddev.mc.basesteam.init.Power;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -141,7 +142,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 		if(output.isEmpty()) return false;
 		ItemStack outputSlot = inventory[slot+3];
 		if(outputSlot == null) return true;
-		return (ItemStack.isSameItemSameTags(output, outputSlot)
+		return (ItemStack.isSameItemSameComponents(output, outputSlot)
 				&& (output.getCount() + outputSlot.getCount()) <= outputSlot.getMaxStackSize());
 	}
 	
@@ -267,15 +268,15 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	
 
 	@Override
-	protected void saveAdditional(CompoundTag tagRoot){
-		super.saveAdditional(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.saveAdditional(tagRoot, registries);
 		prepareDataFieldsForSync();
 		tagRoot.putIntArray("Data", getDataFieldArray());
 	}
 	
 	@Override
-	public void load(CompoundTag tagRoot){
-		super.load(tagRoot);
+	protected void loadAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.loadAdditional(tagRoot, registries);
 		if(tagRoot.contains("Data")){
 			int[] data = tagRoot.getIntArray("Data");
 			System.arraycopy(data, 0, this.getDataFieldArray(), 0, Math.min(data.length,this.getDataFieldArray().length));
@@ -335,7 +336,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 		SimpleContainer inventory = new SimpleContainer(1);
 		inventory.setItem(0, input);
 		return getLevel().getRecipeManager().getRecipeFor(RecipeType.SMELTING, inventory, getLevel())
-				.map(recipe -> recipe.assemble(inventory, getLevel().registryAccess())).orElse(ItemStack.EMPTY);
+				.map(recipe -> recipe.value().assemble(inventory, getLevel().registryAccess())).orElse(ItemStack.EMPTY);
 	}
 
 

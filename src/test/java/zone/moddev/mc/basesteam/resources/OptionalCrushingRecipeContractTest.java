@@ -4,6 +4,7 @@ import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -64,10 +65,14 @@ public class OptionalCrushingRecipeContractTest {
             String name = "crushing_" + machine + ".json";
             JsonObject recipe = recipes.get(name);
             assertNotNull(name, recipe);
-            assertEquals(name, 2, recipe.getAsJsonArray("conditions").size());
+            assertFalse(name, recipe.has("conditions"));
+            JsonObject condition = recipe.getAsJsonObject("forge:condition");
+            assertEquals("forge:and", condition.get("type").getAsString());
+            var guards = condition.getAsJsonArray("values");
+            assertEquals(name, 2, guards.size());
             assertTrue(name + " must skip the unavailable serializer", baseGuard(
-                    recipe.getAsJsonArray("conditions").get(0)));
-            JsonObject mode = recipe.getAsJsonArray("conditions").get(1).getAsJsonObject();
+                    guards.get(0)));
+            JsonObject mode = guards.get(1).getAsJsonObject();
             assertEquals(name, 2, mode.size());
             assertEquals("basesteam:recipe_mode", mode.get("type").getAsString());
             assertEquals("APOCALYPTIC", mode.get("mode").getAsString());
@@ -86,14 +91,14 @@ public class OptionalCrushingRecipeContractTest {
             assertFalse(condition, baseGuard(json(condition)));
     }
 
-    @Test public void nativeForge37SerializerRetainsTheExactProviderIdentity() {
+    @Test public void nativeForge50CodecRetainsTheExactProviderIdentity() {
         JsonObject guard = json("{\"type\":\"forge:mod_loaded\",\"modid\":\"basemetals\"}");
-        ModLoadedCondition condition = ModLoadedCondition.Serializer.INSTANCE.read(guard);
-        assertEquals("forge:mod_loaded", ModLoadedCondition.Serializer.INSTANCE.getID().toString());
-        JsonObject encoded = new JsonObject();
-        ModLoadedCondition.Serializer.INSTANCE.write(encoded, condition);
+        ModLoadedCondition condition = ModLoadedCondition.CODEC.codec().parse(JsonOps.INSTANCE, guard).getOrThrow();
+        assertSame(ModLoadedCondition.CODEC, condition.codec());
+        JsonObject encoded = ModLoadedCondition.CODEC.codec().encodeStart(JsonOps.INSTANCE, condition)
+                .getOrThrow().getAsJsonObject();
         assertEquals("basemetals", encoded.get("modid").getAsString());
-        assertThrows(RuntimeException.class, () -> ModLoadedCondition.Serializer.INSTANCE.read(json("{}")));
+        assertTrue(ModLoadedCondition.CODEC.codec().parse(JsonOps.INSTANCE, json("{}")).error().isPresent());
     }
 
     @Test public void processingInputsOutputsAndQuantitiesRemainExactlyTheSame() throws Exception {
@@ -107,7 +112,7 @@ public class OptionalCrushingRecipeContractTest {
             JsonObject output = recipe.getAsJsonObject("result");
             assertEquals(machine.equals("steam_tank") ? 1 : 2, output.size());
             assertEquals(machine.equals("steam_governor") ? "basepower:sprocket"
-                    : "basesteam:steam_governor", output.get("item").getAsString());
+                    : "basesteam:steam_governor", output.get("id").getAsString());
             int amount = machine.equals("steam_tank") ? 1 : machine.equals("steam_elevator") ? 3 : 2;
             assertEquals(!machine.equals("steam_tank"), output.has("count"));
             assertEquals(amount, output.has("count") ? output.get("count").getAsInt() : 1);

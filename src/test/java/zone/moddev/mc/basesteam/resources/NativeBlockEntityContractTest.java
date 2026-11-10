@@ -44,7 +44,7 @@ public class NativeBlockEntityContractTest {
             saved.putInt("x", 7); saved.putInt("y", 9); saved.putInt("z", 11);
             saved.putIntArray("Energy", new int[] { Float.floatToIntBits(37.5F) });
             saved.putByte("Facing", (byte) direction.get3DDataValue());
-            drill.load(saved);
+            drill.loadWithComponents(saved, NativeTestBootstrap.registries());
             assertEquals(destination, drill.getBlockPos());
             assertSame(state, drill.getBlockState());
             assertEquals(direction, drill.getBlockState().getValue(SteamDrillBlock.FACING));

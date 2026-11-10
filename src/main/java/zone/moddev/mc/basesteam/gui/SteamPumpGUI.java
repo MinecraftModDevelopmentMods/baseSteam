@@ -12,7 +12,7 @@ public class SteamPumpGUI extends SimpleMachineGUI{
 
 	public SteamPumpGUI() {
 		super(
-				new ResourceLocation(SteamAdvantage.MODID+":textures/gui/container/steam_pump.png"), 
+				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/steam_pump.png"),
 				new Integer2D[0]
 		);
 	}

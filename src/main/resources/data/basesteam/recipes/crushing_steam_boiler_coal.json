@@ -1,6 +1,23 @@
 {
   "type": "basemetals:crushing",
-  "ingredient": { "item": "basesteam:steam_boiler_coal" },
-  "result": { "item": "basesteam:steam_governor", "count": 2 },
-  "conditions": [{ "type": "forge:mod_loaded", "modid": "basemetals" }, { "type": "basesteam:recipe_mode", "mode": "APOCALYPTIC" }]
+  "ingredient": {
+    "item": "basesteam:steam_boiler_coal"
+  },
+  "result": {
+    "id": "basesteam:steam_governor",
+    "count": 2
+  },
+  "forge:condition": {
+    "type": "forge:and",
+    "values": [
+      {
+        "type": "forge:mod_loaded",
+        "modid": "basemetals"
+      },
+      {
+        "type": "basesteam:recipe_mode",
+        "mode": "APOCALYPTIC"
+      }
+    ]
+  }
 }

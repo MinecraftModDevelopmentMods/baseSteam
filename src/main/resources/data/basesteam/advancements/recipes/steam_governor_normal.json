@@ -6,7 +6,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:nuggets/iron"
+            "items": "#forge:nuggets/iron"
           }
         ]
       }
@@ -16,7 +16,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:ingots/brass"
+            "items": "#forge:ingots/brass"
           }
         ]
       }

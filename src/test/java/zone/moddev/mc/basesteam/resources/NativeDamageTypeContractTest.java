@@ -19,7 +19,7 @@ public class NativeDamageTypeContractTest {
         for (String id : new String[] { "steam_machine", "musket" }) {
             Path path = Path.of("src/main/resources/data/basesteam/damage_type", id + ".json");
             try (Reader reader = Files.newBufferedReader(path)) {
-                DamageType type = DamageType.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(reader))
+                DamageType type = DamageType.DIRECT_CODEC.parse(JsonOps.INSTANCE, JsonParser.parseReader(reader))
                         .result().orElseThrow(() -> new AssertionError("Invalid native damage type " + id));
                 assertEquals(id, type.msgId());
                 assertEquals(DamageScaling.NEVER, type.scaling());

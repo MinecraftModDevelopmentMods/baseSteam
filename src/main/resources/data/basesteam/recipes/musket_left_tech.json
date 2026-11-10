@@ -16,20 +16,23 @@
     }
   },
   "result": {
-    "item": "basesteam:musket"
+    "id": "basesteam:musket"
   },
-  "conditions": [
-    {
-      "type": "basesteam:recipe_mode",
-      "mode": "TECH_PROGRESSION"
-    },
-    {
-      "type": "basesteam:musket_enabled"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:ingots/steel"
-    }
-  ],
+  "forge:condition": {
+    "type": "forge:and",
+    "values": [
+      {
+        "type": "basesteam:recipe_mode",
+        "mode": "TECH_PROGRESSION"
+      },
+      {
+        "type": "basesteam:musket_enabled"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:ingots/steel"
+      }
+    ]
+  },
   "group": "basesteam:musket"
 }

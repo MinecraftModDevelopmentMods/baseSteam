@@ -1,10 +1,14 @@
 package zone.moddev.mc.basesteam.testing;
 
+import java.util.List;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -21,18 +25,24 @@ public final class NativeTestBootstrap {
         GameData.unfreezeData();
     }
 
+    public static RegistryAccess.Frozen registries() {
+        return RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
+    }
+
     public static synchronized void registerVanillaFluidTypes() throws ReflectiveOperationException {
         start();
         if (ForgeMod.LAVA_TYPE.isPresent()) return;
 
         // Plain JUnit has no mod loader to dispatch these two Forge registry phases.
         if (ForgeRegistries.FLUID_TYPES.get() == null) {
+            var registries = ForgeRegistries.class.getDeclaredField("registries");
+            registries.setAccessible(true);
+            DeferredRegister<?> fluidTypes = ((List<?>) registries.get(null)).stream()
+                    .map(DeferredRegister.class::cast)
+                    .filter(registry -> ForgeRegistries.Keys.FLUID_TYPES.equals(registry.getRegistryKey()))
+                    .findFirst().orElseThrow();
             var event = new NewRegistryEvent();
-            var fluidTypes = ForgeRegistries.class.getDeclaredField("DEFERRED_FLUID_TYPES");
-            fluidTypes.setAccessible(true);
-            var create = DeferredRegister.class.getDeclaredMethod("createRegistry", NewRegistryEvent.class);
-            create.setAccessible(true);
-            create.invoke(fluidTypes.get(null), event);
+            invokeRegistryPhase(fluidTypes, "createRegistry", event);
             var fill = NewRegistryEvent.class.getDeclaredMethod("fill");
             fill.setAccessible(true);
             fill.invoke(event);
@@ -40,12 +50,21 @@ public final class NativeTestBootstrap {
 
         var vanillaTypes = ForgeMod.class.getDeclaredField("VANILLA_FLUID_TYPES");
         vanillaTypes.setAccessible(true);
-        var addEntries = DeferredRegister.class.getDeclaredMethod("addEntries", RegisterEvent.class);
-        addEntries.setAccessible(true);
         var event = RegisterEvent.class.getDeclaredConstructor(ResourceKey.class, ForgeRegistry.class, Registry.class);
         event.setAccessible(true);
-        addEntries.invoke(vanillaTypes.get(null), event.newInstance(
-                ForgeRegistries.Keys.FLUID_TYPES, ForgeRegistries.FLUID_TYPES.get(), null));
+        invokeRegistryPhase((DeferredRegister<?>) vanillaTypes.get(null), "handleEvent",
+                event.newInstance(ForgeRegistries.Keys.FLUID_TYPES, ForgeRegistries.FLUID_TYPES.get(), null));
+    }
+
+    private static void invokeRegistryPhase(DeferredRegister<?> register, String phase, Event event)
+            throws ReflectiveOperationException {
+        // The launch-only EventBus transform is not present in plain JUnit.
+        Class<?> dispatcher = Class.forName(DeferredRegister.class.getName() + "$EventDispatcher");
+        var constructor = dispatcher.getDeclaredConstructor(DeferredRegister.class);
+        constructor.setAccessible(true);
+        var method = dispatcher.getDeclaredMethod(phase, event.getClass());
+        method.setAccessible(true);
+        method.invoke(constructor.newInstance(register), event);
     }
 
     private static final class NativeRegistries {

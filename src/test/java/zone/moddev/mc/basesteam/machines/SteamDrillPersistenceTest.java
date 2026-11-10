@@ -3,6 +3,8 @@ package zone.moddev.mc.basesteam.machines;
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
@@ -31,15 +33,15 @@ public class SteamDrillPersistenceTest {
 
     @Test public void retainsLegacyProgressUntilWorldIsAttached() {
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
-        drill.load(target(94));
+        drill.loadWithComponents(target(94), NativeTestBootstrap.registries());
         drill.prepareDataFieldsForSync();
         assertEquals(94, drill.getDataFieldArray()[1]);
     }
 
     @Test public void clearsPreviousProgressOnReadingAnUntargetedTile() {
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
-        drill.load(target(94));
-        drill.load(new CompoundTag());
+        drill.loadWithComponents(target(94), NativeTestBootstrap.registries());
+        drill.loadWithComponents(new CompoundTag(), NativeTestBootstrap.registries());
         drill.prepareDataFieldsForSync();
         assertEquals(0, drill.getDataFieldArray()[1]);
     }
@@ -52,7 +54,7 @@ public class SteamDrillPersistenceTest {
             state.putString("Name", "minecraft:stone");
             tag.put("TargetState", state);
             SteamDrillTileEntity drill = new SteamDrillTileEntity();
-            drill.load(tag);
+            drill.loadWithComponents(tag, NativeTestBootstrap.registries());
             assertEquals(facing, field(drill, "savedFacing"));
             assertEquals(new BlockPos(2048, 80, 2049), field(drill, "targetBlockCoord"));
             assertEquals(state, field(drill, "savedTargetState"));
@@ -66,11 +68,11 @@ public class SteamDrillPersistenceTest {
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
         CompoundTag tag = target(94);
         tag.putByte("Facing", (byte) Direction.UP.get3DDataValue());
-        drill.load(tag);
-        drill.load(target(12));
+        drill.loadWithComponents(tag, NativeTestBootstrap.registries());
+        drill.loadWithComponents(target(12), NativeTestBootstrap.registries());
         assertNull(field(drill, "savedFacing"));
         tag.putByte("Facing", (byte) 127);
-        drill.load(tag);
+        drill.loadWithComponents(tag, NativeTestBootstrap.registries());
         assertNull(field(drill, "savedFacing"));
     }
 
@@ -85,19 +87,19 @@ public class SteamDrillPersistenceTest {
         items.add(stack);
         tag.put("Items", items);
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
-        drill.load(tag);
+        drill.loadWithComponents(tag, NativeTestBootstrap.registries());
         assertEquals(37.5F, drill.getEnergy(Power.steam_power), 0.0F);
         ItemStack output = drill.getItem(4);
         assertEquals(net.minecraft.world.item.Items.COBBLESTONE, output.getItem());
         assertEquals(23, output.getCount());
     }
 
-    @Test public void drillOutputDoesNotMergeStacksWithDifferentTags() {
+    @Test public void drillOutputDoesNotMergeStacksWithDifferentComponents() {
         SteamDrillTileEntity drill = new SteamDrillTileEntity();
         ItemStack first = new ItemStack(net.minecraft.world.item.Items.COBBLESTONE, 8);
-        first.getOrCreateTag().putString("source", "first");
+        CustomData.update(DataComponents.CUSTOM_DATA, first, tag -> tag.putString("source", "first"));
         ItemStack different = new ItemStack(net.minecraft.world.item.Items.COBBLESTONE, 4);
-        different.getOrCreateTag().putString("source", "second");
+        CustomData.update(DataComponents.CUSTOM_DATA, different, tag -> tag.putString("source", "second"));
         ItemStack matching = first.copy();
         matching.setCount(3);
 
@@ -105,9 +107,9 @@ public class SteamDrillPersistenceTest {
         assertNull(drill.addItem(different));
         assertNull(drill.addItem(matching));
         assertEquals(11, drill.getItem(0).getCount());
-        assertEquals("first", drill.getItem(0).getTag().getString("source"));
+        assertEquals("first", drill.getItem(0).get(DataComponents.CUSTOM_DATA).copyTag().getString("source"));
         assertEquals(4, drill.getItem(1).getCount());
-        assertEquals("second", drill.getItem(1).getTag().getString("source"));
+        assertEquals("second", drill.getItem(1).get(DataComponents.CUSTOM_DATA).copyTag().getString("source"));
     }
 
     @Test public void serializationNeverLooksUpTheWorldOrInfersNeighbours() throws Exception {
@@ -144,7 +146,7 @@ public class SteamDrillPersistenceTest {
             tag.putInt("targetY", target.getY());
             tag.putInt("targetZ", target.getZ());
             SteamDrillTileEntity drill = new SteamDrillTileEntity(origin, new SteamDrillBlock().defaultBlockState());
-            drill.load(tag);
+            drill.loadWithComponents(tag, NativeTestBootstrap.registries());
             assertNull(field(drill, "savedFacing"));
             assertEquals(direction, infer.invoke(drill));
         }

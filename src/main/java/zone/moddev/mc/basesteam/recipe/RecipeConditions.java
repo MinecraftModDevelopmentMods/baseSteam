@@ -1,52 +1,59 @@
 package zone.moddev.mc.basesteam.recipe;
 
-import com.google.gson.JsonObject;
-import java.util.Locale;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
 import zone.moddev.mc.basepower.PowerAdvantage;
 import zone.moddev.mc.basepower.RecipeMode;
 import zone.moddev.mc.basesteam.SteamAdvantage;
+import java.util.Locale;
 
-/** Registers the data-pack conditions used by SteamAdvantage recipes. */
+/** Registers the Forge data-pack conditions used by Steam recipes. */
 public final class RecipeConditions {
-    private static boolean registered;
+    private static final DeferredRegister<MapCodec<? extends ICondition>> SERIALIZERS =
+            DeferredRegister.create(ForgeRegistries.Keys.CONDITION_SERIALIZERS, SteamAdvantage.MODID);
+
+    static {
+        SERIALIZERS.register("recipe_mode", () -> ModeCondition.CODEC);
+        SERIALIZERS.register("musket_enabled", () -> MusketCondition.CODEC);
+    }
 
     private RecipeConditions() {}
 
-    public static synchronized void register() {
-        if (registered) return;
-        CraftingHelper.register(new IConditionSerializer<ModeCondition>() {
-            @Override public ResourceLocation getID() { return ModeCondition.ID; }
-            @Override public ModeCondition read(JsonObject json) {
-                return new ModeCondition(RecipeMode.valueOf(GsonHelper.getAsString(json, "mode").toUpperCase(Locale.ROOT)));
-            }
-            @Override public void write(JsonObject json, ModeCondition condition) {
-                json.addProperty("mode", condition.mode.name());
-            }
-        });
-        CraftingHelper.register(new IConditionSerializer<MusketCondition>() {
-            @Override public ResourceLocation getID() { return MusketCondition.ID; }
-            @Override public MusketCondition read(JsonObject json) { return new MusketCondition(); }
-            @Override public void write(JsonObject json, MusketCondition condition) {}
-        });
-        registered = true;
+    public static void register(IEventBus bus) {
+        SERIALIZERS.register(bus);
     }
 
-    private static final class ModeCondition implements ICondition {
-        private static final ResourceLocation ID = new ResourceLocation(SteamAdvantage.MODID, "recipe_mode");
-        private final RecipeMode mode;
-        private ModeCondition(RecipeMode mode) { this.mode = mode; }
-        @Override public ResourceLocation getID() { return ID; }
-        @Override public boolean test(IContext context) { return PowerAdvantage.recipeMode == mode; }
+    private record ModeCondition(RecipeMode mode) implements ICondition {
+        private static final MapCodec<ModeCondition> CODEC = Codec.STRING
+                .comapFlatMap(ModeCondition::parseMode, RecipeMode::name)
+                .fieldOf("mode").xmap(ModeCondition::new, ModeCondition::mode);
+
+        private static DataResult<RecipeMode> parseMode(String value) {
+            try {
+                return DataResult.success(RecipeMode.valueOf(value.toUpperCase(Locale.ROOT)));
+            } catch (IllegalArgumentException exception) {
+                return DataResult.error(() -> "Unknown baseSteam recipe mode: " + value);
+            }
+        }
+
+        @Override public MapCodec<ModeCondition> codec() { return CODEC; }
+        @Override public boolean test(IContext context, DynamicOps<?> ops) {
+            return PowerAdvantage.recipeMode == mode;
+        }
     }
 
-    private static final class MusketCondition implements ICondition {
-        private static final ResourceLocation ID = new ResourceLocation(SteamAdvantage.MODID, "musket_enabled");
-        @Override public ResourceLocation getID() { return ID; }
-        @Override public boolean test(IContext context) { return SteamAdvantage.MUSKET_ENABLE; }
+    private record MusketCondition() implements ICondition {
+        private static final MapCodec<MusketCondition> CODEC = MapCodec.unit(new MusketCondition());
+
+        @Override public MapCodec<MusketCondition> codec() { return CODEC; }
+        @Override public boolean test(IContext context, DynamicOps<?> ops) {
+            return SteamAdvantage.MUSKET_ENABLE;
+        }
     }
 }

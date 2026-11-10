@@ -39,10 +39,13 @@ public class NativeLootContractTest {
         }
     }
 
-    @Test public void packUsesNative1201ResourceAndDataFormats() throws Exception {
+    @Test public void packUsesNative1206ResourceAndDataFormats() throws Exception {
         JsonObject pack = read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack");
-        assertEquals(15, pack.get("pack_format").getAsInt());
-        assertEquals(15, pack.get("forge:server_data_pack_format").getAsInt());
+        assertEquals(32, pack.get("pack_format").getAsInt());
+        JsonObject supported = pack.getAsJsonObject("supported_formats");
+        assertEquals(32, supported.get("min_inclusive").getAsInt());
+        assertEquals(41, supported.get("max_inclusive").getAsInt());
+        assertFalse(pack.has("forge:server_data_pack_format"));
         assertFalse(pack.has("forge:resource_pack_format"));
         assertFalse(pack.has("forge:data_pack_format"));
     }

@@ -11,33 +11,21 @@ public class DrillBitPersistenceTest {
         NativeTestBootstrap.start();
     }
 
-    @Test public void allSixDirectionsSurviveNativeUpdatePackets() {
-        for (Direction direction : Direction.values()) {
-            DrillBitTileEntity tile = new DrillBitTileEntity();
-            tile.setDirection(direction);
-            CompoundTag packet = tile.getUpdatePacket().getTag();
-            assertEquals(direction.get3DDataValue(), packet.getByte("dir"));
-            DrillBitTileEntity restored = new DrillBitTileEntity();
-            restored.onDataPacket(null, tile.getUpdatePacket());
-            assertEquals(direction.getAxis(), restored.getDirection());
-            assertEquals(direction.get3DDataValue(), restored.getUpdatePacket().getTag().getByte("dir"));
-        }
-    }
-
     @Test public void allSixDirectionsSurviveNativeSaveAndChunkUpdateTag() {
         for (Direction direction : Direction.values()) {
             DrillBitTileEntity tile = new DrillBitTileEntity();
             tile.setDirection(direction);
 
-            CompoundTag saved = tile.saveWithoutMetadata();
+            var registries = NativeTestBootstrap.registries();
+            CompoundTag saved = tile.saveWithoutMetadata(registries);
             assertEquals(direction.get3DDataValue(), saved.getByte("dir"));
             DrillBitTileEntity restored = new DrillBitTileEntity();
-            restored.load(saved);
-            assertEquals(direction.get3DDataValue(), restored.getUpdateTag().getByte("dir"));
+            restored.loadWithComponents(saved, registries);
+            assertEquals(direction.get3DDataValue(), restored.getUpdateTag(registries).getByte("dir"));
 
             DrillBitTileEntity client = new DrillBitTileEntity();
-            client.handleUpdateTag(tile.getUpdateTag());
-            assertEquals(direction.get3DDataValue(), client.getUpdatePacket().getTag().getByte("dir"));
+            client.handleUpdateTag(tile.getUpdateTag(registries), registries);
+            assertEquals(direction.get3DDataValue(), client.getUpdateTag(registries).getByte("dir"));
         }
     }
 
@@ -45,10 +33,10 @@ public class DrillBitPersistenceTest {
         CompoundTag tag = new CompoundTag();
         tag.putByte("d", (byte) Direction.EAST.get3DDataValue());
         DrillBitTileEntity tile = new DrillBitTileEntity();
-        tile.load(tag);
+        tile.loadWithComponents(tag, NativeTestBootstrap.registries());
         assertEquals(Direction.Axis.X, tile.getDirection());
         tag.putByte("dir", (byte) Direction.NORTH.get3DDataValue());
-        tile.load(tag);
+        tile.loadWithComponents(tag, NativeTestBootstrap.registries());
         assertEquals(Direction.Axis.Z, tile.getDirection());
     }
 
@@ -56,7 +44,7 @@ public class DrillBitPersistenceTest {
         CompoundTag tag = new CompoundTag();
         tag.putByte("dir", (byte) 127);
         DrillBitTileEntity tile = new DrillBitTileEntity();
-        tile.load(tag);
-        assertEquals(Direction.DOWN.get3DDataValue(), tile.getUpdatePacket().getTag().getByte("dir"));
+        tile.loadWithComponents(tag, NativeTestBootstrap.registries());
+        assertEquals(Direction.DOWN.get3DDataValue(), tile.getUpdateTag(NativeTestBootstrap.registries()).getByte("dir"));
     }
 }

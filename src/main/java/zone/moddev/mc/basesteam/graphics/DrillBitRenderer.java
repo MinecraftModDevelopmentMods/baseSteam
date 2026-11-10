@@ -17,7 +17,7 @@ import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 @OnlyIn(Dist.CLIENT)
 public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity> {
     private static final ResourceLocation TEXTURE =
-            new ResourceLocation(SteamAdvantage.MODID, "textures/entity/drill_bit.png");
+            ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/entity/drill_bit.png");
 
     public DrillBitRenderer(Context dispatcher) {
     }
@@ -81,6 +81,6 @@ public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity>
             float normalX, float normalY, float normalZ, int light, int overlay) {
         vertices.vertex(transform.pose(), x, y, z).color(255, 255, 255, 255).uv(u, v)
                 .overlayCoords(overlay).uv2(light)
-                .normal(transform.normal(), normalX, normalY, normalZ).endVertex();
+                .normal(transform, normalX, normalY, normalZ).endVertex();
     }
 }

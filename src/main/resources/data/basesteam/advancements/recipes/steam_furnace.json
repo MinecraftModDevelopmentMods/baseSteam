@@ -18,7 +18,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:governors"
+            "items": "#forge:governors"
           }
         ]
       }
@@ -28,7 +28,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:plates/iron"
+            "items": "#forge:plates/iron"
           }
         ]
       }
@@ -38,7 +38,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:frames/steel"
+            "items": "#forge:frames/steel"
           }
         ]
       }

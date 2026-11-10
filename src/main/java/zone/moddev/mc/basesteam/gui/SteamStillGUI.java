@@ -12,7 +12,7 @@ public class SteamStillGUI extends SimpleMachineGUI{
 
 	public SteamStillGUI() {
 		super(
-				new ResourceLocation(SteamAdvantage.MODID+":textures/gui/container/steam_still.png"), 
+				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/steam_still.png"),
 				new Integer2D[0]
 		);
 	}

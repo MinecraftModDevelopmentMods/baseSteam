@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +20,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -100,9 +100,9 @@ public class RecipeUnlockContractTest {
         for (Path file : files(DATA.resolve("recipes"))) {
             JsonObject recipe = read(file);
             if (!crafting(recipe)) continue;
-            JsonElement result = recipe.get("result");
-            String output = result.isJsonPrimitive() ? result.getAsString()
-                    : result.getAsJsonObject().get("item").getAsString();
+            JsonObject result = recipe.getAsJsonObject("result");
+            assertFalse("Legacy recipe result item field", result.has("item"));
+            String output = result.get("id").getAsString();
             assertTrue("Missing output-specific group: " + file, recipe.has("group"));
             assertEquals("Different items must not share a recipe-book cell: " + file,
                     output, recipe.get("group").getAsString());
@@ -115,8 +115,9 @@ public class RecipeUnlockContractTest {
         assertEquals("item:minecraft:string", predicateKey(predicate));
         assertEquals(ingredientKey(ingredient), predicateKey(predicate));
         JsonObject tag = new JsonParser().parse("{\"tag\":\"minecraft:planks\"}").getAsJsonObject();
-        assertEquals("tag:minecraft:planks", predicateKey(tag));
-        assertEquals(ingredientKey(tag), predicateKey(tag));
+        JsonObject nativeTag = new JsonParser().parse("{\"items\":\"#minecraft:planks\"}").getAsJsonObject();
+        assertEquals("tag:minecraft:planks", predicateKey(nativeTag));
+        assertEquals(ingredientKey(tag), predicateKey(nativeTag));
         assertThrows("Legacy item predicates must not compare equal to native predicates",
                 AssertionError.class, () -> predicateKey(ingredient));
     }
@@ -125,7 +126,7 @@ public class RecipeUnlockContractTest {
         for (String json : new String[]{"{}", "{\"items\":[]}",
                 "{\"items\":[\"minecraft:string\",\"minecraft:stone\"]}",
                 "{\"items\":\"minecraft:string\"}", "{\"items\":[1]}", "{\"items\":[null]}",
-                "{\"tag\":[\"minecraft:planks\"]}",
+                "{\"tag\":\"minecraft:planks\"}", "{\"items\":\"#\"}",
                 "{\"items\":[\"minecraft:string\"],\"item\":\"minecraft:stone\"}",
                 "{\"items\":[\"minecraft:string\"],\"tag\":\"minecraft:planks\"}"}) {
             JsonObject predicate = new JsonParser().parse(json).getAsJsonObject();
@@ -138,21 +139,29 @@ public class RecipeUnlockContractTest {
         JsonObject predicate = unlock.getAsJsonObject("criteria").getAsJsonObject("has_ingredient_1")
                 .getAsJsonObject("conditions").getAsJsonArray("items").get(0).getAsJsonObject();
         assertEquals("item:minecraft:flint_and_steel", predicateKey(predicate));
-        ItemPredicate nativePredicate = ItemPredicate.fromJson(predicate);
-        assertTrue(nativePredicate.matches(new ItemStack(Items.FLINT_AND_STEEL)));
-        assertFalse("String alone must not unlock a musket", nativePredicate.matches(new ItemStack(Items.STRING)));
-        assertFalse("Unrelated inventory must not act as an ANY predicate", nativePredicate.matches(new ItemStack(Items.STONE)));
+        ItemPredicate nativePredicate = decode(predicate);
+        var accepted = nativePredicate.items().orElseThrow();
+        assertTrue(accepted.contains(Items.FLINT_AND_STEEL.builtInRegistryHolder()));
+        assertFalse("String alone must not unlock a musket", accepted.contains(Items.STRING.builtInRegistryHolder()));
+        assertFalse("Unrelated inventory must not act as an ANY predicate",
+                accepted.contains(Items.STONE.builtInRegistryHolder()));
     }
 
     @Test public void nativeParserNegativeControlExposesIgnoredLegacyItemField() {
         JsonObject legacy = new JsonParser().parse("{\"item\":\"minecraft:string\"}").getAsJsonObject();
-        ItemPredicate unrestricted = ItemPredicate.fromJson(legacy);
-        assertTrue("The old field is ignored by the native parser", unrestricted.matches(new ItemStack(Items.STONE)));
+        ItemPredicate unrestricted = decode(legacy);
+        assertTrue("The old field is ignored by the native parser", unrestricted.items().isEmpty());
         assertThrows(AssertionError.class, () -> predicateKey(legacy));
         JsonObject singleton = new JsonParser().parse("{\"items\":[\"minecraft:string\"]}").getAsJsonObject();
-        ItemPredicate restricted = ItemPredicate.fromJson(singleton);
-        assertTrue(restricted.matches(new ItemStack(Items.STRING)));
-        assertFalse("Native singleton must not become ANY", restricted.matches(new ItemStack(Items.STONE)));
+        ItemPredicate restricted = decode(singleton);
+        var accepted = restricted.items().orElseThrow();
+        assertTrue(accepted.contains(Items.STRING.builtInRegistryHolder()));
+        assertFalse("Native singleton must not become ANY", accepted.contains(Items.STONE.builtInRegistryHolder()));
+    }
+
+    private static ItemPredicate decode(JsonObject json) {
+        return ItemPredicate.CODEC.parse(NativeTestBootstrap.registries().createSerializationContext(JsonOps.INSTANCE), json)
+                .getOrThrow();
     }
 
     private static boolean crafting(JsonObject recipe) {
@@ -164,10 +173,12 @@ public class RecipeUnlockContractTest {
     private static String predicateKey(JsonObject predicate) {
         assertEquals("Only one native item or tag predicate is expected", 1, predicate.size());
         assertFalse("Native advancement predicates must not use the ignored legacy item field", predicate.has("item"));
-        if (predicate.has("tag")) {
-            JsonElement tag = predicate.get("tag");
-            assertTrue("Tag predicate must contain a string", tag.isJsonPrimitive() && tag.getAsJsonPrimitive().isString());
-            return "tag:" + tag.getAsString();
+        assertFalse("Native tag predicates must also use the items field", predicate.has("tag"));
+        JsonElement selection = predicate.get("items");
+        if (selection != null && selection.isJsonPrimitive() && selection.getAsJsonPrimitive().isString()) {
+            String tag = selection.getAsString();
+            assertTrue("Native tag predicate must use a #namespace:path", tag.matches("#[a-z0-9_.-]+:[a-z0-9/_.-]+"));
+            return "tag:" + tag.substring(1);
         }
         assertTrue("Native item predicate requires an items array", predicate.has("items") && predicate.get("items").isJsonArray());
         JsonArray items = predicate.getAsJsonArray("items");

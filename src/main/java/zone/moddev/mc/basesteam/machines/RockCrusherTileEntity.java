@@ -1,6 +1,7 @@
 package zone.moddev.mc.basesteam.machines;
 
 import cyano.poweradvantage.api.ConduitType;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -190,7 +191,7 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	private int canAddToOutputInventory(ItemStack output) {
 		for(int i = 1; i < inventory.length; i++){
 			if(inventory[i] == null) {return i;}
-			if(ItemStack.isSameItemSameTags(output, inventory[i])
+			if(ItemStack.isSameItemSameComponents(output, inventory[i])
 					&& (inventory[i].getCount() + output.getCount()) <= inventory[i].getMaxStackSize()){
 				return i;
 			}
@@ -199,14 +200,14 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	}
 	
 	@Override
-	protected void saveAdditional(CompoundTag tagRoot){
-		super.saveAdditional(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.saveAdditional(tagRoot, registries);
 		tagRoot.putShort("progress",(short)progress);
 	}
 	
 	@Override
-	public void load(CompoundTag tagRoot){
-		super.load(tagRoot);
+	protected void loadAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.loadAdditional(tagRoot, registries);
 		if(tagRoot.contains("progress")){
 			progress = tagRoot.getShort("progress");
 		}

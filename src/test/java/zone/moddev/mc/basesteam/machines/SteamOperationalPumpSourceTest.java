@@ -131,7 +131,9 @@ public class SteamOperationalPumpSourceTest {
         private int pickups;
         private RefusingSource() { super(Block.Properties.of()); }
         @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
-        @Override public net.minecraft.world.item.ItemStack pickupBlock(LevelAccessor world, BlockPos pos, BlockState state) {
+        @Override public net.minecraft.world.item.ItemStack pickupBlock(
+                net.minecraft.world.entity.player.Player player, LevelAccessor world, BlockPos pos, BlockState state) {
+            assertNull("Automated pickup has no acting player", player);
             pickups++;
             return net.minecraft.world.item.ItemStack.EMPTY;
         }

@@ -6,6 +6,7 @@ import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.compat.BaseMetalsCompat;
 import zone.moddev.mc.basesteam.init.Blocks;
 import zone.moddev.mc.basesteam.init.Power;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
@@ -131,7 +132,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	private boolean canStack(ItemStack newItem, ItemStack slot) {
 		if(slot == null || newItem == null) return true;
-		return ItemStack.isSameItemSameTags(newItem, slot)
+		return ItemStack.isSameItemSameComponents(newItem, slot)
 				&& (newItem.getCount() + slot.getCount() <= slot.getMaxStackSize());
 	}
 	
@@ -140,7 +141,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			if(inventory[i] == null){
 				inventory[i] = in;
 				return null;
-			} else if(ItemStack.isSameItemSameTags(in, inventory[i])){
+			} else if(ItemStack.isSameItemSameComponents(in, inventory[i])){
 				// are stackable
 				int maxStackSize = inventory[i].getMaxStackSize();
 				if(inventory[i].getCount() >= maxStackSize){
@@ -188,11 +189,11 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			return false;
 		}
 		SteamDrillTileEntity te = (SteamDrillTileEntity)movedTile;
-		CompoundTag dataTransfer = saveWithFullMetadata();
+		CompoundTag dataTransfer = saveWithFullMetadata(w.registryAccess());
 		dataTransfer.putInt("x", nextPos.getX());
 		dataTransfer.putInt("y", nextPos.getY());
 		dataTransfer.putInt("z", nextPos.getZ());
-		te.load(dataTransfer);
+		te.loadWithComponents(dataTransfer, w.registryAccess());
 		te.clearRemoved();
 		te.subtractEnergy(ENERGY_COST_MOVE, Power.steam_power);
 		te.setChanged();
@@ -449,7 +450,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 							inv.setChanged();
 							this.setChanged();
 							return;
-						} else if(ItemStack.isSameItemSameTags(theirItem, inventory[mySlot])
+						} else if(ItemStack.isSameItemSameComponents(theirItem, inventory[mySlot])
 								&& theirItem.getCount() < theirItem.getMaxStackSize()
 								&& theirItem.getCount() < inv.getMaxStackSize()){
 							theirItem.grow(1);
@@ -467,8 +468,8 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tagRoot){
-		super.saveAdditional(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.saveAdditional(tagRoot, registries);
 		tagRoot.putShort("progress",(short)progress);
 		// getFacing refreshes this during normal ticks. World lookups here can
 		// synchronously reload a chunk while its unload-save is in progress.
@@ -482,8 +483,8 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 	
 	@Override
-	public void load(CompoundTag tagRoot){
-		super.load(tagRoot);
+	protected void loadAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.loadAdditional(tagRoot, registries);
 		untargetBlock();
 		savedFacing = null;
 		oldDir = null;

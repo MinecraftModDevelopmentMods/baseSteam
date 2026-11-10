@@ -96,14 +96,14 @@ public final class Blocks {
         if (!ForgeRegistries.Keys.BLOCKS.equals(event.getRegistryKey())) return;
         init();
         event.register(ForgeRegistries.Keys.BLOCKS, registry ->
-                ALL_BLOCKS.forEach((id, block) -> registry.register(new ResourceLocation(SteamAdvantage.MODID, id), block)));
+                ALL_BLOCKS.forEach((id, block) -> registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), block)));
     }
 
     @SubscribeEvent
     public static void registerBlockItems(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.ITEMS, registry -> ALL_BLOCKS.forEach((id, block) -> {
             BlockItem item = new BlockItem(block, new Item.Properties());
-            registry.register(new ResourceLocation(SteamAdvantage.MODID, id), item);
+            registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
             if (!"pump_pipe_steam".equals(id) && !"drillbit".equals(id)) ItemGroups.show(item);
         }));
     }
