@@ -20,9 +20,9 @@ build-only input from the pinned OreSpawn checkout, checked by SHA-256.
 Java 25 is not a production toolchain. Use a separate Steam Gradle user home or the
 agreed warm cache with distinct project state.
 
-CI and CodeQL apply Steam's Forge 45 Mavenizer adapter only to the pinned
-basePower checkout, which predates the tool setup. The pinned Base Metals
-checkout already verifies and configures its own tool, so it builds normally.
+CI and CodeQL build the pinned basePower and Base Metals sources with their own
+Forge 45 setup. Steam supplies the verified OreSpawn Mavenizer jar to basePower
+without applying a second Gradle init script.
 The dependency commits and artifact checksums are in `gradle.properties`.
 
 ## Compatibility

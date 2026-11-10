@@ -103,8 +103,6 @@ jobs:
           test "$(git -C "$power" rev-parse HEAD)" = "$POWERADVANTAGE_SOURCE_REF"
           test "$(git -C "$basemetals" rev-parse HEAD)" = "$BASEMETALS_SOURCE_REF"
           mavenizer="$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar"
-          mavenizer_init="$GITHUB_WORKSPACE/gradle/forge45-mavenizer.init.gradle"
-          mavenizer_script="$GITHUB_WORKSPACE/gradle/forge45-mavenizer.gradle"
           printf '%s  %s\n' '341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE' "$mavenizer" | sha256sum -c -
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew" "$power/gradlew"
           (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
@@ -112,7 +110,6 @@ jobs:
           osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.119041-deobf.jar"
           bmjar="$basemetals/build/libs-dev/BaseMetals-3.1.2.119041-deobf.jar"
           (cd "$power" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar unitBootstrapJar verifyReleaseDependencies \
-            -I "$mavenizer_init" "-Pforge45MavenizerScript=$mavenizer_script" \
             "-Pforge45MavenizerJar=$mavenizer" \
             -PbaseMetalsDeobfJar="$bmjar" -PoreSpawnDeobfJar="$osjar" \
             --no-daemon --stacktrace)

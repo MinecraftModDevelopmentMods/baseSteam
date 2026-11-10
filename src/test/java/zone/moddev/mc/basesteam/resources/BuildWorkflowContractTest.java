@@ -8,7 +8,6 @@ import static org.junit.Assert.*;
 
 public class BuildWorkflowContractTest {
     @Test public void everyHostedBuildUsesPinnedToolchainProjectProperties() throws Exception {
-        assertTrue(Files.isRegularFile(Paths.get("gradle/forge45-mavenizer.init.gradle")));
         assertTrue(Files.isRegularFile(Paths.get("gradle/forge45-mavenizer.gradle")));
         java.util.Properties pins = new java.util.Properties();
         try (java.io.Reader reader = Files.newBufferedReader(Paths.get("gradle.properties"), StandardCharsets.UTF_8)) {
@@ -50,19 +49,16 @@ public class BuildWorkflowContractTest {
             assertTrue(name, source.contains("341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE"));
             int toolCheck = source.indexOf("| sha256sum -c -");
             assertTrue(name, toolCheck >= 0 && toolCheck < source.indexOf("(cd \"$basemetals\""));
-            assertTrue(name, source.contains("mavenizer_init=\"$GITHUB_WORKSPACE/gradle/forge45-mavenizer.init.gradle\""));
-            assertTrue(name, source.contains("mavenizer_script=\"$GITHUB_WORKSPACE/gradle/forge45-mavenizer.gradle\""));
-            assertFalse(name, source.contains("$power/gradle/forge45-mavenizer"));
+            assertFalse(name, source.contains("forge45-mavenizer.init.gradle") || source.contains("-Pforge45MavenizerScript"));
             assertTrue(name, source.contains(
                     "(cd \"$basemetals\" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)"));
-            String initArgs = "-I \"$mavenizer_init\" \"-Pforge45MavenizerScript=$mavenizer_script\"";
             String toolArg = "\"-Pforge45MavenizerJar=$mavenizer\"";
             int powerStart = source.indexOf("(cd \"$power\"");
             int powerEnd = source.indexOf("\n          powerjar=", powerStart);
             assertTrue(name, powerStart >= 0 && powerEnd > powerStart);
             String powerBuild = source.substring(powerStart, powerEnd);
-            assertTrue(name, powerBuild.contains(initArgs) && powerBuild.contains(toolArg));
-            assertEquals(name, 1L, source.lines().filter(line -> line.contains(initArgs)).count());
+            assertTrue(name, powerBuild.contains(toolArg));
+            assertFalse(name, powerBuild.contains("-I ") || powerBuild.contains("--init-script"));
             assertEquals(name, 1L, source.lines().filter(line -> line.contains(toolArg)).count());
             assertTrue(name, source.contains("\"-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}\""));
             for (String line : source.split("\\R")) {
