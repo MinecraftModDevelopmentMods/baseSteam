@@ -10,6 +10,7 @@ import zone.moddev.mc.basepower.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basepower.util.FluidHandlerHelper;
 import zone.moddev.mc.basesteam.init.Power;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.entity.player.Player;
@@ -134,7 +135,7 @@ public class SteamPumpTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 			return net.minecraft.world.level.material.Fluids.EMPTY;
 		}
 		// Native pickup preserves waterlogged hosts; unsupported blocks have no destructive fallback.
-		ItemStack collected = ((BucketPickup)state.getBlock()).pickupBlock(world, pos, state);
+		ItemStack collected = ((BucketPickup)state.getBlock()).pickupBlock(null, world, pos, state);
 		return collected.isEmpty() ? net.minecraft.world.level.material.Fluids.EMPTY : state.getFluidState().getType();
 	}
 
@@ -284,8 +285,8 @@ public class SteamPumpTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void saveAdditional(final CompoundTag tagRoot) {
-		super.saveAdditional(tagRoot);
+	protected void saveAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
+		super.saveAdditional(tagRoot, registries);
 		CompoundTag tankTag = new CompoundTag();
 		this.getTank().writeToNBT(tankTag);
 		tagRoot.put("Tank", tankTag);
@@ -296,8 +297,8 @@ public class SteamPumpTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	public void load(final CompoundTag tagRoot) {
-		super.load(tagRoot);
+	protected void loadAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
+		super.loadAdditional(tagRoot, registries);
 		String tankKey = tagRoot.contains("Tank") ? "Tank" : "TankOut";
 		if (tagRoot.contains(tankKey)) {
 			CompoundTag tankTag = tagRoot.getCompound(tankKey);

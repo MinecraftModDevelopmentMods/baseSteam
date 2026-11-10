@@ -57,20 +57,20 @@ public class SteamMachinePersistenceTest {
         tag.putInt("BurnTime", 127);
         tag.putInt("BurnTimeTotal", 1600);
         CoalBoilerTileEntity coal = new CoalBoilerTileEntity();
-        coal.load(tag);
-        CompoundTag saved = coal.saveWithFullMetadata();
+        coal.loadWithComponents(tag, NativeTestBootstrap.registries());
+        CompoundTag saved = coal.saveWithFullMetadata(NativeTestBootstrap.registries());
         assertEquals("basesteam:steam_boiler_coal", saved.getString("id"));
         assertEquals(127, saved.getInt("BurnTime"));
         assertEquals(1600, saved.getInt("BurnTimeTotal"));
         CoalBoilerTileEntity restored = new CoalBoilerTileEntity();
-        restored.load(saved);
+        restored.loadWithComponents(saved, NativeTestBootstrap.registries());
         assertEquals(37.5F, restored.getEnergy(Power.steam_power), 0.0F);
         assertEquals(1500, restored.getTank().getFluidAmount());
         tag.putFloat("Electricity", 60.0F);
         ElectricBoilerTileEntity electric = new ElectricBoilerTileEntity();
-        electric.load(tag);
+        electric.loadWithComponents(tag, NativeTestBootstrap.registries());
         ElectricBoilerTileEntity electricRestored = new ElectricBoilerTileEntity();
-        electricRestored.load(electric.saveWithoutMetadata());
+        electricRestored.loadWithComponents(electric.saveWithoutMetadata(NativeTestBootstrap.registries()), NativeTestBootstrap.registries());
         assertEquals(37.5F, electricRestored.getEnergy(Power.steam_power), 0.0F);
         assertEquals(60.0F, electricRestored.getEnergy(ElectricBoilerTileEntity.ELECTRIC_POWER), 0.0F);
         assertEquals(1500, electricRestored.getTank().getFluidAmount());
@@ -81,21 +81,21 @@ public class SteamMachinePersistenceTest {
         tag.put("TankOut", water(750));
         tag.putByte("NextPump", (byte) 11);
         SteamPumpTileEntity pump = new SteamPumpTileEntity();
-        pump.load(tag);
-        CompoundTag saved = pump.saveWithoutMetadata();
+        pump.loadWithComponents(tag, NativeTestBootstrap.registries());
+        CompoundTag saved = pump.saveWithoutMetadata(NativeTestBootstrap.registries());
         assertEquals(750, saved.getCompound("Tank").getInt("Amount"));
         assertEquals(11, saved.getByte("NextPump"));
         SteamPumpTileEntity pumpRestored = new SteamPumpTileEntity();
-        pumpRestored.load(saved);
+        pumpRestored.loadWithComponents(saved, NativeTestBootstrap.registries());
         assertEquals(750, pumpRestored.getTank().getFluidAmount());
         assertEquals(37.5F, pumpRestored.getEnergy(Power.steam_power), 0.0F);
         tag.putFloat("Tempoerature", 412.5F);
         GeothermalBoilerTileEntity geothermal = new GeothermalBoilerTileEntity();
-        geothermal.load(tag);
-        assertEquals(412.5F, geothermal.saveWithoutMetadata().getFloat("Temperature"), 0.0F);
+        geothermal.loadWithComponents(tag, NativeTestBootstrap.registries());
+        assertEquals(412.5F, geothermal.saveWithoutMetadata(NativeTestBootstrap.registries()).getFloat("Temperature"), 0.0F);
         tag.putFloat("Temperature", 500.0F);
-        geothermal.load(tag);
-        assertEquals(500.0F, geothermal.saveWithoutMetadata().getFloat("Temperature"), 0.0F);
+        geothermal.loadWithComponents(tag, NativeTestBootstrap.registries());
+        assertEquals(500.0F, geothermal.saveWithoutMetadata(NativeTestBootstrap.registries()).getFloat("Temperature"), 0.0F);
     }
 
     @Test public void stillKeepsSeparateTanksAndExplicitlyEmptyReloads() {
@@ -103,15 +103,15 @@ public class SteamMachinePersistenceTest {
         tag.put("TankIn", water(625));
         tag.put("TankOut", water(375));
         SteamStillTileEntity still = new SteamStillTileEntity();
-        still.load(tag);
+        still.loadWithComponents(tag, NativeTestBootstrap.registries());
         SteamStillTileEntity restored = new SteamStillTileEntity();
-        restored.load(still.saveWithoutMetadata());
+        restored.loadWithComponents(still.saveWithoutMetadata(NativeTestBootstrap.registries()), NativeTestBootstrap.registries());
         assertEquals(625, restored.getInputTank().getFluidAmount());
         assertEquals(375, restored.getOutputTank().getFluidAmount());
         assertEquals(37.5F, restored.getEnergy(Power.steam_power), 0.0F);
         tag.put("TankIn", water(0));
         tag.put("TankOut", water(0));
-        restored.load(tag);
+        restored.loadWithComponents(tag, NativeTestBootstrap.registries());
         assertEquals(0, restored.getInputTank().getFluidAmount());
         assertEquals(0, restored.getOutputTank().getFluidAmount());
     }
@@ -136,7 +136,7 @@ public class SteamMachinePersistenceTest {
         registry.unfreeze();
         try {
             BlockEntityType<T> type = BlockEntityType.Builder.of(factory, Blocks.STONE).build(null);
-            registry.register(new ResourceLocation("basesteam", id), type);
+            registry.register(ResourceLocation.fromNamespaceAndPath("basesteam", id), type);
             return type;
         } finally {
             if (locked) registry.freeze();

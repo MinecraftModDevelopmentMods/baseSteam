@@ -45,7 +45,7 @@ public final class Items {
         if (!ForgeRegistries.Keys.ITEMS.equals(event.getRegistryKey())) return;
         init();
         event.register(ForgeRegistries.Keys.ITEMS, registry -> allItems.forEach((id, item) -> {
-            registry.register(new ResourceLocation(SteamAdvantage.MODID, id), item);
+            registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
             ItemGroups.show(item);
         }));
     }

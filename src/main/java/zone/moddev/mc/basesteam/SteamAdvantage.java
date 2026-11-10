@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -28,12 +27,12 @@ import zone.moddev.mc.basesteam.migration.SteamLegacyMigrations;
 import zone.moddev.mc.basesteam.migration.SteamConfigMigration;
 import zone.moddev.mc.basesteam.recipe.RecipeConditions;
 
-/** Forge 1.20.1 entry point for baseSteam. */
+/** Forge 1.20.6 entry point for baseSteam. */
 @Mod(SteamAdvantage.MODID)
 public final class SteamAdvantage {
     public static final String MODID = "basesteam";
     public static final String NAME = "baseSteam";
-    public static final String VERSION = "2.2.13.120011";
+    public static final String VERSION = "2.2.14.120061";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static float MUSKET_DAMAGE = 20.0F;
@@ -41,20 +40,18 @@ public final class SteamAdvantage {
     public static boolean MUSKET_ENABLE = true;
     public static final Map<String, Float> fluidBurnValues = new HashMap<>();
 
-    public SteamAdvantage() {
+    public SteamAdvantage(FMLJavaModLoadingContext context) {
         SteamLegacyMigrations.register();
 
         migrateLegacyConfiguration();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SteamAdvantageConfig.SPEC);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(SteamAdvantageConfig::onConfigLoading);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::commonSetup);
+        context.registerConfig(ModConfig.Type.COMMON, SteamAdvantageConfig.SPEC);
+        var modBus = context.getModEventBus();
+        modBus.addListener(SteamAdvantageConfig::onConfigLoading);
+        modBus.addListener(this::commonSetup);
+        RecipeConditions.register(modBus);
 
-        DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> {
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(
-                    zone.moddev.mc.basesteam.graphics.ClientRegistration::onClientSetup);
-            FMLJavaModLoadingContext.get().getModEventBus().addListener(
-                    zone.moddev.mc.basesteam.graphics.ClientRegistration::registerRenderers);
-        });
+        DistExecutor.runWhenOn(Dist.CLIENT,
+                () -> () -> zone.moddev.mc.basesteam.graphics.ClientRegistration.register(modBus));
     }
 
     private static void migrateLegacyConfiguration() {
@@ -79,8 +76,6 @@ public final class SteamAdvantage {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
-        // CraftingHelper's shared condition map is not safe during parallel loading.
-        event.enqueueWork(RecipeConditions::register);
         event.enqueueWork(GUI::init);
         SteamAdvantageConfig.apply();
         Recipes.init();

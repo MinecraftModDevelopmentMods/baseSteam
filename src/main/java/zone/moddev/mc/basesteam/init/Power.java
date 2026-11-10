@@ -28,7 +28,7 @@ public abstract class Power {
 	}
 
 	private static ResourceKey<DamageType> damageType(String id) {
-		return ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(SteamAdvantage.MODID, id));
+		return ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id));
 	}
 
 	private static DamageSource damageSource(Level level, ResourceKey<DamageType> type) {

@@ -23,25 +23,28 @@
     }
   },
   "result": {
-    "item": "basesteam:steam_crusher"
+    "id": "basesteam:steam_crusher"
   },
   "group": "basesteam:steam_crusher",
-  "conditions": [
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:frames/steel"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:governors"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:plates/iron"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:storage_blocks/steel"
-    }
-  ]
+  "forge:condition": {
+    "type": "forge:and",
+    "values": [
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:frames/steel"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:governors"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:plates/iron"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:storage_blocks/steel"
+      }
+    ]
+  }
 }

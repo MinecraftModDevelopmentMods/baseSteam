@@ -6,30 +6,30 @@ import static zone.moddev.mc.basesteam.util.SoundHelper.playSoundAtPosition;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.init.Enchantments;
 import zone.moddev.mc.basesteam.init.Power;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -57,18 +57,22 @@ import net.minecraft.tags.TagKey;
 @SuppressWarnings("deprecation")
 public class MusketItem extends net.minecraft.world.item.Item{
 	private static final TagKey<Block> FRAGILE_TARGETS = TagKey.create(Registries.BLOCK,
-			new ResourceLocation(SteamAdvantage.MODID, "musket_fragile"));
+			ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "musket_fragile"));
 	
 	
 	public static final String NBT_DATA_KEY_LOADED = "loaded";
 	public static final double MAX_RANGE = 64;
 	private static final int maxUseTime = 7200;
 
-	private static final TagKey<Item> BLACKPOWDER_AMMO_TAG = ItemTags.create(new ResourceLocation("forge", "ammo/blackpowder"));
-	private static final TagKey<Item> STEEL_INGOT_TAG = ItemTags.create(new ResourceLocation("forge", "ingots/steel"));
+	private static final TagKey<Item> BLACKPOWDER_AMMO_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ammo/blackpowder"));
+	private static final TagKey<Item> STEEL_INGOT_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ingots/steel"));
 
 	public MusketItem(Item.Properties properties){
-		super(properties.defaultDurability(250));
+		super(properties.durability(250).attributes(ItemAttributeModifiers.builder()
+				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID,
+						"Weapon modifier", getMeleeDamage(), AttributeModifier.Operation.ADD_VALUE),
+						EquipmentSlotGroup.MAINHAND)
+				.build()));
 	}
 	
 
@@ -147,9 +151,11 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	protected void fire(ItemStack srcItemStack, LivingEntity playerEntity,
 			Level world) {
 		final boolean isPlayer = playerEntity instanceof Player;
+		int explosive = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
+		int recoil = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.recoil, srcItemStack);
 		unload(srcItemStack);
 		if(isPlayer && !((Player)playerEntity).isCreative()){
-			srcItemStack.hurtAndBreak(1, playerEntity, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+			srcItemStack.hurtAndBreak(1, playerEntity, EquipmentSlot.MAINHAND);
 		}
 		Vec3 lookVector = playerEntity.getLookAngle();
 		spawnParticle(ParticleTypes.EXPLOSION_EMITTER, world,
@@ -174,8 +180,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		if(rayTrace instanceof EntityHitResult){
 			Entity e = ((EntityHitResult) rayTrace).getEntity();
 			e.hurt(Power.musketDamage(world), getShotDamage());
-			if(EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack) > 0){
-				int lvl = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
+			if(explosive > 0){
+				int lvl = explosive;
 				world.explode(playerEntity, e.getX(), e.getY()+0.5, e.getZ(),
 						explodeFactor * lvl, 
 						explosionInteraction);
@@ -183,7 +189,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 						e.getX()+lvl, e.getY()+lvl, e.getZ()+lvl);
 				List<LivingEntity> collateralDamage = world.getEntitiesOfClass(LivingEntity.class, fireArea);
 				for(LivingEntity victim : collateralDamage){
-					victim.setSecondsOnFire(lvl);
+					victim.igniteForSeconds(lvl);
 				}
 			}
 		} else if(rayTrace.getType() == HitResult.Type.BLOCK){
@@ -199,8 +205,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 					world.removeBlock(coord, false);
 				}
 			}
-			if(EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack) > 0){
-				int lvl = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
+			if(explosive > 0){
+				int lvl = explosive;
 				world.explode(playerEntity, rayTrace.getLocation().x, rayTrace.getLocation().y, rayTrace.getLocation().z,
 						explodeFactor * lvl, 
 						explosionInteraction);
@@ -208,7 +214,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 						rayTrace.getLocation().x+lvl, rayTrace.getLocation().y+lvl, rayTrace.getLocation().z+lvl);
 				List<LivingEntity> collateralDamage = world.getEntitiesOfClass(LivingEntity.class, fireArea);
 				for(LivingEntity victim : collateralDamage){
-					victim.setSecondsOnFire(lvl);
+					victim.igniteForSeconds(lvl);
 				}
 			}
 		}
@@ -220,7 +226,6 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		}
 		
 		// recoil enchantment kicks you back
-		int recoil = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.recoil, srcItemStack);
 		if(recoil > 0){
 			double c = -0.3;
 			double lateral = 2.0;
@@ -246,7 +251,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	@Override
 	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker)
 	{
-		stack.hurtAndBreak(1, attacker, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+		stack.hurtAndBreak(1, attacker, EquipmentSlot.MAINHAND);
 		return true;
 	}
 	
@@ -259,54 +264,37 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 	
 	public static void startLoad(ItemStack musket){
-		CompoundTag data;
-		if(musket.hasTag()){
-			data = musket.getTag();
-		} else {
-			data = new CompoundTag();
-		}
-		data.putByte(NBT_DATA_KEY_LOADED, (byte)2);
-		musket.setTag(data);
+		setLoadedState(musket, (byte)2);
 	}
 	
 	public static void finishLoad(ItemStack musket){
-		CompoundTag data;
-		if(musket.hasTag()){
-			data = musket.getTag();
-		} else {
-			data = new CompoundTag();
-		}
-		data.putByte(NBT_DATA_KEY_LOADED, (byte)1);
-		musket.setTag(data);
+		setLoadedState(musket, (byte)1);
 	}
 	
 	public static void unload(ItemStack musket){
-		CompoundTag data;
-		if(musket.hasTag()){
-			data = musket.getTag();
-		} else {
-			data = new CompoundTag();
-		}
-		data.putByte(NBT_DATA_KEY_LOADED, (byte)0);
-		musket.setTag(data);
+		setLoadedState(musket, (byte)0);
+	}
+
+	private static void setLoadedState(ItemStack musket, byte state) {
+		CustomData.update(DataComponents.CUSTOM_DATA, musket, tag -> tag.putByte(NBT_DATA_KEY_LOADED, state));
+	}
+
+	private static byte loadedState(ItemStack musket) {
+		CustomData data = musket.get(DataComponents.CUSTOM_DATA);
+		return data == null ? 0 : data.copyTag().getByte(NBT_DATA_KEY_LOADED);
 	}
 	
 	public static boolean isLoaded(ItemStack musket){
-		CompoundTag data = musket.getTag();
-		if(data == null) return false;
-		return data.contains(NBT_DATA_KEY_LOADED) && data.getByte(NBT_DATA_KEY_LOADED) == 1;
+		return loadedState(musket) == 1;
 	}
 	
 	public static boolean isNotLoaded(ItemStack musket){
-		CompoundTag data = musket.getTag();
-		if(data == null || !data.contains(NBT_DATA_KEY_LOADED)) return true;
-		return data.contains(NBT_DATA_KEY_LOADED) && data.getByte(NBT_DATA_KEY_LOADED) == 0;
+		byte state = loadedState(musket);
+		return state != 1 && state != 2;
 	}
 	
 	public static boolean isAlmostLoaded(ItemStack musket){
-		CompoundTag data = musket.getTag();
-		if(data == null) return false;
-		return data.contains(NBT_DATA_KEY_LOADED) && data.getByte(NBT_DATA_KEY_LOADED) == 2;
+		return loadedState(musket) == 2;
 	}
 
 
@@ -315,7 +303,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		if(e instanceof Player) {
 			Player playerEntity = (Player) e;
 			if (playerEntity.isCreative()
-					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS, musket) > 0
+					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket) > 0
 					|| EnchantmentHelper.getItemEnchantmentLevel(Enchantments.powderless, musket) > 0) return true;
 			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
 				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
@@ -331,7 +319,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		if(e instanceof Player) {
 			Player playerEntity = (Player) e;
 			if (playerEntity.isCreative()
-					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY_ARROWS, musket) > 0
+					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket) > 0
 					|| EnchantmentHelper.getItemEnchantmentLevel(Enchantments.powderless, musket) > 0) return;
 			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
 				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
@@ -439,8 +427,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 	
 	@Override
-	public void appendHoverText(ItemStack stack, Level world, List<Component> list, net.minecraft.world.item.TooltipFlag flag){
-		super.appendHoverText(stack,world,list,flag);
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, net.minecraft.world.item.TooltipFlag flag){
+		super.appendHoverText(stack,context,list,flag);
 		list.add(Component.translatable("tooltip.musket.damage", (int)MusketItem.getShotDamage()));
 		if(isLoaded(stack)){
 			list.add(Component.translatable("tooltip.musket.loaded"));
@@ -450,16 +438,6 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		}
 	}
 
-	/** Sets melee attack damage */
-	@Override
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack)
-	{
-		Multimap<Attribute, AttributeModifier> multimap = HashMultimap.create();
-		if(slot != EquipmentSlot.MAINHAND) return multimap;
-		multimap.put(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID, "Weapon modifier", (double)getMeleeDamage(), AttributeModifier.Operation.ADDITION));
-		return multimap;
-	}
-	
 	@Override
 	public int getUseDuration(ItemStack stack)
 	{

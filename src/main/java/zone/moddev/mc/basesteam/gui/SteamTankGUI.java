@@ -11,7 +11,7 @@ public class SteamTankGUI extends SimpleMachineGUI{
 
 	public SteamTankGUI() {
 		super(
-				new ResourceLocation(SteamAdvantage.MODID+":textures/gui/container/steam_tank.png"), 
+				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/steam_tank.png"),
 				new Integer2D[0]
 		);
 	}

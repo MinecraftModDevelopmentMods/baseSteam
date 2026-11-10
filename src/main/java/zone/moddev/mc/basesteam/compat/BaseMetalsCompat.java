@@ -38,8 +38,9 @@ public final class BaseMetalsCompat {
         private static ItemStack find(Level world, ItemStack input) {
             SimpleContainer inventory = new SimpleContainer(1);
             inventory.setItem(0, input.copy());
-            for (var candidate : world.getRecipeManager().getRecipes()) {
-                if (candidate instanceof CrushingRecipe crushing && crushing.matches(inventory, world)) {
+            for (var candidate : world.getRecipeManager().getAllRecipesFor(CrushingRecipe.TYPE.get())) {
+                CrushingRecipe crushing = candidate.value();
+                if (crushing.matches(inventory, world)) {
                     return crushing.getResultItem(world.registryAccess()).copy();
                 }
             }

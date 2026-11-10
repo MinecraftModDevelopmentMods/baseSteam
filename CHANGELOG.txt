@@ -1,3 +1,9 @@
+baseSteam 2.2.14.120061 (local Minecraft 1.20.6 port)
+
+- Target Minecraft 1.20.6, Forge 50.2.0 and Java 21 with basePower 2.4.13.120061.
+- Preserve musket loaded state and durability through native item components and legacy upgrades.
+- Keep the Steam registry IDs and machine state while moving saves, packets and data packs to Forge 50.
+
 baseSteam 2.2.13.120011 (local Minecraft 1.20.1 port)
 
 - Move to Minecraft 1.20.1, Forge 47.4.10 and Java 17 with basePower 2.4.12.120011.

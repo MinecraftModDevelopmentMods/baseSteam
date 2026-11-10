@@ -105,6 +105,6 @@ public final class SteamLegacyMigrations {
     }
 
     private static ResourceLocation id(String path) {
-        return new ResourceLocation(SteamAdvantage.MODID, path);
+        return ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, path);
     }
 }

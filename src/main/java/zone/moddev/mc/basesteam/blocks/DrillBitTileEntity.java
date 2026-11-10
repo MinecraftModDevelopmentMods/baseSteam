@@ -3,11 +3,11 @@ package zone.moddev.mc.basesteam.blocks;
 import zone.moddev.mc.basesteam.init.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,21 +78,23 @@ public class DrillBitTileEntity extends BlockEntity{
 	}
 	
 	@Override
-	protected void saveAdditional(CompoundTag root){
-		super.saveAdditional(root);
+	protected void saveAdditional(CompoundTag root, HolderLookup.Provider registries){
+		super.saveAdditional(root, registries);
 		writeDirectionToNBT(root);
 	}
 	
 
 	@Override
-	public void load(CompoundTag root){
-		super.load(root);
+	protected void loadAdditional(CompoundTag root, HolderLookup.Provider registries){
+		super.loadAdditional(root, registries);
 		readDirectionFromNBT(root);
 	}
 
 	@Override
-	public CompoundTag getUpdateTag() {
-		return saveWithoutMetadata();
+	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+		CompoundTag tag = new CompoundTag();
+		writeDirectionToNBT(tag);
+		return tag;
 	}
 
 	/**
@@ -100,16 +102,7 @@ public class DrillBitTileEntity extends BlockEntity{
 	 */
 	@Override 
 	public ClientboundBlockEntityDataPacket getUpdatePacket(){
-		CompoundTag nbtTag = new CompoundTag();
-		writeDirectionToNBT(nbtTag);
-		return ClientboundBlockEntityDataPacket.create(this, tile -> nbtTag);
-	}
-	/**
-	 * Receives the network packet made by <code>getDescriptionPacket()</code>
-	 */
-	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet) {
-		readDirectionFromNBT(packet.getTag());
+		return ClientboundBlockEntityDataPacket.create(this);
 	}
 
 	private void writeDirectionToNBT(CompoundTag root) {

@@ -20,25 +20,28 @@
     }
   },
   "result": {
-    "item": "basesteam:steam_governor"
+    "id": "basesteam:steam_governor"
   },
-  "conditions": [
-    {
-      "type": "basesteam:recipe_mode",
-      "mode": "APOCALYPTIC"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:ingots/brass"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:rods"
-    },
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:sprockets"
-    }
-  ],
+  "forge:condition": {
+    "type": "forge:and",
+    "values": [
+      {
+        "type": "basesteam:recipe_mode",
+        "mode": "APOCALYPTIC"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:ingots/brass"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:rods"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:sprockets"
+      }
+    ]
+  },
   "group": "basesteam:steam_governor"
 }

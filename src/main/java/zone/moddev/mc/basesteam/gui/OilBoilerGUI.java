@@ -12,7 +12,7 @@ public class OilBoilerGUI extends SimpleMachineGUI{
 
 	public OilBoilerGUI() {
 		super(
-				new ResourceLocation(SteamAdvantage.MODID+":textures/gui/container/oil_boiler.png"), 
+				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/oil_boiler.png"),
 				new Integer2D[0]
 		);
 	}

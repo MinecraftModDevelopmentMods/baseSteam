@@ -11,7 +11,7 @@ public class RockCrusherGUI extends SimpleMachineGUI{
 
 	public RockCrusherGUI() {
 		super(
-				new ResourceLocation(SteamAdvantage.MODID+":textures/gui/container/rock_crusher.png"), 
+				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/rock_crusher.png"),
 				Integer2D.fromCoordinates(44,19, 44,88, 62,88, 80,88, 98,88, 116,88)
 		);
 	}

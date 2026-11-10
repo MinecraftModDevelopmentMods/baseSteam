@@ -11,7 +11,7 @@ public class CoalBoilerGUI extends SimpleMachineGUI{
 
 	public CoalBoilerGUI() {
 		super(
-				new ResourceLocation(SteamAdvantage.MODID+":textures/gui/container/coal_boiler.png"), 
+				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/coal_boiler.png"),
 				new Integer2D[] {new Integer2D(80,80)}
 		);
 	}

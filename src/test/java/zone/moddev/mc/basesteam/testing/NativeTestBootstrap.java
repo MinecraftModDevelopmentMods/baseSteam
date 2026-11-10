@@ -1,6 +1,8 @@
 package zone.moddev.mc.basesteam.testing;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
@@ -19,6 +21,10 @@ public final class NativeTestBootstrap {
         NativeRegistries.ensureStarted();
         // Standalone fixtures construct blocks and items outside Forge's mod registration phase.
         GameData.unfreezeData();
+    }
+
+    public static RegistryAccess.Frozen registries() {
+        return RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     }
 
     public static synchronized void registerVanillaFluidTypes() throws ReflectiveOperationException {

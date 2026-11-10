@@ -6,7 +6,7 @@
       "conditions": {
         "items": [
           {
-            "tag": "forge:ingots/brass"
+            "items": "#forge:ingots/brass"
           }
         ]
       }

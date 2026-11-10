@@ -70,7 +70,7 @@ public class NativeFuelContractTest {
                 return 237;
             }
         };
-        ForgeRegistries.ITEMS.register(new ResourceLocation("basesteam_test", "fuel_override"), item);
+        ForgeRegistries.ITEMS.register(ResourceLocation.fromNamespaceAndPath("basesteam_test", "fuel_override"), item);
         assertEquals(237, FurnaceFuelHelper.getBurnTime(new ItemStack(item)));
     }
 }

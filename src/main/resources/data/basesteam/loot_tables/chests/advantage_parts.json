@@ -1,20 +1,20 @@
 {
+  "type": "minecraft:chest",
   "pools": [
     {
-      "__comment": "25% chance of a baseSteam item",
       "rolls": 1,
       "entries": [
         {
-          "type": "empty",
+          "type": "minecraft:empty",
           "weight": 135
         },
         {
-          "type": "item",
+          "type": "minecraft:item",
           "name": "basesteam:steam_governor",
           "weight": 50,
           "functions": [
             {
-              "function": "set_count",
+              "function": "minecraft:set_count",
               "count": {
                 "min": 1,
                 "max": 6
@@ -23,12 +23,12 @@
           ]
         },
         {
-          "type": "item",
+          "type": "minecraft:item",
           "name": "basesteam:steam_pipe",
           "weight": 25,
           "functions": [
             {
-              "function": "set_count",
+              "function": "minecraft:set_count",
               "count": {
                 "min": 3,
                 "max": 6
@@ -37,12 +37,12 @@
           ]
         },
         {
-          "type": "item",
+          "type": "minecraft:item",
           "name": "basesteam:blackpowder_cartridge",
           "weight": 50,
           "functions": [
             {
-              "function": "set_count",
+              "function": "minecraft:set_count",
               "count": {
                 "min": 5,
                 "max": 15
@@ -51,15 +51,13 @@
           ]
         },
         {
-          "type": "item",
+          "type": "minecraft:item",
           "name": "basesteam:musket",
-          "entryName": "basesteam:musket_plain",
           "weight": 18
         },
         {
-          "type": "item",
+          "type": "minecraft:item",
           "name": "basesteam:musket",
-          "entryName": "basesteam:musket_enchanted",
           "weight": 2,
           "functions": [
             {

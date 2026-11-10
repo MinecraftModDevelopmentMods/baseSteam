@@ -11,7 +11,7 @@ public class GeothermalBoilerGUI extends SimpleMachineGUI{
 
 	public GeothermalBoilerGUI() {
 		super(
-				new ResourceLocation(SteamAdvantage.MODID+":textures/gui/container/geothermal_boiler.png"), 
+				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/geothermal_boiler.png"),
 				new Integer2D[0] 
 		);
 	}

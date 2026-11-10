@@ -11,14 +11,12 @@
     }
   },
   "result": {
-    "item": "basesteam:steam_pipe",
+    "id": "basesteam:steam_pipe",
     "count": 6
   },
   "group": "basesteam:steam_pipe",
-  "conditions": [
-    {
-      "type": "basepower:tag_not_empty",
-      "tag": "forge:ingots/brass"
-    }
-  ]
+  "forge:condition": {
+    "type": "basepower:tag_not_empty",
+    "tag": "forge:ingots/brass"
+  }
 }

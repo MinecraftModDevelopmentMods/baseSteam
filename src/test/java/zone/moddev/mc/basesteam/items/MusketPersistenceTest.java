@@ -2,6 +2,9 @@ package zone.moddev.mc.basesteam.items;
 
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -14,22 +17,33 @@ public class MusketPersistenceTest {
         NativeTestBootstrap.start();
     }
 
-    @Test public void loadingCycleKeepsLegacyByteValuesAndOtherNbt() {
-        ItemStack stack = new ItemStack(net.minecraft.world.item.Items.STICK);
+    @Test public void loadingCycleKeepsLegacyByteValuesWearAndOtherComponents() {
+        ItemStack stack = new ItemStack(Items.CROSSBOW);
         CompoundTag tag = new CompoundTag();
         tag.putString("owner", "legacy");
-        stack.setTag(tag);
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        stack.setDamageValue(123);
         assertTrue(MusketItem.isNotLoaded(stack));
         MusketItem.startLoad(stack);
-        assertEquals(2, stack.getTag().getByte("loaded"));
+        assertEquals(2, data(stack).getByte("loaded"));
         assertTrue(MusketItem.isAlmostLoaded(stack));
         MusketItem.finishLoad(stack);
-        assertEquals(1, stack.getTag().getByte("loaded"));
+        assertEquals(1, data(stack).getByte("loaded"));
         assertTrue(MusketItem.isLoaded(stack.copy()));
+        var registries = NativeTestBootstrap.registries();
+        ItemStack restored = ItemStack.parse(registries, stack.save(registries)).orElseThrow();
+        assertTrue(MusketItem.isLoaded(restored));
+        assertEquals(123, restored.getDamageValue());
         MusketItem.unload(stack);
-        assertEquals(0, stack.getTag().getByte("loaded"));
+        assertEquals(0, data(stack).getByte("loaded"));
         assertTrue(MusketItem.isNotLoaded(stack));
-        assertEquals("legacy", stack.getTag().getString("owner"));
+        assertEquals("legacy", data(stack).getString("owner"));
+        assertEquals(123, stack.getDamageValue());
+        assertTrue(MusketItem.isLoaded(restored));
+    }
+
+    private static CompoundTag data(ItemStack stack) {
+        return stack.get(DataComponents.CUSTOM_DATA).copyTag();
     }
 
     @Test public void rayIntersectionSupportsEveryAxisAndRejectsTargetsBehind() {

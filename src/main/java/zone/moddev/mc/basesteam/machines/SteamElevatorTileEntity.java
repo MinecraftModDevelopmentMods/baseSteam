@@ -3,6 +3,7 @@ package zone.moddev.mc.basesteam.machines;
 import cyano.poweradvantage.api.ConduitType;
 import zone.moddev.mc.basesteam.init.Blocks;
 import zone.moddev.mc.basesteam.init.Power;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
@@ -172,14 +173,14 @@ public class SteamElevatorTileEntity extends cyano.poweradvantage.api.simple.Til
 
 	
 	@Override
-	protected void saveAdditional(CompoundTag tagRoot){
-		super.saveAdditional(tagRoot);
+	protected void saveAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.saveAdditional(tagRoot, registries);
 		tagRoot.putBoolean("up",above);
 	}
 	
 	@Override
-	public void load(CompoundTag tagRoot){
-		super.load(tagRoot);
+	protected void loadAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
+		super.loadAdditional(tagRoot, registries);
 		if(tagRoot.contains("up")){
 			above = tagRoot.getBoolean("up");
 		}
