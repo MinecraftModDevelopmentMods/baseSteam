@@ -2,7 +2,7 @@ name: CodeQL
 
 on:
   push:
-    branches: [master-1.20.1, feature/basesteam-1.20.1-port]
+    branches: [master-1.20.1, feature/basesteam-1.20.1-port, feature/prepare-basesteam-1.20.1]
   pull_request:
     branches: [master-1.20.1]
   schedule:
@@ -21,6 +21,11 @@ jobs:
     steps:
       - name: Check out baseSteam
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Verify merged dependency pins and public basePower bytes
+        id: public-pins
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/verify-published-pins.sh
       - name: Validate coordinated dependency pins
         shell: bash
         run: |
@@ -104,7 +109,6 @@ jobs:
           test "$(git -C "$basemetals" rev-parse HEAD)" = "$BASEMETALS_SOURCE_REF"
           mavenizer="$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar"
           printf '%s  %s\n' '416DCA4797BC55826F0DDCF03FDC405F1990FC15C2133FA27A1F143BF7976177' "$mavenizer" | sha256sum -c -
-          chmod +x "$orespawn/gradlew" "$basemetals/gradlew" "$power/gradlew"
           (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
           (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
           osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.120011-deobf.jar"

@@ -11,7 +11,7 @@ baseSteam 2.2.13.120011 (local Minecraft 1.20.1 port)
 - Preserve steam track transparency, machine piston resistance and hidden helper drops.
 - Keep musket reload feedback and fragile-block hits using the new item and block APIs.
 
-baseSteam 2.2.12.119041 (local Minecraft 1.19.4 port)
+baseSteam 2.2.12.119041 (Minecraft 1.19.4 / Forge)
 
 - Target Minecraft 1.19.4 / Forge 45.4.0 and Java 17 with basePower 2.4.11.119041.
 - Adapt native registrations, rendering, damage, sound, fuel and recipe calls.
