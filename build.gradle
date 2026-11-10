@@ -639,6 +639,7 @@ tasks.register('verifyReleaseArtifacts') {
     description = 'Audits the exact three distributable jars and release-critical contents.'
     dependsOn tasks.named('verifyReleaseDependencies')
     dependsOn tasks.named('assemble')
+    dependsOn tasks.named('jar')
     doLast {
         File libs = layout.buildDirectory.dir('libs').get().asFile
         List<File> jars = (libs.listFiles() ?: [] as File[])
