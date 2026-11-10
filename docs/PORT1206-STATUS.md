@@ -10,15 +10,15 @@
 
 | Input | Commit | Local native jar SHA-256 |
 | --- | --- | --- |
-| basePower 2.4.13.120061 | Pending final pin | Pending final pin |
-| Base Metals 3.1.1.120061 | `ea326ef35c0b463d6297e374a53d5ddbfe4041af` | `08AC265C7284D18962A3DE91B7C267187AEF76ACF6AFE7BBA0729F5CED60A437` |
+| basePower 2.4.13.120061 | `5fdbb2c2b2d9bbc760aca3919e5b5b648f4545e2` | `E192657CC426BC8CD0E3809F6CBF53A135E5C49C6E34A8936DE2DD034D701A04` |
+| Base Metals 3.1.2.120061 (local shared hook) | `0c2cdd4d0e8c3bf2e5fa234d49e57960bbf80bde` | `FC6DE01771ED9CD799D946A0ED4B6782B289C47AA8CFCA7753F9E102DD0F0417` |
 | OreSpawn 4.1.0.120061 | `4085315345ff043448b316d75e03f4b8da45402d` | `FAA7107B9FB84E2C62ED847CAFD880AA3C4238A37799BAD955EA9602A944AA26` |
 
-The companions were read from their 1.20.6 checkouts' `build/libs`
-directories. Their hashes and Forge/Java manifest identities passed both local
-development and player checks. Steam's audit requires the actual Power commit,
-native jar and test-bootstrap pins. It rejects pin overrides and does not use
-any 1.20.1 or newer 1.20.6 mod artifacts.
+The native jars serve as both development and packaged inputs. The Power
+JUnit bootstrap is pinned to
+`96752A443070E117EED9308ABC9C2009BD3533F121C9594A7108908E104673C9`;
+both bootstrap source hashes are recorded in `gradle.properties`.
+No dependency is embedded or promoted to a publication claim.
 
 ## Evidence
 

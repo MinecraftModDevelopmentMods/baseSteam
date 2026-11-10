@@ -215,7 +215,7 @@ repositories {
 // Only code and launch tasks require the exact jars; source/resource checks can run independently.
 def explicitJar = { String property -> providers.gradleProperty(property).map { file(it) }.getOrNull() }
 def powerRoot = '../../PowerAdvantage'
-def baseMetalsRoot = '../../../../BaseMetals/BaseMetals 1206/BaseMetals'
+def baseMetalsRoot = '../../../../BaseMetals/.verification-basemetals1206/Advantage shared hook'
 def powerNativeJar = file("${powerRoot}/build/libs/basePower-${project.poweradvantage_version}.jar")
 def powerAdvantageDeobfJar = explicitJar('powerAdvantageDeobfJar') ?: powerNativeJar
 def baseMetalsDeobfJar = explicitJar('baseMetalsDeobfJar') ?: file(
@@ -269,10 +269,18 @@ def committedPin = { String key, pattern ->
 def forgeCapabilityBootstrapJar = providers.gradleProperty('forgeCapabilityBootstrapJar')
         .map { file(it) }
         .orElse(file("${powerRoot}/build/unit-bootstrap/forge-native-unit-bootstrap.jar"))
+def unitBootstrapSources = [
+        poweradvantage_test_bootstrap_source_sha256: explicitJar('forgeCapabilityBootstrapSource') ?:
+                file("${powerRoot}/test-rig/unit-bootstrap/ForgeCapabilityBootstrap.java"),
+        poweradvantage_test_registry_source_sha256: explicitJar('forgeUnitRegistriesSource') ?:
+                file("${powerRoot}/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/ForgeUnitRegistries.java")
+]
 tasks.named('test', Test) {
     useJUnit()
     inputs.files(forgeCapabilityBootstrapJar)
+    inputs.files(unitBootstrapSources.values())
     inputs.property('powerBootstrapSha256', providers.gradleProperty('poweradvantage_test_bootstrap_sha256'))
+    unitBootstrapSources.keySet().each { inputs.property(it, providers.gradleProperty(it)) }
     doFirst {
         File bootstrapJar = forgeCapabilityBootstrapJar.getOrNull()
         if (bootstrapJar == null || !bootstrapJar.isFile()) {
@@ -283,6 +291,14 @@ tasks.named('test', Test) {
                 .encodeHex().toString().toUpperCase(Locale.ROOT)
         if (actualHash != expectedHash) {
             throw new GradleException("basePower test bootstrap SHA-256 is ${actualHash}, expected ${expectedHash}")
+        }
+        unitBootstrapSources.each { key, source ->
+            String expected = committedPin(key, /[A-F0-9]{64}/)
+            if (!source.isFile() || MessageDigest.getInstance('SHA-256').digest(source.bytes)
+                    .encodeHex().toString().toUpperCase(Locale.ROOT) != expected) {
+                throw new GradleException("Missing or mismatched basePower test source: ${source} (expected ${expected})")
+            }
+            logger.lifecycle("basePower test source: ${source.canonicalPath} SHA-256 ${expected}")
         }
         new ZipFile(bootstrapJar).withCloseable { zip ->
             def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
@@ -447,7 +463,7 @@ tasks.register('verifyReleaseConfiguration') {
                 || project.cf_versions != '1.20.6') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.1.1.120061'
+        if (project.basemetals_version != '3.1.2.120061'
                 || project.orespawn_version != '4.1.0.120061') {
             throw new GradleException('Unexpected development API versions')
         }
@@ -463,7 +479,7 @@ tasks.register('verifyReleaseConfiguration') {
         String metadata = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
         ['modId="basesteam"', 'displayName="baseSteam"',
          'modId="basepower"\nmandatory=true\nversionRange="[${poweradvantage_version},3.0.0)"',
-         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.1.120061,4.0.0)"'].each { marker ->
+         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.120061,4.0.0)"'].each { marker ->
             if (!metadata.contains(marker)) {
                 throw new GradleException("Source mods.toml is missing ${marker}")
             }

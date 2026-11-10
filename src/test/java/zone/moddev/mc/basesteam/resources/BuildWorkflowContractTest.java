@@ -20,7 +20,8 @@ public class BuildWorkflowContractTest {
         assertEquals("2.4.13.120061", pins.getProperty("poweradvantage_version"));
         for (String key : new String[] {"poweradvantage_source_ref", "poweradvantage_deobf_sha256",
                 "poweradvantage_player_sha256", "poweradvantage_test_bootstrap_sha256",
-                "poweradvantage_test_bootstrap_source_sha256", "basemetals_source_commit", "basemetals_deobf_sha256",
+                "poweradvantage_test_bootstrap_source_sha256", "poweradvantage_test_registry_source_sha256",
+                "basemetals_source_commit", "basemetals_deobf_sha256",
                 "basemetals_player_sha256", "orespawn_source_commit", "orespawn_deobf_sha256",
                 "orespawn_player_sha256"}) {
             assertTrue(key, pins.getProperty(key, "").matches(

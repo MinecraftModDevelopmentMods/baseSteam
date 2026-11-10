@@ -16,18 +16,20 @@ ForgeGradle's Slime Launcher also locates a Java 8 toolchain while generating
 runs. The game itself runs on Java 21.
 
 Forge 50 uses official names at runtime. Steam does not run an SRG renamer.
-The required dependency is basePower 2.4.13.120061. Base Metals 3.1.1.120061 is
+The required dependency is basePower 2.4.13.120061. Base Metals 3.1.2.120061 is
 optional at runtime and uses OreSpawn 4.1.0.120061. The exact native companion
 jars serve as both development and player inputs. No dependency is embedded.
 The mod ID, data namespace, and registry paths remain `basesteam`.
 
 ## Local Verification
 
-The default paths point to the coordinated local 1.20.6 checkouts. The
+The default paths point to the coordinated local 1.20.6 checkouts, including
+the Base Metals shared-hook checkout. The
 `*DeobfJar` project properties remain accepted path overrides even though the
 target uses native jars. For packaged checks, the `*PlayerJar` overrides
 are separate. Both paths must satisfy the pins in `gradle.properties`.
-A pending Power pin fails closed.
+The unit gate also verifies the Power bootstrap jar and both source hashes.
+Absent or mismatched inputs fail closed.
 
 From this checkout in PowerShell, with the pinned local JDKs installed:
 

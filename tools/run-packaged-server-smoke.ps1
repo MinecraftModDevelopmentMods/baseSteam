@@ -34,7 +34,7 @@ if (!$PowerJar) {
     $PowerJar = Join-Path $project "../../PowerAdvantage/build/libs/basePower-$($pins.poweradvantage_version).jar"
 }
 if (!$BaseMetalsJar) {
-    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/BaseMetals 1206/BaseMetals/build/libs/BaseMetals-$($pins.basemetals_version).jar"
+    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/.verification-basemetals1206/Advantage shared hook/build/libs/BaseMetals-$($pins.basemetals_version).jar"
 }
 if (!$OreSpawnJar) {
     $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS1206/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
