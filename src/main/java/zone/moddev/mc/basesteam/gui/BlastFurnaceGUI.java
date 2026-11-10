@@ -21,7 +21,7 @@ public class BlastFurnaceGUI extends SimpleMachineGUI{
 			@Override
 			public void onTake(Player player, ItemStack stack)
 			{
-				stack.onCraftedBy(player.level, player, stack.getCount());
+				stack.onCraftedBy(player.level(), player, stack.getCount());
 				super.onTake(player, stack);
 			}
 			@Override
@@ -47,8 +47,7 @@ public class BlastFurnaceGUI extends SimpleMachineGUI{
 	 * @param guiContainer This is the instance of GUIContainer that is drawing 
 	 * the GUI. You need to use it to draw on the screen. For example:<br>
 	   <pre>
-com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, arrowTexture);
-guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, textureOffsetY, width, height)
+guiContainer.blit(arrowTexture, x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, textureOffsetY, width, height)
 	   </pre>
 	 * @param x This is the x coordinate (in pixels) from the top-left corner of 
 	 * the GUI
@@ -85,7 +84,7 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 
 			GUIHelper.drawFlameProgress(x+30, y+46, 1f - target.getBurnLevel(), guiContainer);
 			
-			GUIHelper.drawNeedle(x+tempPivotX, y+tempPivotY, z, temp);
+			GUIHelper.drawNeedle(guiContainer, x+tempPivotX, y+tempPivotY, z, temp);
 			for(int i = 0; i < 3; i++){
 				GUIHelper.drawDownArrowProgress(arrowX+18*i,arrowY,progress[i],guiContainer);
 			}

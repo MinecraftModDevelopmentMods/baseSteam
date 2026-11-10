@@ -131,8 +131,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	private boolean canStack(ItemStack newItem, ItemStack slot) {
 		if(slot == null || newItem == null) return true;
-		return ItemStack.isSame(newItem, slot)
-				&& ItemStack.tagMatches(newItem, slot)
+		return ItemStack.isSameItemSameTags(newItem, slot)
 				&& (newItem.getCount() + slot.getCount() <= slot.getMaxStackSize());
 	}
 	
@@ -141,8 +140,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			if(inventory[i] == null){
 				inventory[i] = in;
 				return null;
-			} else if(ItemStack.isSame(in, inventory[i])
-					&& ItemStack.tagMatches(in, inventory[i])){
+			} else if(ItemStack.isSameItemSameTags(in, inventory[i])){
 				// are stackable
 				int maxStackSize = inventory[i].getMaxStackSize();
 				if(inventory[i].getCount() >= maxStackSize){
@@ -264,7 +262,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 						break;
 					}
 					if(powerAdvantageWorld().getBlockState(n).getBlock() != Blocks.drillbit){
-						if(powerAdvantageWorld().isEmptyBlock(n) || powerAdvantageWorld().getBlockState(n).getMaterial().isReplaceable()){
+						if(powerAdvantageWorld().isEmptyBlock(n) || powerAdvantageWorld().getBlockState(n).canBeReplaced()){
 							// this block is not worth mining, replace it
 							DrillBitTileEntity.createDrillBitBlock(powerAdvantageWorld(), n, f);
 							this.subtractEnergy(ENERGY_COST_DRILLBIT, Power.steam_power);
@@ -451,8 +449,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 							inv.setChanged();
 							this.setChanged();
 							return;
-						} else if(ItemStack.isSame(theirItem, inventory[mySlot])
-								&& ItemStack.tagMatches(theirItem, inventory[mySlot])
+						} else if(ItemStack.isSameItemSameTags(theirItem, inventory[mySlot])
 								&& theirItem.getCount() < theirItem.getMaxStackSize()
 								&& theirItem.getCount() < inv.getMaxStackSize()){
 							theirItem.grow(1);

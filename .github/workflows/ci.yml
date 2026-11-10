@@ -1,16 +1,16 @@
-name: baseSteam 1.19 CI
+name: baseSteam 1.20 CI
 
 on:
   push:
-    branches: [master-1.19.4, feature/basesteam-1.19.4-port]
+    branches: [master-1.20.1, feature/basesteam-1.20.1-port, feature/prepare-basesteam-1.20.1]
   pull_request:
-    branches: [master-1.19.4]
+    branches: [master-1.20.1]
 
 permissions:
   contents: read
 
 concurrency:
-  group: basesteam-1.19-${{ github.workflow }}-${{ github.ref }}
+  group: basesteam-1.20-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -21,6 +21,11 @@ jobs:
     steps:
       - name: Check out baseSteam
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Verify merged dependency pins and public basePower bytes
+        id: public-pins
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/verify-published-pins.sh
       - name: Validate coordinated dependency pins
         shell: bash
         run: |
@@ -28,19 +33,19 @@ jobs:
           power_ref=$(sed -n 's/^poweradvantage_source_ref=//p' gradle.properties | tr -d '\r')
           power_hash=$(sed -n 's/^poweradvantage_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$power_ref" =~ ^[a-f0-9]{40}$ || ! "$power_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact basePower 1.19 dependency pin is pending."
+            echo "::error::The exact basePower 1.20.1 dependency pin is pending."
             exit 1
           fi
           bm_ref=$(sed -n 's/^basemetals_source_commit=//p' gradle.properties | tr -d '\r')
           bm_hash=$(sed -n 's/^basemetals_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$bm_ref" =~ ^[a-f0-9]{40}$ || ! "$bm_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact Base Metals 1.19 dependency pin is pending."
+            echo "::error::The exact Base Metals 1.20.1 dependency pin is pending."
             exit 1
           fi
           os_ref=$(sed -n 's/^orespawn_source_commit=//p' gradle.properties | tr -d '\r')
           os_hash=$(sed -n 's/^orespawn_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$os_ref" =~ ^[a-f0-9]{40}$ || ! "$os_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact OreSpawn 1.19 dependency pin is pending."
+            echo "::error::The exact OreSpawn 1.20.1 dependency pin is pending."
             exit 1
           fi
           echo "ORESPAWN_SOURCE_REF=$os_ref" >> "$GITHUB_ENV"
@@ -61,7 +66,7 @@ jobs:
           repository: MinecraftModDevelopmentMods/BaseMetals
           ref: ${{ env.BASEMETALS_SOURCE_REF }}
           path: .ci-dependencies/BaseMetals
-      - name: Check out basePower 1.19.4
+      - name: Check out basePower 1.20.1
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/basePower
@@ -91,7 +96,7 @@ jobs:
           -Porg.gradle.java.installations.auto-download=false" >> "$GITHUB_ENV"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
-      - name: Build 1.19.4 dependency chain
+      - name: Build 1.20.1 dependency chain
         id: dependencies
         shell: bash
         run: |
@@ -103,48 +108,38 @@ jobs:
           test "$(git -C "$power" rev-parse HEAD)" = "$POWERADVANTAGE_SOURCE_REF"
           test "$(git -C "$basemetals" rev-parse HEAD)" = "$BASEMETALS_SOURCE_REF"
           mavenizer="$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar"
-          printf '%s  %s\n' '341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE' "$mavenizer" | sha256sum -c -
-          chmod +x "$orespawn/gradlew" "$basemetals/gradlew" "$power/gradlew"
-          (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
-          (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
-          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.119041-deobf.jar"
-          bmjar="$basemetals/build/libs-dev/BaseMetals-3.1.2.119041-deobf.jar"
+          printf '%s  %s\n' '416DCA4797BC55826F0DDCF03FDC405F1990FC15C2133FA27A1F143BF7976177' "$mavenizer" | sha256sum -c -
+          (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS assemble --no-daemon --stacktrace)
+          (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS assemble --no-daemon --stacktrace)
+          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.120011-deobf.jar"
+          bm_version=$(sed -n 's/^basemetals_version=//p' "$GITHUB_WORKSPACE/gradle.properties" | tr -d '\r')
+          bmjar="$basemetals/build/libs-dev/BaseMetals-$bm_version-deobf.jar"
           (cd "$power" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar unitBootstrapJar verifyReleaseDependencies \
-            "-Pforge45MavenizerJar=$mavenizer" \
+            "-Pforge47MavenizerJar=$mavenizer" \
             -PbaseMetalsDeobfJar="$bmjar" -PoreSpawnDeobfJar="$osjar" \
             --no-daemon --stacktrace)
-          powerjar="$power/build/libs-dev/basePower-2.4.11.119041-deobf.jar"
+          powerjar="$power/build/libs-dev/basePower-2.4.12.120011-deobf.jar"
           bootstrap="$power/build/unit-bootstrap/forge-native-unit-bootstrap.jar"
           test -f "$osjar" && test -f "$bmjar" && test -f "$powerjar" && test -f "$bootstrap"
           echo "orespawn=$osjar" >> "$GITHUB_OUTPUT"
           echo "basemetals=$bmjar" >> "$GITHUB_OUTPUT"
+          echo "orespawn_player=$orespawn/build/libs/OreSpawn-4.1.0.120011.jar" >> "$GITHUB_OUTPUT"
+          echo "basemetals_player=$basemetals/build/libs/BaseMetals-$bm_version.jar" >> "$GITHUB_OUTPUT"
           echo "power=$powerjar" >> "$GITHUB_OUTPUT"
           echo "bootstrap=$bootstrap" >> "$GITHUB_OUTPUT"
           echo "mavenizer=$mavenizer" >> "$GITHUB_OUTPUT"
-      - name: Download the released player jars
-        id: player
-        shell: bash
+      - name: Verify source layout and recipe unlocks
         run: |
-          set -euo pipefail
-          directory="$RUNNER_TEMP/base-steam-published"
-          mkdir "$directory"
-          fetch() {
-            curl --fail --silent --show-error --location --proto '=https' --proto-redir '=https' \
-              --output "$directory/$1.jar" "$2"
-            echo "$1=$directory/$1.jar" >> "$GITHUB_OUTPUT"
-          }
-          maven="https://maven.moddev.zone/releases/zone/moddev/mc"
-          fetch power "$maven/basepower/basePower/2.4.11.119041/basePower-2.4.11.119041.jar?ci=$GITHUB_RUN_ID"
-          fetch metals "$maven/basemetals/BaseMetals/3.1.2.119041/BaseMetals-3.1.2.119041.jar?ci=$GITHUB_RUN_ID"
-          fetch orespawn 'https://www.curseforge.com/api/v1/mods/245586/files/9171353/download'
+          node tools/verify-native-port.js
+          node tools/generate-recipe-unlocks.js --check
       - name: Build and audit release artifacts
         run: >-
           ./gradlew $MMD_GRADLE_TOOLCHAINS clean check build javadoc verifyReleaseDependencies verifyPlayerDependencies verifyReleaseArtifacts
           writeReleaseChecksums verifyEclipseProductionClasspath
-          "-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}"
-          "-PpowerAdvantagePlayerJar=${{ steps.player.outputs.power }}"
-          "-PbaseMetalsPlayerJar=${{ steps.player.outputs.metals }}"
-          "-PoreSpawnPlayerJar=${{ steps.player.outputs.orespawn }}"
+          "-Pforge47MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}"
+          "-PpowerAdvantagePlayerJar=${{ steps.public-pins.outputs.power_player }}"
+          "-PbaseMetalsPlayerJar=${{ steps.dependencies.outputs.basemetals_player }}"
+          "-PoreSpawnPlayerJar=${{ steps.dependencies.outputs.orespawn_player }}"
           -PforgeCapabilityBootstrapJar=${{ steps.dependencies.outputs.bootstrap }}
           -PpowerAdvantageDeobfJar=${{ steps.dependencies.outputs.power }}
           -PbaseMetalsDeobfJar=${{ steps.dependencies.outputs.basemetals }}
@@ -153,20 +148,20 @@ jobs:
       - name: Upload audited release candidate
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: baseSteam-1.19.4-${{ github.sha }}
+          name: baseSteam-1.20.1-${{ github.sha }}
           if-no-files-found: error
           retention-days: 30
           path: |
-            build/libs/baseSteam-2.2.12.119041.jar
-            build/libs/baseSteam-2.2.12.119041-sources.jar
-            build/libs/baseSteam-2.2.12.119041-javadoc.jar
+            build/libs/baseSteam-2.2.13.120011.jar
+            build/libs/baseSteam-2.2.13.120011-sources.jar
+            build/libs/baseSteam-2.2.13.120011-javadoc.jar
             build/release/SHA256SUMS
             CHANGELOG.txt
       - name: Upload diagnostics on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: baseSteam-1.19.4-diagnostics-${{ github.sha }}
+          name: baseSteam-1.20.1-diagnostics-${{ github.sha }}
           if-no-files-found: ignore
           retention-days: 14
           path: |

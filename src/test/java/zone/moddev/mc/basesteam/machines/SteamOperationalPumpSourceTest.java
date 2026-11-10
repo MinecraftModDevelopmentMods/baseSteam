@@ -7,7 +7,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BucketPickup;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
@@ -55,7 +54,7 @@ public class SteamOperationalPumpSourceTest {
     }
 
     @Test public void unsupportedModSourceIsNeverReplacedOrCredited() {
-        Block host = new Block(Block.Properties.of(Material.STONE)) {
+        Block host = new Block(Block.Properties.of()) {
             @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
         };
         BlockState source = host.defaultBlockState();
@@ -130,7 +129,7 @@ public class SteamOperationalPumpSourceTest {
 
     private static final class RefusingSource extends Block implements BucketPickup {
         private int pickups;
-        private RefusingSource() { super(Block.Properties.of(Material.STONE)); }
+        private RefusingSource() { super(Block.Properties.of()); }
         @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
         @Override public net.minecraft.world.item.ItemStack pickupBlock(LevelAccessor world, BlockPos pos, BlockState state) {
             pickups++;

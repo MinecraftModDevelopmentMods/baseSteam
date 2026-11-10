@@ -14,7 +14,8 @@ import zone.moddev.mc.basesteam.init.Enchantments;
 import zone.moddev.mc.basesteam.init.Power;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.Entity;
@@ -55,6 +56,8 @@ import net.minecraft.tags.TagKey;
 
 @SuppressWarnings("deprecation")
 public class MusketItem extends net.minecraft.world.item.Item{
+	private static final TagKey<Block> FRAGILE_TARGETS = TagKey.create(Registries.BLOCK,
+			new ResourceLocation(SteamAdvantage.MODID, "musket_fragile"));
 	
 	
 	public static final String NBT_DATA_KEY_LOADED = "loaded";
@@ -111,8 +114,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 	
 	@Override
-	public void onUsingTick(ItemStack stack, LivingEntity player, int count){
-		if(player.level.isClientSide && count % 7 == 3 && isNotLoaded(stack)){
+	public void onUseTick(Level level, LivingEntity player, ItemStack stack, int count){
+		if(level.isClientSide && count % 7 == 3 && isNotLoaded(stack)){
 			// indicator to player that the gun is loading
 			player.playSound(SoundType.STONE.getStepSound(), 0.5f, 1.0f);
 		}
@@ -189,19 +192,11 @@ public class MusketItem extends net.minecraft.world.item.Item{
 			BlockPos coord = ((BlockHitResult) rayTrace).getBlockPos();
 			if(!world.isOutsideBuildHeight(coord) && world.hasChunkAt(coord) && !world.isEmptyBlock(coord)){
 				BlockState bs = world.getBlockState(coord);
-				Material blockMat = bs.getMaterial();
-				if(blockMat == net.minecraft.world.level.material.Material.GLASS
-						|| blockMat == net.minecraft.world.level.material.Material.LEAVES
-						|| blockMat == net.minecraft.world.level.material.Material.DECORATION
-						|| blockMat == net.minecraft.world.level.material.Material.PLANT
-						|| blockMat == net.minecraft.world.level.material.Material.REPLACEABLE_PLANT
-						|| blockMat == net.minecraft.world.level.material.Material.WEB){
+				if (bs.is(FRAGILE_TARGETS)) {
 					world.destroyBlock(coord, true);
-				} else if (blockMat == net.minecraft.world.level.material.Material.EXPLOSIVE){
-					if(world.getBlockState(coord).getBlock() instanceof TntBlock){
-						TntBlock.explode(world, coord);
-						world.removeBlock(coord, false);
-					}
+				} else if (bs.getBlock() instanceof TntBlock) {
+					TntBlock.explode(world, coord);
+					world.removeBlock(coord, false);
 				}
 			}
 			if(EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack) > 0){

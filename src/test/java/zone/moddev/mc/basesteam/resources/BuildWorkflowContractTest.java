@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 
 public class BuildWorkflowContractTest {
     @Test public void everyHostedBuildUsesPinnedToolchainProjectProperties() throws Exception {
-        assertTrue(Files.isRegularFile(Paths.get("gradle/forge45-mavenizer.gradle")));
+        assertTrue(Files.isRegularFile(Paths.get("gradle/forge47-mavenizer.gradle")));
         java.util.Properties pins = new java.util.Properties();
         try (java.io.Reader reader = Files.newBufferedReader(Paths.get("gradle.properties"), StandardCharsets.UTF_8)) {
             pins.load(reader);
@@ -25,19 +25,21 @@ public class BuildWorkflowContractTest {
             String source = new String(Files.readAllBytes(Paths.get(".github/workflows", name)),
                     StandardCharsets.UTF_8);
             assertTrue(name, source.contains("ref: ${{ env.BASEMETALS_SOURCE_REF }}"));
-            assertTrue(name, source.contains("BaseMetals-" + pins.getProperty("basemetals_version") + "-deobf.jar"));
+            assertTrue(name, source.contains("sed -n 's/^basemetals_version=//p'"));
+            assertTrue(name, source.contains("BaseMetals-$bm_version-deobf.jar"));
             assertTrue(name, source.contains("repository: " + pins.getProperty("poweradvantage_source_repository")));
             assertTrue(name, source.contains("basePower-" + pins.getProperty("poweradvantage_version") + "-deobf.jar"));
             assertTrue(name, source.contains("ref: ${{ env.ORESPAWN_SOURCE_REF }}"));
             assertTrue(name, source.contains("ref: ${{ env.POWERADVANTAGE_SOURCE_REF }}"));
-            assertTrue(name, source.contains("The exact basePower 1.19 dependency pin is pending."));
-            assertTrue(name, source.contains("The exact Base Metals 1.19 dependency pin is pending."));
-            assertTrue(name, source.contains("The exact OreSpawn 1.19 dependency pin is pending."));
+            assertTrue(name, source.contains("The exact basePower 1.20.1 dependency pin is pending."));
+            assertTrue(name, source.contains("The exact Base Metals 1.20.1 dependency pin is pending."));
+            assertTrue(name, source.contains("The exact OreSpawn 1.20.1 dependency pin is pending."));
             assertTrue(name, source.contains("^[a-f0-9]{40}$"));
             assertTrue(name, source.contains("^[A-F0-9]{64}$"));
+            int publicCheck = source.indexOf("bash .github/verify-published-pins.sh");
             int pinCheck = source.indexOf("Validate coordinated dependency pins");
-            assertTrue(name, pinCheck >= 0 && pinCheck < source.indexOf("Check out pinned Base Metals")
-                    && pinCheck < source.indexOf("Check out basePower 1.19.4"));
+            assertTrue(name, publicCheck >= 0 && publicCheck < pinCheck && pinCheck < source.indexOf("Check out pinned Base Metals")
+                    && pinCheck < source.indexOf("Check out basePower 1.20.1"));
             assertFalse(name, source.contains("-Ppoweradvantage_source_ref="));
             assertTrue(name, source.contains("-Porg.gradle.java.installations.paths="));
             assertTrue(name, source.contains("-Porg.gradle.java.installations.auto-detect=false"));
@@ -46,21 +48,25 @@ public class BuildWorkflowContractTest {
             assertTrue(name, source.contains("jar unitBootstrapJar verifyReleaseDependencies"));
             assertTrue(name, source.contains("-PforgeCapabilityBootstrapJar=${{ steps.dependencies.outputs.bootstrap }}"));
             assertTrue(name, source.contains("mavenizer=\"$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar\""));
-            assertTrue(name, source.contains("341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE"));
+            assertTrue(name, source.contains("416DCA4797BC55826F0DDCF03FDC405F1990FC15C2133FA27A1F143BF7976177"));
             int toolCheck = source.indexOf("| sha256sum -c -");
             assertTrue(name, toolCheck >= 0 && toolCheck < source.indexOf("(cd \"$basemetals\""));
-            assertFalse(name, source.contains("forge45-mavenizer.init.gradle") || source.contains("-Pforge45MavenizerScript"));
-            assertTrue(name, source.contains(
-                    "(cd \"$basemetals\" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)"));
-            String toolArg = "\"-Pforge45MavenizerJar=$mavenizer\"";
+            String metalsTask = name.equals("ci.yml") ? "assemble" : "jar";
+            assertTrue(name, source.contains("(cd \"$basemetals\" && ./gradlew $MMD_GRADLE_TOOLCHAINS "
+                    + metalsTask + " --no-daemon --stacktrace)"));
+            if (name.equals("ci.yml")) {
+                assertTrue(source.contains("verifyPlayerDependencies"));
+                assertTrue(source.contains("-PpowerAdvantagePlayerJar=${{ steps.public-pins.outputs.power_player }}"));
+            }
+            String toolArg = "\"-Pforge47MavenizerJar=$mavenizer\"";
             int powerStart = source.indexOf("(cd \"$power\"");
             int powerEnd = source.indexOf("\n          powerjar=", powerStart);
             assertTrue(name, powerStart >= 0 && powerEnd > powerStart);
             String powerBuild = source.substring(powerStart, powerEnd);
             assertTrue(name, powerBuild.contains(toolArg));
-            assertFalse(name, powerBuild.contains("-I ") || powerBuild.contains("--init-script"));
+            assertFalse(name, powerBuild.contains("MavenizerScript"));
             assertEquals(name, 1L, source.lines().filter(line -> line.contains(toolArg)).count());
-            assertTrue(name, source.contains("\"-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}\""));
+            assertTrue(name, source.contains("\"-Pforge47MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}\""));
             for (String line : source.split("\\R")) {
                 if (line.contains("./gradlew ") && !line.contains("chmod")) {
                     assertTrue(name + ": " + line, line.contains("./gradlew $MMD_GRADLE_TOOLCHAINS "));

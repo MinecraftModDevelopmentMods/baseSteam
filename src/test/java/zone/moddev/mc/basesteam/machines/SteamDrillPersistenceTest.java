@@ -92,6 +92,24 @@ public class SteamDrillPersistenceTest {
         assertEquals(23, output.getCount());
     }
 
+    @Test public void drillOutputDoesNotMergeStacksWithDifferentTags() {
+        SteamDrillTileEntity drill = new SteamDrillTileEntity();
+        ItemStack first = new ItemStack(net.minecraft.world.item.Items.COBBLESTONE, 8);
+        first.getOrCreateTag().putString("source", "first");
+        ItemStack different = new ItemStack(net.minecraft.world.item.Items.COBBLESTONE, 4);
+        different.getOrCreateTag().putString("source", "second");
+        ItemStack matching = first.copy();
+        matching.setCount(3);
+
+        assertNull(drill.addItem(first));
+        assertNull(drill.addItem(different));
+        assertNull(drill.addItem(matching));
+        assertEquals(11, drill.getItem(0).getCount());
+        assertEquals("first", drill.getItem(0).getTag().getString("source"));
+        assertEquals(4, drill.getItem(1).getCount());
+        assertEquals("second", drill.getItem(1).getTag().getString("source"));
+    }
+
     @Test public void serializationNeverLooksUpTheWorldOrInfersNeighbours() throws Exception {
         ClassNode node = new ClassNode();
         try (InputStream input = SteamDrillTileEntity.class.getResourceAsStream("SteamDrillTileEntity.class")) {

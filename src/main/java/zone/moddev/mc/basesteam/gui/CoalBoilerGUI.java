@@ -34,8 +34,7 @@ public class CoalBoilerGUI extends SimpleMachineGUI{
 	 * @param guiContainer This is the instance of GUIContainer that is drawing 
 	 * the GUI. You need to use it to draw on the screen. For example:<br>
 	   <pre>
-com.mojang.blaze3d.systems.RenderSystem.setShaderTexture(0, arrowTexture);
-guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, textureOffsetY, width, height)
+guiContainer.blit(arrowTexture, x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, textureOffsetY, width, height)
 	   </pre>
 	 * @param x This is the x coordinate (in pixels) from the top-left corner of 
 	 * the GUI
@@ -71,8 +70,8 @@ guiContainer.blit(x+79, y+35, 0, 0, arrowLength, 17); // x, y, textureOffsetX, t
 			oldWater = water;
 			lastUpdate = t;
 			
-			GUIHelper.drawNeedle(x+steamPivotX, y+steamPivotY, z, steam);
-			GUIHelper.drawNeedle(x+waterPivotX, y+waterPivotY, z, water);
+			GUIHelper.drawNeedle(guiContainer, x+steamPivotX, y+steamPivotY, z, steam);
+			GUIHelper.drawNeedle(guiContainer, x+waterPivotX, y+waterPivotY, z, water);
 			GUIHelper.drawFlameProgress(x+80,y+58,1f-burn,guiContainer);
 			
 		}
