@@ -10,8 +10,8 @@
 
 | Input | Commit | Local native jar SHA-256 |
 | --- | --- | --- |
-| basePower 2.4.13.120061 | `75297fd9f4ce679aca95c2948e81bbef7633b976` | `29C1BD5EF384F8BB2441029061615E52A4B7302B9FC5480F2CE9C84C357A3181` |
-| Base Metals 3.1.2.120061 (local shared hook) | `0c2cdd4d0e8c3bf2e5fa234d49e57960bbf80bde` | `FC6DE01771ED9CD799D946A0ED4B6782B289C47AA8CFCA7753F9E102DD0F0417` |
+| basePower 2.4.13.120061 | `e6ecfb341006186d0adba9dcc3f296297cd34aec` | `29C1BD5EF384F8BB2441029061615E52A4B7302B9FC5480F2CE9C84C357A3181` |
+| Base Metals 3.1.2.120061 (local shared hook) | `9e706db5c85fa2bc7f36dee94f39a5f2fa8ab367` | `6186AC62C7E2E333373EA0D8AD8DE53FF859C520EBF568DFB47517C4F77C8C5D` |
 | OreSpawn 4.1.0.120061 | `4085315345ff043448b316d75e03f4b8da45402d` | `FAA7107B9FB84E2C62ED847CAFD880AA3C4238A37799BAD955EA9602A944AA26` |
 
 The native jars serve as both development and packaged inputs. The Power
@@ -20,7 +20,29 @@ JUnit bootstrap is pinned to
 both bootstrap source hashes are recorded in `gradle.properties`.
 No dependency is embedded or promoted to a publication claim.
 
-## Repinned Candidate Verification
+## Final Repin Verification
+
+Steam commit `e023a2f349ee1aa06ef874ae99242b47b5a6ca68` updates the Power source
+pin and the Base Metals source and jar pins. The Power native jar, unit test
+bootstrap and its sources, and OreSpawn are unchanged. All checks below used
+the frozen inputs in `evidence/steam1206-exact-e6ecfb3/inputs/`, including the
+Base Metals jar from `evidence/player-pre-components-20261110/candidate/` in
+the local shared-hook checkout.
+
+The Steam release, sources and Javadoc jars and their `SHA256SUMS` are frozen
+in `evidence/steam1206-exact-e6ecfb3/candidate/`. Direct byte comparisons of the
+native Steam jar against both earlier exact Steam jars passed. Its SHA-256 is
+`5DDABC83B01A8CC8BAE3188BAAACE01BDCF6F756B7049DADF1ADAA3F9CF480FD`.
+
+| Gate | Result | Receipt |
+| --- | --- | --- |
+| Forced rebuild, exact development and player inputs, release archive audit | Passed | `evidence/steam1206-exact-e6ecfb3/build-audit.log`, `input-checksums.json` and `candidate/candidate-receipt.json` |
+| Full Gradle suite, Java 21 and Eclipse production classpath | 221 JUnit tests passed; no failures or skips; Eclipse generation and audit passed | `evidence/steam1206-exact-e6ecfb3/full-suite.log` and `junit-summary.json` |
+| Forge 50.2.0 development GameTests | All four passed, no ERROR/FATAL records | `evidence/steam1206-exact-e6ecfb3/gametest-server.log` |
+| Packaged Forge 50.2.0 dedicated server | Clean boot and shutdown with and without Base Metals; OreSpawn retained in both | `evidence/packaged-server-exact-e6ecfb3-with-basemetals/receipt.json` and `evidence/packaged-server-exact-e6ecfb3-without-basemetals/receipt.json` |
+| Native source and recipe unlock checks | Passed; all 24 unlocks verified, no source or resource changes since the previous repin | `evidence/steam1206-exact-e6ecfb3/static-checks.log` |
+
+## Power Loot Fix Snapshot
 
 Steam commit `23cb29f9328bc52ebb0a95ae4df7f7e765cf71b7` pins the Power
 datapack loot fix. Steam production sources, the bootstrap, Base Metals and
@@ -28,7 +50,7 @@ OreSpawn did not change. A forced rebuild and direct byte comparison confirmed
 that the Steam jar is identical to the first exact candidate:
 `5DDABC83B01A8CC8BAE3188BAAACE01BDCF6F756B7049DADF1ADAA3F9CF480FD`.
 
-The current frozen artifact is
+The frozen artifact from this snapshot is
 `evidence/steam1206-exact-75297fd/candidate/baseSteam-2.2.14.120061.jar`.
 Its receipt records both Power and Steam hashes and the byte comparison.
 
@@ -145,7 +167,7 @@ The ASM side contract checks this without pretending to substitute for a
 packaged dedicated launch. The smoke script copies the checked Forge install
 and pinned player artifacts into a new, disposable Steam evidence directory.
 
-The `75297fd` candidate is ready for shared endurance, not manual
+The `e6ecfb3` candidate is ready for shared endurance, not manual
 acceptance. Combined Power/Steam/Electric validation, manual client and
 multiplayer checks, and historical world acceptance require their own
 evidence. No release or publication was performed.
