@@ -12,6 +12,8 @@ Minecraft 1.20.6, Forge 50.2.0, official mappings and MCP 20240429.135109.
 ForgeGradle 7.0.34 and the Gradle 9.6.1 wrapper use Temurin 21.0.7+6.
 Mavenizer uses Java 25 and the checksum-verified fixture from the local OreSpawn
 1.20.6 checkout. Set `-Pforge50MavenizerJar=<path>` for a different layout.
+ForgeGradle's Slime Launcher also locates a Java 8 toolchain while generating
+runs. The game itself runs on Java 21.
 
 Forge 50 uses official names at runtime. Steam does not run an SRG renamer.
 The required dependency is basePower 2.4.13.120061. Base Metals 3.1.1.120061 is
@@ -31,16 +33,17 @@ From this checkout in PowerShell, with the pinned local JDKs installed:
 
 ```powershell
 $env:JAVA_HOME = "$env:USERPROFILE/.jdks/temurin-21.0.7+6"
-$jdks = "$env:JAVA_HOME,$env:USERPROFILE/.jdks/jdk-25.0.3+9"
+$jdk8 = "$env:USERPROFILE/.jdks/temurin-8.0.502+7/jdk8u502-b07"
+$jdks = "$env:JAVA_HOME,$env:USERPROFILE/.jdks/jdk-25.0.3+9,$jdk8"
 $toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
   '-Porg.gradle.java.installations.auto-detect=false',
   '-Porg.gradle.java.installations.auto-download=false')
 ./gradlew.bat @toolchains check build deobfJar verifyReleaseArtifacts writeReleaseChecksums
-./gradlew.bat @toolchains verifyPlayerDependencies runGameTestServer
+./gradlew.bat @toolchains -PsteamGameTestRunId=candidate verifyPlayerDependencies runGameTestServer
 ./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_1206_SERVER_INSTALL -RunId candidate-with-basemetals
 ```
 
-The GameTest run uses `build/steam-gametest-run` and a validation-only source
+The GameTest run uses `build/steam-gametest-<id>` and a validation-only source
 set. It checks drill-bit packets, legacy musket componentization, the shared
 durability migration, and loaded recipe, advancement, and loot resources.
 The packaged dedicated smoke is a separate gate. It checks the official Forge

@@ -124,7 +124,9 @@ minecraft {
             args '--nogui'
         }
         register('gameTestServer') {
-            workingDir.set(layout.buildDirectory.dir('steam-gametest-run'))
+            String runId = providers.gradleProperty('steamGameTestRunId').getOrElse('run')
+            if (!(runId ==~ /[A-Za-z0-9_-]+/)) throw new GradleException('Invalid Steam GameTest run ID')
+            workingDir.set(layout.buildDirectory.dir("steam-gametest-${runId}"))
             systemProperty 'forge.enableGameTest', 'true'
             systemProperty 'forge.enabledGameTestNamespaces', mod_id
             mods { basesteam { source sourceSets.gameTestValidation } }
@@ -167,6 +169,9 @@ tasks.withType(JavaExec).configureEach {
         dependsOn gameTest ? prepareForgeGameTestModClasses : prepareForgeRunModClasses
         environment 'MOD_CLASSES', "${mod_id}%%${mergedOutput.get().asFile.absolutePath}"
         doFirst {
+            if (gameTest && new File(workingDir, 'logs/latest.log').exists()) {
+                throw new GradleException('Choose a fresh -PsteamGameTestRunId to preserve the existing receipt')
+            }
             if (name == 'runClient') setArgs(['--launcher-side', 'client'] + args)
             Set<File> splitOutputs = [sourceSets.main, sourceSets.gameTestValidation].collectMany {
                 it.output.files
@@ -175,6 +180,13 @@ tasks.withType(JavaExec).configureEach {
                 !splitOutputs.contains(it.canonicalFile)
             })
             new File(workingDir, 'mods').mkdirs()
+        }
+        if (gameTest) doLast {
+            // Forge can exit zero after a loader failure; require the actual test result.
+            File receipt = new File(workingDir, 'logs/latest.log')
+            if (!receipt.isFile() || !receipt.getText('UTF-8').contains('All 4 required tests passed')) {
+                throw new GradleException("The four Steam GameTests did not pass; see ${receipt}")
+            }
         }
     }
 }

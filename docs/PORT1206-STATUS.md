@@ -46,6 +46,18 @@ any 1.20.1 or newer 1.20.6 mod artifacts.
 - `evidence/steam1206-independent-native-side.log`: 21 checks passed,
   including the native drill renderer geometry and the client-only GUI
   signature regression. Neither receipt is a packaged runtime pass.
+- `evidence/steam1206-provisional-unit-d.log` and its XML results: 219 passed,
+  none failed or skipped. Only the two final pin-contract tests were excluded.
+  Inputs included provisional Power `82B1554AF83DF6FF2D737FA22D8548736B7F23BC182659A12DEAB254ED4CA6C6`
+  and the local Base Metals shared-hook candidate
+  `FC6DE01771ED9CD799D946A0ED4B6782B289C47AA8CFCA7753F9E102DD0F0417`.
+  The a through c fixture failures and XML are preserved.
+- `evidence/steam1206-provisional-gametest-c.log`: Forge reached the dedicated
+  development loader, but provisional Power's `MachineGUIRegistry` auto
+  subscriber was rejected for carrying `@OnlyIn` methods. No Steam tests ran,
+  despite the launcher returning zero. The new task gate requires the actual
+  four-test pass marker and a fresh run ID. The crash is under
+  `build/steam-gametest-provisional-c/crash-reports`.
 
 The isolated data checks use Forge 50.2.0 classes but do not start the Forge
 mod loader or qualify Steam's production classes. The GameTest fixtures are
