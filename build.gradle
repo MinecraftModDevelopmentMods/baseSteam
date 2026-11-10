@@ -1296,7 +1296,7 @@ tasks.register('verifyModelAssets') {
     File steamAtlas = new File(resourceRoot, blocksAtlasPath)
     inputs.dir(assetRoot)
     inputs.files(fileTree(resourceRoot) { include blocksAtlasPath })
-    inputs.files(providers.gradleProperty('powerAdvantageDeobfJar').map { file(it) })
+    inputs.file(powerAdvantageDeobfJar)
 
     doLast {
         fileTree(assetRoot) { include '**/*.json' }.files.sort().each { File jsonFile ->
