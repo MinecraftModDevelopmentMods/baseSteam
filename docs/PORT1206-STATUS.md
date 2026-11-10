@@ -52,6 +52,12 @@ any 1.20.1 or newer 1.20.6 mod artifacts.
   and the local Base Metals shared-hook candidate
   `FC6DE01771ED9CD799D946A0ED4B6782B289C47AA8CFCA7753F9E102DD0F0417`.
   The a through c fixture failures and XML are preserved.
+- `evidence/steam1206-provisional-unit-f.log` and its XML results: the same
+  219 tests passed after the fragile-block fix, using the updated shared
+  Forge 50 JUnit agent
+  `96752A443070E117EED9308ABC9C2009BD3533F121C9594A7108908E104673C9`.
+  The e-run exposed overlapping loader initialization, so Steam now lets
+  the shared agent own that setup and retains only its fluid registry fixture.
 - `evidence/steam1206-provisional-gametest-c.log`: Forge reached the dedicated
   development loader, but provisional Power's `MachineGUIRegistry` auto
   subscriber was rejected for carrying `@OnlyIn` methods. No Steam tests ran,
@@ -64,6 +70,14 @@ any 1.20.1 or newer 1.20.6 mod artifacts.
   log rejects this as a clean data smoke: Forge could not bind the fragile
   block tag because Minecraft renamed `grass` to `short_grass`. The smoke
   now fails on error logs and the registry test checks every required ID.
+- `evidence/packaged-server-provisional-b/receipt.json` and
+  `evidence/packaged-server-provisional-c-no-basemetals/receipt.json`:
+  the corrected packaged Steam jar
+  `6AF7260CF4950998816246029FB9F5C3E5A424512A173E46DD6A80E41ED76A8C`
+  booted and stopped cleanly on Forge 50.2.0 in both profiles, with no
+  ERROR/FATAL records. These runs used the frozen provisional Power jar
+  `82B1554AF83DF6FF2D737FA22D8548736B7F23BC182659A12DEAB254ED4CA6C6`,
+  not a final Power source pin.
 
 The isolated data checks use Forge 50.2.0 classes but do not start the Forge
 mod loader or qualify Steam's production classes. The GameTest fixtures are

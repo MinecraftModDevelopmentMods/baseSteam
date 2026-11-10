@@ -1,8 +1,6 @@
 package zone.moddev.mc.basesteam.testing;
 
 import java.util.List;
-import java.util.Optional;
-import cpw.mods.modlauncher.api.IModuleLayerManager;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -11,8 +9,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -73,30 +69,10 @@ public final class NativeTestBootstrap {
 
     private static final class NativeRegistries {
         static {
-            initializeEmptyForgeDiscovery();
             SharedConstants.tryDetectVersion();
             Bootstrap.bootStrap();
         }
 
         private static void ensureStarted() {}
-
-        private static void initializeEmptyForgeDiscovery() {
-            if (FMLLoader.getLoadingModList() != null) return;
-            // Forge 50 lazily gathers item components through ForgeEventFactory.
-            // Plain JUnit has no launch discovery, so give the native loader an empty list.
-            var list = LoadingModList.of(List.of(), List.of(), null);
-            list.setBrokenFiles(List.of());
-            try {
-                var field = FMLLoader.class.getDeclaredField("loadingModList");
-                field.setAccessible(true);
-                field.set(null, list);
-                var layers = FMLLoader.class.getDeclaredField("moduleLayerManager");
-                layers.setAccessible(true);
-                layers.set(null, (IModuleLayerManager) layer -> layer == IModuleLayerManager.Layer.GAME
-                        ? Optional.of(ModuleLayer.empty()) : Optional.empty());
-            } catch (ReflectiveOperationException exception) {
-                throw new IllegalStateException("Could not initialize the Forge 50 unit fixture", exception);
-            }
-        }
     }
 }
