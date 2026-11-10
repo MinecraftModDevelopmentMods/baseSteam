@@ -3,7 +3,6 @@ package zone.moddev.mc.basesteam.machines;
 import cyano.poweradvantage.api.ConduitType;
 import cyano.poweradvantage.api.PoweredEntity;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -17,7 +16,7 @@ public class SteamElevatorBlock extends cyano.poweradvantage.api.simple.BlockSim
 
 	
 	public SteamElevatorBlock() {
-		super(Material.PISTON, 0.75f, Power.steam_power);
+		super(machineProperties(0.75F), Power.steam_power);
 	}
 
 	@Override

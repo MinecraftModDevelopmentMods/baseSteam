@@ -83,7 +83,7 @@ public class RockCrusherReloadRedstoneTest {
     private static final class ControlWorld extends ServerLevel {
         boolean powered, stopAtFirstSample;
         int samples;
-        private ControlWorld() { super(null, null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false); }
+        private ControlWorld() { super(null, null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false, null); }
         @Override public boolean hasNeighborSignal(BlockPos pos) {
             samples++;
             if (stopAtFirstSample) throw new ControlSample();

@@ -1,18 +1,13 @@
 package zone.moddev.mc.basesteam.blocks;
 
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.StateDefinition;
-import java.util.Collections;
-import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import zone.moddev.mc.basesteam.init.Blocks;
@@ -29,7 +24,7 @@ public class PlatformBlock extends Block {
     };
 
     public PlatformBlock() {
-        super(Block.Properties.of(Material.METAL).strength(5.0F, 2000.0F).noOcclusion()
+        super(SteamBlockProperties.metalHelper(2000.0F)
                 .isRedstoneConductor((state, world, pos) -> false)
                 .isSuffocating((state, world, pos) -> false)
                 .isViewBlocking((state, world, pos) -> false));
@@ -39,7 +34,6 @@ public class PlatformBlock extends Block {
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) { builder.add(HEIGHT); }
     @Override public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPES[state.getValue(HEIGHT)]; }
     @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPES[state.getValue(HEIGHT)]; }
-    @Override public List<ItemStack> getDrops(BlockState state, LootContext.Builder context) { return Collections.emptyList(); }
 
     @Override
     public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {

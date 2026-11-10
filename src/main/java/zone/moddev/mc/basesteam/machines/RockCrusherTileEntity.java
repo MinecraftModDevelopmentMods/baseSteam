@@ -59,7 +59,7 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 			}
 			// reset progress when item in slot changes
 			ItemStack input = inventory[0];
-			if(itemCheck != null && (input == null || input.isEmpty() || ItemStack.isSame(itemCheck, input) == false)){
+			if(itemCheck != null && (input == null || input.isEmpty() || !ItemStack.isSameItem(itemCheck, input))){
 				progress = 0;
 			}
 			itemCheck  = (input == null || input.isEmpty()) ? null : input.copy();
@@ -190,7 +190,7 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	private int canAddToOutputInventory(ItemStack output) {
 		for(int i = 1; i < inventory.length; i++){
 			if(inventory[i] == null) {return i;}
-			if(ItemStack.isSame(output, inventory[i]) && ItemStack.tagMatches(output, inventory[i])
+			if(ItemStack.isSameItemSameTags(output, inventory[i])
 					&& (inventory[i].getCount() + output.getCount()) <= inventory[i].getMaxStackSize()){
 				return i;
 			}

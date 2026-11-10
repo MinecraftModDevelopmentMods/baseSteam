@@ -2,13 +2,10 @@ package zone.moddev.mc.basesteam.graphics;
 
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import zone.moddev.mc.basesteam.init.Items;
 import zone.moddev.mc.basesteam.items.MusketItem;
-import zone.moddev.mc.basesteam.init.Blocks;
 import zone.moddev.mc.basesteam.init.Entities;
 
 /** Client-only renderer registration. */
@@ -21,7 +18,6 @@ public final class ClientRegistration {
 
     public static void onClientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemBlockRenderTypes.setRenderLayer(Blocks.steam_track, RenderType.cutout());
             ItemProperties.register(Items.blackpowder_musket, new ResourceLocation("loaded"),
                     (item, world, entity, seed) -> MusketItem.isLoaded(item) ? 1.0F : 0.0F);
             ItemProperties.register(Items.blackpowder_musket, new ResourceLocation("loading"),

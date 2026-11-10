@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [master-1.19.4, feature/basesteam-1.19.4-port]
+    branches: [master-1.20.1, feature/basesteam-1.20.1-port]
   pull_request:
-    branches: [master-1.19.4]
+    branches: [master-1.20.1]
   schedule:
     - cron: '53 7 * * 4'
 
@@ -28,19 +28,19 @@ jobs:
           power_ref=$(sed -n 's/^poweradvantage_source_ref=//p' gradle.properties | tr -d '\r')
           power_hash=$(sed -n 's/^poweradvantage_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$power_ref" =~ ^[a-f0-9]{40}$ || ! "$power_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact basePower 1.19 dependency pin is pending."
+            echo "::error::The exact basePower 1.20.1 dependency pin is pending."
             exit 1
           fi
           bm_ref=$(sed -n 's/^basemetals_source_commit=//p' gradle.properties | tr -d '\r')
           bm_hash=$(sed -n 's/^basemetals_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$bm_ref" =~ ^[a-f0-9]{40}$ || ! "$bm_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact Base Metals 1.19 dependency pin is pending."
+            echo "::error::The exact Base Metals 1.20.1 dependency pin is pending."
             exit 1
           fi
           os_ref=$(sed -n 's/^orespawn_source_commit=//p' gradle.properties | tr -d '\r')
           os_hash=$(sed -n 's/^orespawn_deobf_sha256=//p' gradle.properties | tr -d '\r')
           if [[ ! "$os_ref" =~ ^[a-f0-9]{40}$ || ! "$os_hash" =~ ^[A-F0-9]{64}$ ]]; then
-            echo "::error::The exact OreSpawn 1.19 dependency pin is pending."
+            echo "::error::The exact OreSpawn 1.20.1 dependency pin is pending."
             exit 1
           fi
           echo "ORESPAWN_SOURCE_REF=$os_ref" >> "$GITHUB_ENV"
@@ -61,7 +61,7 @@ jobs:
           repository: MinecraftModDevelopmentMods/BaseMetals
           ref: ${{ env.BASEMETALS_SOURCE_REF }}
           path: .ci-dependencies/BaseMetals
-      - name: Check out basePower 1.19.4
+      - name: Check out basePower 1.20.1
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/basePower
@@ -91,7 +91,7 @@ jobs:
           -Porg.gradle.java.installations.auto-download=false" >> "$GITHUB_ENV"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
-      - name: Build 1.19.4 dependency chain
+      - name: Build 1.20.1 dependency chain
         id: dependencies
         shell: bash
         run: |
@@ -103,17 +103,18 @@ jobs:
           test "$(git -C "$power" rev-parse HEAD)" = "$POWERADVANTAGE_SOURCE_REF"
           test "$(git -C "$basemetals" rev-parse HEAD)" = "$BASEMETALS_SOURCE_REF"
           mavenizer="$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar"
-          printf '%s  %s\n' '341B3FB10ABA6EA7DC612FBE519DC290A1C81867AED5DD320ACD783688AC49DE' "$mavenizer" | sha256sum -c -
+          printf '%s  %s\n' '416DCA4797BC55826F0DDCF03FDC405F1990FC15C2133FA27A1F143BF7976177' "$mavenizer" | sha256sum -c -
           chmod +x "$orespawn/gradlew" "$basemetals/gradlew" "$power/gradlew"
           (cd "$orespawn" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
           (cd "$basemetals" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)
-          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.119041-deobf.jar"
-          bmjar="$basemetals/build/libs-dev/BaseMetals-3.1.2.119041-deobf.jar"
+          osjar="$orespawn/build/libs-dev/OreSpawn-4.1.0.120011-deobf.jar"
+          bm_version=$(sed -n 's/^basemetals_version=//p' "$GITHUB_WORKSPACE/gradle.properties" | tr -d '\r')
+          bmjar="$basemetals/build/libs-dev/BaseMetals-$bm_version-deobf.jar"
           (cd "$power" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar unitBootstrapJar verifyReleaseDependencies \
-            "-Pforge45MavenizerJar=$mavenizer" \
+            "-Pforge47MavenizerJar=$mavenizer" \
             -PbaseMetalsDeobfJar="$bmjar" -PoreSpawnDeobfJar="$osjar" \
             --no-daemon --stacktrace)
-          powerjar="$power/build/libs-dev/basePower-2.4.11.119041-deobf.jar"
+          powerjar="$power/build/libs-dev/basePower-2.4.12.120011-deobf.jar"
           bootstrap="$power/build/unit-bootstrap/forge-native-unit-bootstrap.jar"
           test -f "$osjar" && test -f "$bmjar" && test -f "$powerjar" && test -f "$bootstrap"
           echo "orespawn=$osjar" >> "$GITHUB_OUTPUT"
@@ -129,7 +130,7 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew $MMD_GRADLE_TOOLCHAINS clean classes --rerun-tasks --no-build-cache --no-daemon --stacktrace \
-            "-Pforge45MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}" \
+            "-Pforge47MavenizerJar=${{ steps.dependencies.outputs.mavenizer }}" \
             -PforgeCapabilityBootstrapJar=${{ steps.dependencies.outputs.bootstrap }} \
             -PpowerAdvantageDeobfJar=${{ steps.dependencies.outputs.power }} \
             -PbaseMetalsDeobfJar=${{ steps.dependencies.outputs.basemetals }} \

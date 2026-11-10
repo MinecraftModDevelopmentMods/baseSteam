@@ -215,6 +215,6 @@ public class CoalBoilerFillPersistenceTest {
         }
     }
     private static final class SaveWorld extends net.minecraft.server.level.ServerLevel {
-        private SaveWorld() { super(null, null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false); }
+        private SaveWorld() { super(null, null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false, null); }
     }
 }

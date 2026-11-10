@@ -23,11 +23,11 @@ for (const name of files(resources).filter(name => /\.(json|mcmeta)$/.test(name)
   json.set(name, JSON.parse(text));
 }
 assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {
-  pack_format: 13, 'forge:server_data_pack_format': 12, description: 'baseSteam'
+  pack_format: 15, 'forge:server_data_pack_format': 15, description: 'baseSteam'
 });
 const metadata = read(`${resources}/META-INF/mods.toml`);
 assert.match(metadata, /modId="basesteam"/);
-assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[2\.4\.11\.119041,3\.0\.0\)"/);
+assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[2\.4\.12\.120011,3\.0\.0\)"/);
 assert.match(metadata, /modId="basemetals"\r?\nmandatory=false/);
 assert.doesNotMatch(metadata, /dependencies\.steamadvantage|modId="(?:steamadvantage|poweradvantage)"/);
 
@@ -51,10 +51,18 @@ function verifyModelReferences(value, name) {
 for (const [name, content] of json) {
   if (name.startsWith(assets)) verifyModelReferences(content, name);
 }
+for (const sourceRoot of ['src/main/java', 'src/test/java']) {
+  for (const name of files(sourceRoot).filter(name => name.endsWith('.java'))) {
+    const declared = /^package\s+([\w.]+);/m.exec(read(name))?.[1];
+    const expected = path.posix.dirname(name.slice(sourceRoot.length + 1)).replaceAll('/', '.');
+    assert.equal(declared, expected, `${name}: source root must match the package (Eclipse/Buildship)`);
+  }
+}
 const source = files('src/main/java').filter(name => name.endsWith('.java'));
 for (const name of source) {
   const text = read(name);
   assert(!/net\.minecraft\.(?:block|tileentity|entity|item|inventory)\./.test(text), name);
+  assert(!/net\.minecraft\.world\.level\.material\.Material;|\.getMaterial\(\)/.test(text), name);
   assert(!/setPosition\(|setLevelAndPosition\(|ITickableTileEntity|\[native code\]/.test(text), name);
   assert(!/getDeclaredField\("(?:level|world|worldPosition)"\)/.test(text), name);
   assert(!/zone\.moddev\.mc\.(?:steamadvantage|poweradvantage)\b/.test(text), name);
@@ -95,5 +103,5 @@ for (const id of pickaxe.values.map(value => value.split(':')[1]).filter(id => !
 }
 const tests = files('src/test/java').filter(name => name.endsWith('.java'));
 const testCount = tests.reduce((sum, name) => sum + (read(name).match(/@Test\b/g) || []).length, 0);
-console.log(`BASESTEAM_NATIVE119_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
+console.log(`BASESTEAM_NATIVE1201_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
 console.log('Source checks only. Compilation, executed tests, packaged runtime and manual acceptance are separate.');

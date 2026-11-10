@@ -5,7 +5,6 @@ import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import zone.moddev.mc.basepower.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -32,7 +31,7 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
 	public SteamDrillBlock(){
-		super(Material.PISTON, 0.75f);
+		super(machineProperties(0.75F));
 		this.registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.DOWN));
 	}
 
