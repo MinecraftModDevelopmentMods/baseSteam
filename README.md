@@ -16,9 +16,11 @@ ForgeGradle's Slime Launcher also locates a Java 8 toolchain while generating
 runs. The game itself runs on Java 21.
 
 Forge 50 uses official names at runtime. Steam does not run an SRG renamer.
-The required dependency is basePower 2.4.13.120061. Base Metals 3.1.2.120061 is
-optional at runtime and uses OreSpawn 4.1.0.120061. The exact native companion
-jars serve as both development and player inputs. No dependency is embedded.
+Install [basePower 2.4.13.120061](https://www.curseforge.com/minecraft/mc-mods/basepower/files/9545972)
+for Minecraft 1.20.6. CurseForge also installs
+[Base Metals](https://www.curseforge.com/minecraft/mc-mods/base-metals); this
+build was tested with 3.1.2.120061 and OreSpawn 4.1.0.120061. The same native
+jars are used for play and development, and none are bundled.
 The mod ID, data namespace, and registry paths remain `basesteam`.
 
 ## Local Verification
@@ -55,7 +57,7 @@ The optional no-Base-Metals profile uses `-WithoutBaseMetals` and retains
 OreSpawn because basePower requires it.
 `node tools/verify-native-port.js` and
 `node tools/generate-recipe-unlocks.js --check` are independent source checks.
-See [local status](docs/PORT1206-STATUS.md) for evidence and open gates.
+See the [1.20.6 notes](docs/PORT1206-STATUS.md) for save compatibility and test coverage.
 
 ## Upgrading a World
 
