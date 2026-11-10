@@ -20,7 +20,34 @@ JUnit bootstrap is pinned to
 both bootstrap source hashes are recorded in `gradle.properties`.
 No dependency is embedded or promoted to a publication claim.
 
-## Evidence
+## Exact Candidate Verification
+
+The frozen `baseSteam-2.2.14.120061.jar` is in
+`evidence/steam1206-exact-5fdbb2c/candidate/`. It was built from Steam commit
+`756fd62385806644c2475fe6a4d9cbe9290b12d7` and has SHA-256
+`5DDABC83B01A8CC8BAE3188BAAACE01BDCF6F756B7049DADF1ADAA3F9CF480FD`.
+Later commits only changed verification, Eclipse generation, and documentation.
+The ordinary `build/libs` jar matched the frozen bytes before and after both
+packaged runs.
+
+| Gate | Result | Receipt |
+| --- | --- | --- |
+| Exact development and player dependencies; archive audit | Passed | `evidence/steam1206-exact-5fdbb2c/build-audit-b.log` and `input-checksums.json` |
+| Full Gradle suite | 221 JUnit tests passed, none failed or skipped; asset, recipe, and repository checks passed | `evidence/steam1206-exact-5fdbb2c/full-suite.log` and `junit-summary.json` |
+| Forge 50 development GameTests | All four required tests passed; no ERROR/FATAL records | `evidence/steam1206-exact-5fdbb2c/gametest-c-server.log` |
+| Packaged Forge dedicated server, with Base Metals | Clean boot and shutdown | `evidence/packaged-server-exact-5fdbb2c-with-basemetals/receipt.json` |
+| Packaged Forge dedicated server, without Base Metals | Clean boot and shutdown; OreSpawn retained | `evidence/packaged-server-exact-5fdbb2c-without-basemetals/receipt.json` |
+| Eclipse generation and production classpath | Passed; no Eclipse client was launched | `evidence/steam1206-exact-5fdbb2c/eclipse-b.log` |
+| Source parity | All 33 recipes and 24 unlocks verified; block loot and harvest tags unchanged | `evidence/steam1206-exact-5fdbb2c/static-parity.log` |
+
+The initial archive audit lacked a task dependency on the development jar.
+The two initial GameTest runs stopped before tests on scratch-directory and
+batch selection issues; the final run seeded server properties and used the
+explicit `basesteam` batch. Initial Eclipse generation omitted `MOD_CLASSES`.
+These are verification fixes, not production changes. Failed attempts remain
+in the evidence directory alongside the passing receipts.
+
+## Provisional Evidence
 
 - `build-steam1206-companions.log`: initial offline cache-only rejection.
 - `build-steam1206-companions-normal.log`: Forge configured, then the stale
@@ -91,7 +118,7 @@ The ASM side contract checks this without pretending to substitute for a
 packaged dedicated launch. The smoke script copies the checked Forge install
 and pinned player artifacts into a new, disposable Steam evidence directory.
 
-Exact pinned build, full unit suite, GameTest and packaged runtime remain
-separate gates. Do not promote the provisional Power artifact to a final
-pin. Manual client, multiplayer and historical world acceptance require
-their own evidence.
+The exact candidate above is ready for shared live validation, not manual
+acceptance. Combined Power/Steam/Electric validation, manual client and
+multiplayer checks, and historical world acceptance require their own
+evidence. No release or publication was performed.

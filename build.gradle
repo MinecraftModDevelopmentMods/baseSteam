@@ -1003,15 +1003,24 @@ tasks.register('isolateEclipseProductionRuns') {
             if (launch.name in ['runClient.launch', 'runServer.launch', 'runData.launch']) {
                 // Eclipse compiles into bin/main, not Gradle's merged run output.
                 def launchXml = new groovy.xml.XmlParser().parseText(contents)
-                def modClasses = launchXml.mapAttribute.find {
+                def environmentVariables = launchXml.mapAttribute.find {
                     it.@key == 'org.eclipse.debug.core.environmentVariables'
-                }.mapEntry.findAll { it.@key == 'MOD_CLASSES' }
-                if (modClasses.size() != 1) {
-                    throw new GradleException("${launch.name} must define one MOD_CLASSES entry")
+                }
+                if (environmentVariables == null) {
+                    environmentVariables = launchXml.appendNode('mapAttribute',
+                            [key: 'org.eclipse.debug.core.environmentVariables'])
+                }
+                def modClasses = environmentVariables.mapEntry.findAll { it.@key == 'MOD_CLASSES' }
+                if (modClasses.size() > 1) {
+                    throw new GradleException("${launch.name} must not duplicate MOD_CLASSES")
                 }
                 String mainOutput = file('bin/main').absolutePath
                 String eclipseModClasses = "${project.mod_id}%%${mainOutput}"
-                modClasses[0].@value = eclipseModClasses
+                if (modClasses.isEmpty()) {
+                    environmentVariables.appendNode('mapEntry', [key: 'MOD_CLASSES', value: eclipseModClasses])
+                } else {
+                    modClasses[0].@value = eclipseModClasses
+                }
                 if (launch.name == 'runClient.launch') {
                     def programArguments = launchXml.stringAttribute.find {
                         it.@key == 'org.eclipse.jdt.launching.PROGRAM_ARGUMENTS'
