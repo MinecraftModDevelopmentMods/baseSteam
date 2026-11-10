@@ -36,8 +36,9 @@ public class BuildWorkflowContractTest {
             assertTrue(name, source.contains("The exact OreSpawn 1.20.1 dependency pin is pending."));
             assertTrue(name, source.contains("^[a-f0-9]{40}$"));
             assertTrue(name, source.contains("^[A-F0-9]{64}$"));
+            int publicCheck = source.indexOf("bash .github/verify-published-pins.sh");
             int pinCheck = source.indexOf("Validate coordinated dependency pins");
-            assertTrue(name, pinCheck >= 0 && pinCheck < source.indexOf("Check out pinned Base Metals")
+            assertTrue(name, publicCheck >= 0 && publicCheck < pinCheck && pinCheck < source.indexOf("Check out pinned Base Metals")
                     && pinCheck < source.indexOf("Check out basePower 1.20.1"));
             assertFalse(name, source.contains("-Ppoweradvantage_source_ref="));
             assertTrue(name, source.contains("-Porg.gradle.java.installations.paths="));
@@ -50,8 +51,13 @@ public class BuildWorkflowContractTest {
             assertTrue(name, source.contains("416DCA4797BC55826F0DDCF03FDC405F1990FC15C2133FA27A1F143BF7976177"));
             int toolCheck = source.indexOf("| sha256sum -c -");
             assertTrue(name, toolCheck >= 0 && toolCheck < source.indexOf("(cd \"$basemetals\""));
-            assertTrue(name, source.contains(
-                    "(cd \"$basemetals\" && ./gradlew $MMD_GRADLE_TOOLCHAINS jar --no-daemon --stacktrace)"));
+            String metalsTask = name.equals("ci.yml") ? "assemble" : "jar";
+            assertTrue(name, source.contains("(cd \"$basemetals\" && ./gradlew $MMD_GRADLE_TOOLCHAINS "
+                    + metalsTask + " --no-daemon --stacktrace)"));
+            if (name.equals("ci.yml")) {
+                assertTrue(source.contains("verifyPlayerDependencies"));
+                assertTrue(source.contains("-PpowerAdvantagePlayerJar=${{ steps.public-pins.outputs.power_player }}"));
+            }
             String toolArg = "\"-Pforge47MavenizerJar=$mavenizer\"";
             int powerStart = source.indexOf("(cd \"$power\"");
             int powerEnd = source.indexOf("\n          powerjar=", powerStart);

@@ -1,10 +1,10 @@
 # baseSteam
 
-**Minecraft 1.20.1 (Forge), version 2.2.13.120011. Local port.**
+**Minecraft 1.20.1 (Forge), version 2.2.13.120011**
 
 baseSteam, formerly Steam Advantage, adds boilers, steam-powered machines,
 pumps, storage, elevators and a blackpowder musket to basePower. Its items and
-blocks use the shared basePower creative tab. This version is not published.
+blocks use the shared basePower creative tab.
 
 ## Upgrading a World
 
@@ -50,8 +50,9 @@ from development and published JARs. Before a packaged smoke, run
 paths default to `D:/MinecraftMineralogy/OS1201/OreSpawn` in the usual checkout
 layout; the same SHA-256 checks apply to defaults and overrides.
 
-Use the coordinated basePower 1.20.1 candidate and matching frozen JARs.
-Pending pins fail closed. No 1.19.4 artifacts may satisfy the 1.20.1 audits.
+Local builds use the exact inputs in `gradle.properties`. Hosted release
+checks also require the merged basePower source and a matching public player
+download. Do not use 1.19.4 jars with this branch.
 
 For example, from the Steam checkout in PowerShell:
 
