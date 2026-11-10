@@ -103,6 +103,12 @@ configurations {
     gameTestValidationRuntimeOnly.extendsFrom runtimeOnly
 }
 
+def steamGameTestRunDirectory = layout.buildDirectory.dir(
+        providers.gradleProperty('steamGameTestRunId').orElse('run').map { runId ->
+            if (!(runId ==~ /[A-Za-z0-9_-]+/)) throw new GradleException('Invalid Steam GameTest run ID')
+            "steam-gametest-${runId}"
+        })
+
 minecraft {
     if (gradle.startParameter.offline) {
         mavenizerArguments.add('--offline')
@@ -124,9 +130,7 @@ minecraft {
             args '--nogui'
         }
         register('gameTestServer') {
-            String runId = providers.gradleProperty('steamGameTestRunId').getOrElse('run')
-            if (!(runId ==~ /[A-Za-z0-9_-]+/)) throw new GradleException('Invalid Steam GameTest run ID')
-            workingDir.set(layout.buildDirectory.dir("steam-gametest-${runId}"))
+            workingDir.set(steamGameTestRunDirectory)
             systemProperty 'forge.enableGameTest', 'true'
             systemProperty 'forge.enabledGameTestNamespaces', mod_id
             mods { basesteam { source sourceSets.gameTestValidation } }
@@ -169,8 +173,12 @@ tasks.withType(JavaExec).configureEach {
         dependsOn gameTest ? prepareForgeGameTestModClasses : prepareForgeRunModClasses
         environment 'MOD_CLASSES', "${mod_id}%%${mergedOutput.get().asFile.absolutePath}"
         doFirst {
-            if (gameTest && new File(workingDir, 'logs/latest.log').exists()) {
-                throw new GradleException('Choose a fresh -PsteamGameTestRunId to preserve the existing receipt')
+            File runDirectory = gameTest ? steamGameTestRunDirectory.get().asFile : workingDir
+            if (gameTest) {
+                if (new File(runDirectory, 'logs/latest.log').exists()) {
+                    throw new GradleException("Choose a fresh -PsteamGameTestRunId to preserve ${runDirectory}")
+                }
+                workingDir(runDirectory)
             }
             if (name == 'runClient') setArgs(['--launcher-side', 'client'] + args)
             Set<File> splitOutputs = [sourceSets.main, sourceSets.gameTestValidation].collectMany {
@@ -179,11 +187,18 @@ tasks.withType(JavaExec).configureEach {
             classpath = files(mergedOutput.get().asFile, classpath.files.findAll {
                 !splitOutputs.contains(it.canonicalFile)
             })
-            new File(workingDir, 'mods').mkdirs()
+            new File(runDirectory, 'mods').mkdirs()
+            if (gameTest) {
+                File settings = new File(runDirectory, 'server.properties')
+                if (!settings.exists()) {
+                    java.nio.file.Files.copy(file('ci-fixtures/steam-gametest-server.properties').toPath(),
+                            settings.toPath())
+                }
+            }
         }
         if (gameTest) doLast {
             // Forge can exit zero after a loader failure; require the actual test result.
-            File receipt = new File(workingDir, 'logs/latest.log')
+            File receipt = new File(steamGameTestRunDirectory.get().asFile, 'logs/latest.log')
             String output = receipt.isFile() ? receipt.getText('UTF-8') : ''
             if (!output.contains('All 4 required tests passed') || (output =~ /\[[^\]\r\n]*\/(?:ERROR|FATAL)\]/).find()) {
                 throw new GradleException("The four Steam GameTests did not pass; see ${receipt}")

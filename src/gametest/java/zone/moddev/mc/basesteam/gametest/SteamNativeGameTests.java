@@ -41,7 +41,7 @@ import zone.moddev.mc.basesteam.items.MusketItem;
 public final class SteamNativeGameTests {
     private SteamNativeGameTests() {}
 
-    @GameTest(template = "basesteam_empty")
+    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
     public static void drillBitPacketPreservesTypePositionAndDirection(GameTestHelper helper) {
         BlockPos local = new BlockPos(1, 1, 1);
         helper.setBlock(local, Blocks.drillbit);
@@ -66,7 +66,7 @@ public final class SteamNativeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "basesteam_empty")
+    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
     public static void legacyMusketWearAndLoadedByteSurviveNativeComponentization(GameTestHelper helper) {
         CompoundTag legacy = new CompoundTag();
         legacy.putString("id", "basesteam:musket");
@@ -92,7 +92,7 @@ public final class SteamNativeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "basesteam_empty")
+    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
     public static void olderMusketAliasAndTopLevelWearSurvivePowerMigration(GameTestHelper helper) {
         CompoundTag legacy = new CompoundTag();
         legacy.putString("id", "steamadvantage:musket");
@@ -109,7 +109,7 @@ public final class SteamNativeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "basesteam_empty")
+    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
     public static void nativeResourcesLoadWithExpectedIds(GameTestHelper helper) {
         var level = helper.getLevel();
         var registries = level.registryAccess();
