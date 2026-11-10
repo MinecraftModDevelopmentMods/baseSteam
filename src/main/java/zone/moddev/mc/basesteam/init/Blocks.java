@@ -8,9 +8,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.BlockItem;
-import net.minecraftforge.event.RegistryEvent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import zone.moddev.mc.basepower.blocks.BlockPowerSwitch;
 import zone.moddev.mc.basepower.init.ItemGroups;
 import zone.moddev.mc.basesteam.SteamAdvantage;
@@ -60,7 +62,6 @@ public final class Blocks {
     /** Constructs blocks during the Forge block registry event. */
     public static synchronized void init() {
         if (initialized) return;
-        ItemGroups.init();
         steam_pipe = add(new SteamPipeBlock(), "steam_pipe");
         steam_track = add(new SteamTrackBlock(), "steam_track");
         steam_boiler_coal = (GUIBlock) add(new CoalBoilerBlock(), "steam_boiler_coal");
@@ -86,27 +87,24 @@ public final class Blocks {
     }
 
     private static Block add(Block block, String id) {
-        block.setRegistryName(SteamAdvantage.MODID, id);
         ALL_BLOCKS.put(id, block);
         return block;
     }
 
     @SubscribeEvent
-    public static void registerBlocks(RegistryEvent.Register<Block> event) {
+    public static void registerBlocks(RegisterEvent event) {
+        if (!ForgeRegistries.Keys.BLOCKS.equals(event.getRegistryKey())) return;
         init();
-        event.getRegistry().registerAll(ALL_BLOCKS.values().toArray(new Block[0]));
+        event.register(ForgeRegistries.Keys.BLOCKS, registry ->
+                ALL_BLOCKS.forEach((id, block) -> registry.register(new ResourceLocation(SteamAdvantage.MODID, id), block)));
     }
 
     @SubscribeEvent
-    public static void registerBlockItems(RegistryEvent.Register<Item> event) {
-        for (Map.Entry<String, Block> entry : ALL_BLOCKS.entrySet()) {
-            Item.Properties properties = new Item.Properties();
-            if (!"pump_pipe_steam".equals(entry.getKey()) && !"drillbit".equals(entry.getKey())) {
-                properties.tab(ItemGroups.tab_powerAdvantage);
-            }
-            BlockItem item = new BlockItem(entry.getValue(), properties);
-            item.setRegistryName(SteamAdvantage.MODID, entry.getKey());
-            event.getRegistry().register(item);
-        }
+    public static void registerBlockItems(RegisterEvent event) {
+        event.register(ForgeRegistries.Keys.ITEMS, registry -> ALL_BLOCKS.forEach((id, block) -> {
+            BlockItem item = new BlockItem(block, new Item.Properties());
+            registry.register(new ResourceLocation(SteamAdvantage.MODID, id), item);
+            if (!"pump_pipe_steam".equals(id) && !"drillbit".equals(id)) ItemGroups.show(item);
+        }));
     }
 }

@@ -5,7 +5,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.fml.ModList;
 import zone.moddev.mc.basemetals.recipe.CrushingRecipe;
@@ -28,15 +27,24 @@ public final class BaseMetalsCompat {
     public static ItemStack getCrusherRecipeOutput(Level world, ItemStack input) {
         if (world == null || input == null || input.isEmpty()) return null;
         if (isLoaded()) {
-            SimpleContainer inventory = new SimpleContainer(1);
-            inventory.setItem(0, input.copy());
-            for (Recipe candidate : world.getRecipeManager().getRecipes()) {
-                if (candidate instanceof CrushingRecipe && candidate.matches(inventory, world)) {
-                    return candidate.getResultItem().copy();
-                }
-            }
+            ItemStack result = LoadedCrushingRecipes.find(world, input);
+            if (result != null) return result;
         }
         return getVanillaCrusherOutput(input);
+    }
+
+    // Resolve the optional recipe type only after Forge confirms Base Metals is installed.
+    private static final class LoadedCrushingRecipes {
+        private static ItemStack find(Level world, ItemStack input) {
+            SimpleContainer inventory = new SimpleContainer(1);
+            inventory.setItem(0, input.copy());
+            for (var candidate : world.getRecipeManager().getRecipes()) {
+                if (candidate instanceof CrushingRecipe crushing && crushing.matches(inventory, world)) {
+                    return crushing.getResultItem(world.registryAccess()).copy();
+                }
+            }
+            return null;
+        }
     }
 
     public static ItemStack getCrusherRecipeOutput(Level world, BlockState input) {

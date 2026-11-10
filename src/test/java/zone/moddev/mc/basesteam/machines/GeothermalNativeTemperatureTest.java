@@ -9,10 +9,13 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class GeothermalNativeTemperatureTest {
-    @BeforeClass public static void bootstrap() { NativeTestBootstrap.start(); }
+    @BeforeClass public static void bootstrap() throws ReflectiveOperationException {
+        NativeTestBootstrap.registerVanillaFluidTypes();
+        Blocks.LAVA.getStateDefinition().getPossibleStates().forEach(state -> state.initCache());
+    }
 
     @Test public void nativeLavaTemperaturePreservesTheExistingHeatInput() {
-        assertEquals(1300, Fluids.LAVA.getAttributes().getTemperature());
+        assertEquals(1300, Fluids.LAVA.getFluidType().getTemperature());
         assertEquals(464, GeothermalBoilerTileEntity.thermalEnergy(Blocks.LAVA.defaultBlockState()), 0);
         assertEquals(464, GeothermalBoilerTileEntity.thermalEnergy(Blocks.LAVA.defaultBlockState()
                 .setValue(BlockStateProperties.LEVEL, 7)), 0);

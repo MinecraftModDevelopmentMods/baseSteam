@@ -115,8 +115,8 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 
 	private void decrementFuel() {
-		if(inventory[0].getCount() == 1 && inventory[0].getItem().getContainerItem(inventory[0]) != null){
-			inventory[0] = inventory[0].getItem().getContainerItem(inventory[0]);
+		if(inventory[0].getCount() == 1){
+			inventory[0] = inventory[0].getCraftingRemainingItem();
 		} else {
 			this.removeItem(0, 1);
 		}

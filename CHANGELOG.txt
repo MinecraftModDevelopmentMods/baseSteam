@@ -1,8 +1,15 @@
-baseSteam 2.2.11.118021 (Minecraft 1.18.2)
+baseSteam 2.2.12.119041 (Minecraft 1.19.4)
 
-- Bring baseSteam to Minecraft 1.18.2, with the same recipes and steam machines.
-- Keep saved inventories, steam, drill state and musket wear when upgrading.
-- Use the released basePower 2.4.10.118021 and Base Metals 3.1.2 save hook.
+- Target Minecraft 1.19.4 / Forge 45.4.0 and Java 17 with basePower 2.4.11.119041.
+- Adapt native registrations, rendering, damage, sound, fuel and recipe calls.
+- Retain Steam save IDs, machine data and optional Base Metals recipes.
+- Build against the released basePower 2.4.11.119041 and test with the Base Metals migration fix.
+
+baseSteam 2.2.11.118021 (local Minecraft 1.18.2 candidate)
+
+- Target Minecraft 1.18.2 / Forge 40.3.0 and Java 17 with basePower 2.4.10.118021.
+- Use native block-entity saves and update packets and native musket item tags.
+- Keep Steam registry names, legacy state keys, and recipe data unchanged.
 
 baseSteam 2.2.10.117011 (local Minecraft 1.17.1 candidate)
 
@@ -11,7 +18,6 @@ baseSteam 2.2.10.117011 (local Minecraft 1.17.1 candidate)
 - Carry over Steam Advantage common settings without overwriting an existing baseSteam config.
 - Keep Minecraft 1.17.1 machine behavior, models, GUIs, drops and recipe unlocks unchanged.
 - Fix repeated Eclipse project refreshes without changing the game launch runtime.
-- Build and test against the published basePower 2.4.9.117011 release.
 
 Steam Advantage 2.2.9.117011 (local 1.17.1 port candidate)
 

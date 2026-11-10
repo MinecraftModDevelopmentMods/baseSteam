@@ -14,21 +14,22 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
-def mavenizerFixture = file('ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-1.18.jar')
-def mavenizerFixtureHash = '28A6697BDF6D9500EC0AF9C1C949B9F3ED7DDFDA649CB5CAC4BEEA2E9567570A'
-if (!mavenizerFixture.isFile() || MessageDigest.getInstance('SHA-256').digest(mavenizerFixture.bytes)
-        .encodeHex().toString().toUpperCase(Locale.ROOT) != mavenizerFixtureHash) {
-    throw new GradleException('Missing or invalid Forge 40 Mavenizer compatibility fixture')
-}
-fgtools.configure('mavenizer') {
-    classpath.from(mavenizerFixture)
-    mainClass.set('net.minecraftforge.mcmaven.cli.Main')
-    javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(25)
-        vendor = JvmVendorSpec.ADOPTIUM
-    })
-}
+apply from: 'gradle/forge45-mavenizer.gradle'
 
+def mavenizerFixtureHashes = [
+        (file('ci-fixtures/tools/minecraft-source-compatibility.json')):
+                '33A3217261EBB8F37D45F50BD2F8CE70B221C014A5C15F4C5F8F9091AD6D1EC8',
+        (file('ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.patch')):
+                'D856190DEF5574716C5E4F4379912C451B1F5952B0B111576651A98EECF58544',
+        (file('ci-fixtures/tools/LICENSE-MAVENIZER.txt')):
+                '20C17D8B8C48A600800DFD14F95D5CB9FF47066A9641DDEAB48DC54AEC96E331'
+]
+mavenizerFixtureHashes.each { fixture, expected ->
+    if (!fixture.isFile() || MessageDigest.getInstance('SHA-256').digest(fixture.bytes)
+            .encodeHex().toString().toUpperCase(Locale.ROOT) != expected) {
+        throw new GradleException("Missing or invalid Forge 45 Mavenizer fixture: ${fixture.name}")
+    }
+}
 group = project.mod_group
 version = project.mod_version
 base.archivesName = 'baseSteam'
@@ -103,6 +104,10 @@ def normalizeArchiveLineEndings = { details ->
 }
 
 minecraft {
+    if (gradle.startParameter.offline) {
+        mavenizerArguments.add('--offline')
+        mavenizerArguments.add('--cache-only')
+    }
     mappings channel: project.mapping_channel, version: project.mapping_version
     String configuredRunDirectory = providers.gradleProperty('steamAdvantageRunDirectory')
             .getOrElse('run')
@@ -134,7 +139,7 @@ sourceSets.main.resources {
 def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
 def prepareForgeRunModClasses = tasks.register('prepareForgeRunModClasses', Sync) {
     group = 'ide'
-    description = 'Merges classes and processed resources for Forge 40 launches.'
+    description = 'Merges classes and processed resources for Forge 45 launches.'
     dependsOn tasks.named('classes')
     from sourceSets.main.output
     into forgeRunModClassesDirectory
@@ -204,13 +209,29 @@ tasks.named('processResources', ProcessResources) {
     filesMatching(archiveTextPatterns, normalizeArchiveLineEndings)
 }
 
+def committedPin = { String key, pattern ->
+    Properties pins = new Properties()
+    file('gradle.properties').withInputStream { pins.load(it) }
+    String pinned = pins.getProperty(key, '')
+    if (!(pinned ==~ pattern) || project.property(key) != pinned) {
+        throw new GradleException("Supply the exact coordinated ${key} in gradle.properties; overrides are not accepted.")
+    }
+    pinned
+}
 def forgeCapabilityBootstrapJar = providers.gradleProperty('forgeCapabilityBootstrapJar').map { file(it) }
 tasks.withType(Test).configureEach {
     inputs.files(forgeCapabilityBootstrapJar)
+    inputs.property('powerBootstrapSha256', providers.gradleProperty('poweradvantage_test_bootstrap_sha256'))
     doFirst {
         File bootstrapJar = forgeCapabilityBootstrapJar.getOrNull()
         if (bootstrapJar == null || !bootstrapJar.isFile()) {
             throw new GradleException('Supply the verified basePower test bootstrap via -PforgeCapabilityBootstrapJar=<path>')
+        }
+        String expectedHash = committedPin('poweradvantage_test_bootstrap_sha256', /[A-F0-9]{64}/)
+        String actualHash = MessageDigest.getInstance('SHA-256').digest(bootstrapJar.bytes)
+                .encodeHex().toString().toUpperCase(Locale.ROOT)
+        if (actualHash != expectedHash) {
+            throw new GradleException("basePower test bootstrap SHA-256 is ${actualHash}, expected ${expectedHash}")
         }
         new ZipFile(bootstrapJar).withCloseable { zip ->
             def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
@@ -218,6 +239,7 @@ tasks.withType(Test).configureEach {
                 throw new GradleException('Unexpected native capability test bootstrap entry point')
             }
         }
+        logger.lifecycle("basePower test bootstrap: ${bootstrapJar.canonicalPath} SHA-256 ${actualHash}")
         jvmArgs "-javaagent:${bootstrapJar.canonicalPath}"
     }
 }
@@ -340,9 +362,9 @@ def expectedReleaseFiles = providers.provider {
 def preparedReleaseDir = providers.gradleProperty('preparedReleaseDir')
 
 def verifyPackFormats = { pack ->
-    if (pack.pack_format != 9 || pack['forge:resource_pack_format'] != 8
-            || pack['forge:data_pack_format'] != 9) {
-        throw new GradleException('Minecraft 1.18.2 requires resource pack format 8 and data pack format 9')
+    if (pack.pack_format != 13 || pack['forge:server_data_pack_format'] != 12
+            || pack.containsKey('forge:resource_pack_format') || pack.containsKey('forge:data_pack_format')) {
+        throw new GradleException('Minecraft 1.19.4 requires resource pack format 13 and data pack format 12')
     }
 }
 
@@ -351,15 +373,15 @@ tasks.register('verifyReleaseConfiguration') {
     description = 'Validates release identity, target metadata, and dependency policy.'
     doLast {
         verifyPackFormats(new JsonSlurper().parse(file('src/main/resources/pack.mcmeta')).pack)
-        if (project.mod_version != '2.2.11.118021') {
+        if (project.mod_version != '2.2.12.119041') {
             throw new GradleException("Unexpected baseSteam release version: ${project.mod_version}")
         }
-        if (project.minecraft_version != '1.18.2' || project.minecraft_version_range != '[1.18.2]'
-                || project.forge_version != '40.3.0' || project.forge_version_range != '[40.3.0,41)'
-                || project.loader_version_range != '[40,41)'
+        if (project.minecraft_version != '1.19.4' || project.minecraft_version_range != '[1.19.4]'
+                || project.forge_version != '45.4.0' || project.forge_version_range != '[45.4.0,46)'
+                || project.loader_version_range != '[45,46)'
                 || project.mapping_channel != 'official'
-                || project.mapping_version != '1.18.2'
-                || project.mcp_version != '20220404.173914') {
+                || project.mapping_version != '1.19.4'
+                || project.mcp_version != '20230314.122934') {
             throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
         }
         if (project.loader_name != 'forge' || project.loader_code != '1'
@@ -379,42 +401,32 @@ tasks.register('verifyReleaseConfiguration') {
         }
         if (project.cf_requirements != 'basepower,base-metals'
                 || project.cf_optionals != ''
-                || project.cf_versions != '1.18.2') {
+                || project.cf_versions != '1.19.4') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.1.2.118021'
-                || project.orespawn_version != '4.1.0.118021') {
+        if (project.basemetals_version != '3.1.2.119041'
+                || project.orespawn_version != '4.1.0.119041') {
             throw new GradleException('Unexpected development API versions')
         }
-        if (project.poweradvantage_version != '2.4.10.118021'
+        if (project.poweradvantage_version != '2.4.11.119041'
                 || project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/basePower') {
             throw new GradleException('Unexpected basePower compile dependency identity')
         }
         String mainSource = file(
                 'src/main/java/zone/moddev/mc/basesteam/SteamAdvantage.java').getText('UTF-8')
         if (!mainSource.contains('MODID = "basesteam"')
-                || !mainSource.contains('VERSION = "2.2.11.118021"')) {
+                || !mainSource.contains('VERSION = "2.2.12.119041"')) {
             throw new GradleException('baseSteam source identity changed')
         }
         String metadata = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
         ['modId="basesteam"', 'displayName="baseSteam"',
-         'modId="basepower"\nmandatory=true\nversionRange="[2.4.10.118021,3.0.0)"',
-         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.118021,4.0.0)"'].each { marker ->
+         'modId="basepower"\nmandatory=true\nversionRange="[2.4.11.119041,3.0.0)"',
+         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.119041,4.0.0)"'].each { marker ->
             if (!metadata.contains(marker)) {
                 throw new GradleException("Source mods.toml is missing ${marker}")
             }
         }
     }
-}
-
-def committedPin = { String key, pattern ->
-    Properties pins = new Properties()
-    file('gradle.properties').withInputStream { pins.load(it) }
-    String pinned = pins.getProperty(key, '')
-    if (!(pinned ==~ pattern) || project.property(key) != pinned) {
-        throw new GradleException("Supply the exact coordinated ${key} in gradle.properties; overrides are not accepted.")
-    }
-    pinned
 }
 
 def auditJar = { File jarFile, String property, String hashPin, String modId, String expectedVersion,
@@ -436,9 +448,9 @@ def auditJar = { File jarFile, String property, String hashPin, String modId, St
         }
         def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
         if (manifest.getValue('Implementation-Version') != expectedVersion
-                || manifest.getValue('Built-On') != '1.18.2-40.3.0'
+                || manifest.getValue('Built-On') != "${project.minecraft_version}-${project.forge_version}"
                 || manifest.getValue('Built-On-Java') != '17') {
-            throw new GradleException("${modId} must be ${expectedVersion} for Forge 40.3.0 and Java 17")
+            throw new GradleException("${modId} must be ${expectedVersion} for Forge ${project.forge_version} and Java 17")
         }
         String metadata = zip.getInputStream(zip.getEntry('META-INF/mods.toml')).getText('UTF-8')
         if (!metadata.readLines().any { it.startsWith("modId=\"${modId}\"") }) {
@@ -448,7 +460,10 @@ def auditJar = { File jarFile, String property, String hashPin, String modId, St
     logger.lifecycle("${modId}: ${jarFile.canonicalPath} SHA-256 ${actualHash}")
 }
 
-def baseMetalsApi = ['zone/moddev/mc/basemetals/recipe/CrushingRecipe.class']
+def baseMetalsApi = [
+        'zone/moddev/mc/basemetals/api/migration/Legacy112MigrationExtension.class',
+        'zone/moddev/mc/basemetals/recipe/CrushingRecipe.class'
+]
 def oreSpawnApi = ['zone/moddev/mc/orespawn/api/OreSpawnApi.class']
 def powerApi = [
         'cyano/poweradvantage/api/PoweredEntity.class',
@@ -503,7 +518,6 @@ tasks.register('verifyNativeDevelopmentDependencies') {
     description = 'Resolves Forge and audits the exact development JARs.'
     dependsOn tasks.named('verifyCompanionDevelopmentDependencies')
     doLast {
-        committedPin('poweradvantage_source_ref', /[a-f0-9]{40}/)
         auditJar(powerAdvantageDeobfJar, 'powerAdvantageDeobfJar', 'poweradvantage_deobf_sha256',
                 'basepower', project.poweradvantage_version, powerApi)
 
@@ -537,6 +551,27 @@ tasks.register('verifyReleaseDependencies') {
     description = 'Audits native development dependencies with the final release source pin.'
     dependsOn tasks.named('verifyReleaseConfiguration')
     dependsOn tasks.named('verifyNativeDevelopmentDependencies')
+    doLast { committedPin('poweradvantage_source_ref', /[a-f0-9]{40}/) }
+}
+
+def blocksAtlasPath = 'assets/minecraft/atlases/blocks.json'
+def steamBlocksAtlas = [sources: [[type: 'single', resource: 'basesteam:entity/drill_bit']]]
+def verifySteamBlocksAtlas = { Object atlas ->
+    if (atlas != steamBlocksAtlas) {
+        throw new GradleException("${blocksAtlasPath} must stitch only basesteam:entity/drill_bit as a single source")
+    }
+}
+def verifyPackagedAssetNamespaces = { ZipFile zip ->
+    String steamAssets = "assets/${project.mod_id}/"
+    def foreignAssets = zip.entries().findAll {
+        !it.directory && it.name.startsWith('assets/') && !it.name.startsWith(steamAssets)
+    }.collect { it.name }
+    if (foreignAssets != [blocksAtlasPath]) {
+        throw new GradleException("${zip.name} must contain only ${blocksAtlasPath} outside ${steamAssets}; found ${foreignAssets}")
+    }
+    zip.getInputStream(zip.getEntry(blocksAtlasPath)).withCloseable { input ->
+        verifySteamBlocksAtlas(new JsonSlurper().parse(input, 'UTF-8'))
+    }
 }
 
 tasks.register('verifyReleaseArtifacts') {
@@ -576,6 +611,7 @@ tasks.register('verifyReleaseArtifacts') {
 
         File mainJar = new File(libs, expectedReleaseFiles.get()[0])
         new ZipFile(mainJar).withCloseable { zip ->
+            verifyPackagedAssetNamespaces(zip)
             List<String> names = zip.entries().collect { it.name }
             ['META-INF/mods.toml', 'pack.mcmeta',
              'zone/moddev/mc/basesteam/SteamAdvantage.class',
@@ -584,6 +620,8 @@ tasks.register('verifyReleaseArtifacts') {
              'zone/moddev/mc/basesteam/machines/GeothermalBoilerTileEntity.class',
              'zone/moddev/mc/basesteam/migration/SteamLegacyMigrations.class',
              'assets/basesteam/lang/en_us.json',
+             'data/basesteam/damage_type/musket.json',
+             'data/basesteam/damage_type/steam_machine.json',
              'data/basesteam/recipes/steam_pipe.json',
              'data/basesteam/advancements/recipes/steam_pipe.json'].each { required ->
                 if (!names.contains(required)) {
@@ -601,7 +639,8 @@ tasks.register('verifyReleaseArtifacts') {
             def resourcePack = new JsonSlurper().parseText(zip.getInputStream(zip.getEntry('pack.mcmeta'))
                     .getText(StandardCharsets.UTF_8.name()))
             verifyPackFormats(resourcePack.pack)
-            ['agent-notes/', '.codex/', 'src/test/', 'fernflower_abstract_parameter_names.txt',
+            ['agent-notes/', '.codex/', 'src/test/', 'zone/moddev/mc/basesteam/testing/',
+             'fernflower_abstract_parameter_names.txt',
               'cyano/poweradvantage/', 'zone/moddev/mc/basepower/', 'zone/moddev/mc/poweradvantage/',
               'zone/moddev/mc/steamadvantage/', 'assets/steamadvantage/', 'data/steamadvantage/',
               'zone/moddev/mc/basemetals/', 'cyano/basemetals/', 'com/mcmoddev/lib/',
@@ -614,12 +653,16 @@ tasks.register('verifyReleaseArtifacts') {
             String metadata = zip.getInputStream(zip.getEntry('META-INF/mods.toml'))
                     .getText(StandardCharsets.UTF_8.name())
             if (!metadata.contains('modId="basesteam"')
-                    || !metadata.contains("version=\"${project.mod_version}\"")) {
+                    || !metadata.contains("version=\"${project.mod_version}\"")
+                    || !metadata.contains("versionRange=\"${project.minecraft_version_range}\"")
+                    || !metadata.contains("versionRange=\"${project.forge_version_range}\"")
+                    || !metadata.contains("loaderVersion=\"${project.loader_version_range}\"")) {
                 throw new GradleException('Packaged mods.toml identity or version is incorrect')
             }
             def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
             if (manifest.getValue('Implementation-Version') != project.mod_version
                     || manifest.getValue('Built-On-Java') != project.java_version
+                    || manifest.getValue('Built-On') != "${project.minecraft_version}-${project.forge_version}"
                     || manifest.getValue('Implementation-Timestamp') != null
                     || manifest.getValue('Timestamp') != null) {
                 throw new GradleException('Release manifest identity is incorrect or volatile')
@@ -638,6 +681,9 @@ tasks.register('verifyReleaseArtifacts') {
             }
         }
 
+        new ZipFile(tasks.named('jar', Jar).get().archiveFile.get().asFile).withCloseable { zip ->
+            verifyPackagedAssetNamespaces(zip)
+        }
         new ZipFile(new File(libs, expectedReleaseFiles.get()[1])).withCloseable { sourceZip ->
             if (sourceZip.getEntry('zone/moddev/mc/basesteam/SteamAdvantage.java') == null
                     || sourceZip.getEntry('zone/moddev/mc/basesteam/machines/SteamDrillTileEntity.java') == null) {
@@ -712,6 +758,9 @@ tasks.register('verifyPreparedReleaseArtifacts') {
                 .findAll { !it.trim().isEmpty() }.sort()
         if (actualChecksums != declaredChecksums) {
             throw new GradleException('Prepared release checksums do not match the immutable jars')
+        }
+        new ZipFile(new File(prepared, expectedReleaseFiles.get()[0])).withCloseable { zip ->
+            verifyPackagedAssetNamespaces(zip)
         }
     }
 }
@@ -1037,7 +1086,7 @@ tasks.register('verifyEclipseProductionClasspath') {
             if (!arguments.contains('--main cpw.mods.bootstraplauncher.BootstrapLauncher')
                     || !vmArguments.contains('--add-opens java.base/java.lang.invoke=ALL-UNNAMED')
                     || contents.contains('net.minecraftforge.userdev.LaunchTesting')) {
-                throw new GradleException("${name} must retain the native Forge 40 bootstrap and Java 17 module access")
+                throw new GradleException("${name} must retain the native Forge 45 bootstrap and Java 17 module access")
             }
             if (launch.booleanAttribute.find {
                 it.@key.text() == 'org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE'
@@ -1097,7 +1146,7 @@ tasks.register('verifyEclipseProductionClasspath') {
                     || !arguments.contains("--fml.mcVersion ${project.minecraft_version}")
                     || !arguments.contains("--fml.forgeVersion ${project.forge_version}")
                     || !arguments.contains("--fml.mcpVersion ${project.mcp_version}")) {
-                throw new GradleException("${name} does not target the exact Forge 40 development runtime")
+                throw new GradleException("${name} does not target the exact Forge 45 development runtime")
             }
         }
     }
@@ -1111,7 +1160,9 @@ tasks.register('verifyModelAssets') {
     File assetRoot = new File(resourceRoot, "assets/${project.mod_id}")
     File modelRoot = new File(assetRoot, 'models')
     File blockstateRoot = new File(assetRoot, 'blockstates')
+    File steamAtlas = new File(resourceRoot, blocksAtlasPath)
     inputs.dir(assetRoot)
+    inputs.files(fileTree(resourceRoot) { include blocksAtlasPath })
     inputs.files(providers.gradleProperty('powerAdvantageDeobfJar').map { file(it) })
 
     doLast {
@@ -1119,7 +1170,24 @@ tasks.register('verifyModelAssets') {
             new JsonSlurper().parse(jsonFile)
         }
 
+        Set<String> atlasPrefixes = ['block/', 'item/'] as Set<String>
+        Set<String> singleSprites = [] as Set<String>
+        if (steamAtlas.isFile()) {
+            def atlas = new JsonSlurper().parse(steamAtlas)
+            verifySteamBlocksAtlas(atlas)
+            singleSprites.addAll(atlas.sources.collect { it.resource })
+        }
         Set<String> powerAdvantageAssets = new ZipFile(powerAdvantageDeobfJar).withCloseable { zip ->
+            def atlasEntry = zip.getEntry(blocksAtlasPath)
+            if (atlasEntry != null) {
+                zip.getInputStream(atlasEntry).withCloseable { input ->
+                    def atlas = new JsonSlurper().parse(input, 'UTF-8')
+                    // Power's directory sources preserve the existing texture IDs across namespaces.
+                    atlas.sources.findAll {
+                        it.type == 'directory' && it.source instanceof String && it.prefix == it.source + '/'
+                    }.each { atlasPrefixes.add(it.prefix) }
+                }
+            }
             zip.entries().collect { it.name } as Set<String>
         }
         def verifyReference = { String reference, String assetType, String sourcePath ->
@@ -1137,6 +1205,10 @@ tasks.register('verifyModelAssets') {
             if (!present) {
                 throw new GradleException(
                         "${sourcePath} references missing ${assetType} asset ${reference}")
+            }
+            if (assetType == 'textures' && !singleSprites.contains(reference)
+                    && !atlasPrefixes.any { path.startsWith(it) }) {
+                throw new GradleException("${sourcePath} references unstitched blocks atlas texture ${reference}")
             }
         }
 

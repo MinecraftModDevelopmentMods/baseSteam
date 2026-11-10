@@ -4,10 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import zone.moddev.mc.basepower.init.ItemGroups;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.items.MusketItem;
@@ -26,28 +28,26 @@ public final class Items {
     /** Constructs items during the Forge item registry event. */
     public static synchronized void init() {
         if (initialized) return;
-        ItemGroups.init();
-        steam_governor = add("steam_governor", new Item(properties()));
-        steam_drill_bit = add("steam_drill_bit", new Item(properties()));
-        blackpowder_cartridge = add("blackpowder_cartridge", new Item(properties()));
-        blackpowder_musket = add("musket", new MusketItem(properties().stacksTo(1)));
+        steam_governor = add("steam_governor", new Item(new Item.Properties()));
+        steam_drill_bit = add("steam_drill_bit", new Item(new Item.Properties()));
+        blackpowder_cartridge = add("blackpowder_cartridge", new Item(new Item.Properties()));
+        blackpowder_musket = add("musket", new MusketItem(new Item.Properties().stacksTo(1)));
         initialized = true;
     }
 
-    private static Item.Properties properties() {
-        return new Item.Properties().tab(ItemGroups.tab_powerAdvantage);
-    }
-
     private static Item add(String id, Item item) {
-        item.setRegistryName(SteamAdvantage.MODID, id);
         allItems.put(id, item);
         return item;
     }
 
     @SubscribeEvent
-    public static void register(RegistryEvent.Register<Item> event) {
+    public static void register(RegisterEvent event) {
+        if (!ForgeRegistries.Keys.ITEMS.equals(event.getRegistryKey())) return;
         init();
-        event.getRegistry().registerAll(allItems.values().toArray(new Item[0]));
+        event.register(ForgeRegistries.Keys.ITEMS, registry -> allItems.forEach((id, item) -> {
+            registry.register(new ResourceLocation(SteamAdvantage.MODID, id), item);
+            ItemGroups.show(item);
+        }));
     }
 
     public static Item getItemByName(String id) { return allItems.get(id); }

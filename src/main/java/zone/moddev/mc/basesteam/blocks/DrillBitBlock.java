@@ -42,7 +42,7 @@ public class DrillBitBlock extends Block implements EntityBlock {
 
     @Override
     public void entityInside(BlockState state, Level world, BlockPos pos, Entity victim) {
-        victim.hurt(Power.machine_damage, 2.0F);
+        if (!world.isClientSide) victim.hurt(Power.machineDamage(world), 2.0F);
     }
 
     @Override

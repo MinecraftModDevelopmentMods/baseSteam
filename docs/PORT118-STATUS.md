@@ -1,11 +1,9 @@
-# baseSteam 1.18.2 port notes
+# baseSteam 1.18.2 local port
 
-The release branch uses the shared Base Metals 3.1.2 migration hook and the
-published basePower 2.4.10.118021 build.
+The current local candidate uses the shared Base Metals 3.1.2 migration hook.
 See [gradle.properties](../gradle.properties) for the exact Power, Base Metals
-and OreSpawn pins.
-
-The first locally tested Steam player jar had SHA-256
+and OreSpawn pins. The release and Eclipse audits passed with these inputs.
+The current Steam player JAR has SHA-256
 `2E7131FD22F9486905212F64323F5E11EEFBE0A538499E92477373D0C5D2A2CC`.
 The notes below record earlier port milestones and their original inputs.
 
@@ -14,8 +12,8 @@ The notes below record earlier port milestones and their original inputs.
 - Branch: `feature/basesteam-1.18.2-port`; candidate `2.2.11.118021`.
 - Target: Forge `40.3.0`, official `1.18.2`, MCP `20220404.173914`,
   Temurin `17.0.1+12`, ForgeGradle `7.0.34`, Gradle `9.6.1`.
-- The original port was tested locally on disposable worlds; the notes below
-  describe that candidate, not the later publication build.
+- Scope: local-only. No push, publication, original world, PA117 edit, or
+  sibling project build.
 
 ## Port changes
 

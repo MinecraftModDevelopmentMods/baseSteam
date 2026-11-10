@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
 import net.minecraft.core.Direction;
@@ -35,10 +35,10 @@ public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity>
         try {
             matrices.translate(0.5D, 0.5D, 0.5D);
             if (axis != Direction.Axis.Y) {
-                matrices.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-                if (axis != Direction.Axis.Z) matrices.mulPose(Vector3f.ZP.rotationDegrees(90.0F));
+                matrices.mulPose(Axis.XP.rotationDegrees(90.0F));
+                if (axis != Direction.Axis.Z) matrices.mulPose(Axis.ZP.rotationDegrees(90.0F));
             }
-            matrices.mulPose(Vector3f.YP.rotationDegrees(rotation));
+            matrices.mulPose(Axis.YP.rotationDegrees(rotation));
             PoseStack.Pose transform = matrices.last();
             final float radius = 0.25F;
             // Retain the original six quads and UV layout; native buffers supply lighting and overlay.
