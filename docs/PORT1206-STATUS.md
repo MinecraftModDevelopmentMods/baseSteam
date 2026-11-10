@@ -167,7 +167,7 @@ The ASM side contract checks this without pretending to substitute for a
 packaged dedicated launch. The smoke script copies the checked Forge install
 and pinned player artifacts into a new, disposable Steam evidence directory.
 
-The `e6ecfb3` candidate is ready for shared endurance, not manual
-acceptance. Combined Power/Steam/Electric validation, manual client and
-multiplayer checks, and historical world acceptance require their own
-evidence. No release or publication was performed.
+The jar pinned to Power `e6ecfb3` passed the combined 21-station rig and
+the two 30-minute runs on fresh and migrated worlds, including a full
+restart. The combined Eclipse client also passed its resource and screen
+checks. It is ready for manual testing on a disposable copy, not a release.
