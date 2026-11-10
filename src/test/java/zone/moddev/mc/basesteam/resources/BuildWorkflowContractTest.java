@@ -35,11 +35,21 @@ public class BuildWorkflowContractTest {
         assertTrue(build.contains("basePower-${project.poweradvantage_version}.jar"));
     }
 
-    @Test public void thisLocalPortDoesNotOptIntoTheHistoricalHostedJobs() throws Exception {
-        for (String name : new String[] {"ci.yml", "codeql-analysis.yml", "validate-gradle-build.yml"}) {
+    @Test public void hostedJobsCheckPublishedNativeInputsBeforeCompiling() throws Exception {
+        for (String name : new String[] {"ci.yml", "codeql-analysis.yml"}) {
             String source = Files.readString(Path.of(".github/workflows", name));
-            assertFalse(name, source.contains("master-1.20.6"));
-            assertFalse(name, source.contains("feature/basesteam-1.20.6-port"));
+            int pinCheck = source.indexOf("bash .github/verify-published-pins.sh");
+            assertTrue(name, pinCheck > 0 && pinCheck < source.indexOf("Check out released basePower source"));
+            assertTrue(name, source.contains("branches: [master-1.20.6"));
+            assertTrue(name, source.contains("java-version: '21.0.7+6.0.LTS'"));
+            assertTrue(name, source.contains("-Pforge50MavenizerJar=$MAVENIZER"));
+            assertTrue(name, source.contains("-PpowerAdvantageDeobfJar=$POWER_PLAYER"));
+            assertFalse(name, source.contains("forge47"));
         }
+        String script = Files.readString(Path.of(".github/verify-published-pins.sh"));
+        assertTrue(script.contains("$(value poweradvantage_public_file_id)"));
+        assertTrue(script.contains("$(value basemetals_public_file_id)"));
+        assertTrue(script.contains("$(value orespawn_public_file_id)"));
+        assertTrue(script.contains("sha256sum -c -"));
     }
 }

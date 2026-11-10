@@ -1,10 +1,10 @@
 # baseSteam
 
-**Minecraft 1.20.6 (Forge), version 2.2.14.120061. Local port.**
+**Minecraft 1.20.6 (Forge), version 2.2.14.120061.**
 
 baseSteam, formerly Steam Advantage, adds boilers, steam-powered machines,
 pumps, storage, elevators and a blackpowder musket to basePower. Items and
-blocks use the shared basePower creative tab. This checkout is not a release.
+blocks use the shared basePower creative tab.
 
 ## Build Target
 
