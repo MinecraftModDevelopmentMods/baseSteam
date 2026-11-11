@@ -1,7 +1,7 @@
 # Steam on Minecraft 1.21.1
 
 Local candidate 2.2.15.121011 targets Forge 52.1.0 and Java 21.
-The build pins the coordinated local basePower commit `72fd326b9a9c` and
+The build pins the coordinated local basePower commit `a16e8148871f` and
 its exact native jar. Public CI still requires merged sources and verified
 public files. Nothing has been published.
 
