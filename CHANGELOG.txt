@@ -4,8 +4,8 @@ baseSteam 2.2.16.121111 (local Minecraft 1.21.11 source port)
 - Adapt native registration, persistence, recipes, item definitions and drill rendering.
 - Retain registry identities, legacy state keys, recipe payloads and configuration defaults.
 - Use native Forge hidden-client pack metadata with data-format 94.1 at the mod root.
-- Stitch the drill-bit sprite into the native item atlas as well as the block atlas.
-- Local source and archive gates pass; runtime and combined upgrade qualification remains open.
+- Keep block/material sprites, including the drill bit, out of the native item atlas; retain legacy item-icon lookup compatibility.
+- Local source, archive, compiler, GameTest and packaged reopen gates pass; combined world upgrades, endurance and manual acceptance are separate.
 
 baseSteam 2.2.15.121011 (Minecraft 1.21.1 / Forge)
 

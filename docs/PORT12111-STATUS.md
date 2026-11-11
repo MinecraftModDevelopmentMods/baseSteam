@@ -1,12 +1,19 @@
 # Steam on Minecraft 1.21.11
 
-Candidate B pins the local Power vanilla-registry delta fix and the Base
-Metals callback fix below. Candidate A and its evidence remain preserved
-separately under build/qualified-A-63eef004; its results are not relabelled B.
+This is historical C2 candidate qualification against Power134F, not an
+overall family release claim. The parent reports a later, broader chained
+1.13 dimension route exposing a Power dynamic-biome-registry issue; its fix
+and replacement pin are outside this preserved candidate's proof.
+
+Candidate C2 pins the local Power registry, BlockItem-name and atlas fixes
+and the Base Metals callback fix below. A/B evidence remains preserved under
+build/qualified-A-63eef004 and build/native-B-35, not relabelled C2.
 The forced 43-task source/release suite, actual Eclipse ECJ scopes, all four
 GameTests and both packaged save/reopen profiles pass against these pins.
-The ordinary Steam player jar remains byte-identical to the frozen candidate:
-5B4D7743B5507060D4D11E77944814E66257AAC9089C47E423E3E3A165912648.
+The ordinary Steam player jar matches the frozen C2 client candidate:
+25EE7784EAA180C77B7735B90928801F56A7342B5733B49222E2B0E72E5577F9.
+Only assets/minecraft/atlases/items.json differs from the earlier 5B4D jar;
+all production class payloads are unchanged.
 Exact dependency hashes and source commits are build-audit pins, not embedded
 manifest fields; the runtime metadata retains the same dependency versions.
 
@@ -17,8 +24,8 @@ The starting source is manually accepted 1.21.1 commit
 GameTests are a baseline, not qualification of this port.
 
 The approved local basePower 2.4.15.121111 integration candidate is pinned to
-3c94944d300462badfbd88cef9f5f1dd6a51c32a and native jar SHA-256
-71E0E84F217AA33F4F190D26A44D236461C95BE4D5A3832B5DED214B883A3AD6
+a1cd197b4b6c3fc9c5d56da254d0f0ae9929fe8c and native jar SHA-256
+134FF55595E86D450DBFB5531F389BF0BE81FE6347F1EB03765B571A1D488B59
 with exact native unit-bootstrap and registry-support source hashes. The
 default local dependency paths pass without path overrides. Public release
 file IDs for local-only candidates remain empty and hosted publication gates
@@ -63,7 +70,7 @@ this platform compatibility-label issue remains open, not silently waived.
 See FORGE61-RESOURCE-METADATA.md for parent integration guidance.
 
 The default local check/build/Javadoc/dependency/archive/checksum/Eclipse
-metadata suite passes (43 tasks), with 242 unit tests and zero failures,
+metadata suite passes (43 tasks), with 244 unit tests and zero failures,
 errors or skips. All three real Eclipse .classpath scopes compile using ECJ
 3.46.0; those ECJ-compiled unit tests also pass with zero skips/assumptions.
 Both source compilers include production, unit and GameTest Java sources.
@@ -80,9 +87,9 @@ the strict stderr gate on the platform's Log4j/Netty unsupported kqueue/epoll
 probe; its failed receipt is retained, not waived as a clean default run.
 The parent's pure-platform receipt independently shows the same diagnostic.
 The empty-cache platform proof is preserved under build/repro path with
-spaces 34. B's independent path-with-spaces reproduction is recorded under
-build/repro path with spaces 36, with a fresh source stage and the same
-native-engine cache, not another cold download. It uses B's exact pins and
+spaces 34. C2's independent path-with-spaces reproduction is recorded under
+build/repro path with spaces 39, with a fresh source stage and the same
+native-engine cache, not another cold download. It uses C2's exact pins and
 no dependency path overrides. Combined migration/endurance and manual acceptance remain
 separate parent/user gates; these isolated checks do not establish them.
 Nothing has been pushed, tagged or published.
@@ -92,10 +99,28 @@ release pins and documentation from 9c5bf9b4610e06d3b5a6d5a0bde38d7516327d96.
 Historical release notes were carried forward without importing 1.21.1 pins
 or transferring its runtime acceptance to this port.
 
-The native item atlas now explicitly includes basesteam:entity/drill_bit in
-addition to the block atlas. A native SpriteSources/resource-reader test
-checks every Steam model texture against the exact Power and Steam packs,
-including the legacy material IDs, and an omitted-Power negative control.
+The native item atlas contains only the items directory with prefix items/.
+The drill single source remains exclusively in Steam's block atlas. Native
+SpriteSources/resource-reader tests cover every model texture and reject
+block/material sources in ITEMS and any item-atlas resolution of world-block
+textures. Power's block atlas intentionally retains legacy items/ lookup;
+true item-icon overlap is tested positively, not mistaken for the block/material
+shadowing defect. The omitted-Power and malformed-source controls remain strict.
+Both native BlockItem description and hover-name keys are checked through
+the actual registration factory for all 17 blocks, with a missing-prefix
+negative control. These proofs run in child JVMs so intrusive holders cannot
+leak into later registry-freeze tests. The initial isolation failure is retained.
+
+The parent's actual frozen combined client run 20261111-182839-413cf9f7
+passes with this exact Steam jar, Power134F, BM598D and the other frozen
+profile inputs: 94 items, 905 states, 39 GUIs, 351 caption checks, 355 rejected
+negative controls, 26 fluid-gauge pixel cases, recipe-book grouping and zero
+resource errors. The frozen profile hash is
+9109C8904BE3D42185F5A636EC5F0EF6ED36D5DD5986F14E4B607EC03704D700.
+Input copies/origins and the receipt hashes were checked independently;
+build/native-C2-38/frozen-client-proof-receipt.json records the binding.
+Worldless renderer geometry retains its reported manual gaps; automated
+client resource proof is not manual gameplay or world-renderer acceptance.
 
 Independent checks pass for the source/resource contracts, 24 recipe unlocks,
 33 normalized recipe payloads and 113 unchanged protected resource files.
@@ -110,13 +135,21 @@ malformed selectors. ItemPredicate.CODEC controls prove the native discovery
 predicates remain restrictive and expose the ignored old item field.
 The generator's 24 checked-in unlocks remain unchanged and --check passes.
 Earlier evidence is under ignored build/native-independent-26 and
-build/steam-native-compile-22. Current B-pin evidence is under
-build/native-B-35, build/ecj-native61-B-35,
-build/steam-gametest-native61-B-35 and
-evidence/packaged-server-native61-B-35-{with,without}-metals-nio.
-All three rebuilt Steam archives match the frozen artifacts byte for byte.
+build/steam-native-compile-22. Current C2 evidence is under
+build/native-C2-38, build/ecj-native61-C2-38-final,
+build/steam-gametest-native61-C2-38-final and
+evidence/packaged-server-native61-C2-38-{with,without}-metals-nio.
+The C2 archives are compared against their exact graphics/client-bound bytes.
 Earlier source/archive/ECJ and old-pin cold receipts remain under
 build/native-pinned-28 and build/repro path with spaces 32. Failed attempts remain
 alongside later runs, including the old ValueOutput namespace false positive
-and initial atlas-fixture setup failures. No gameplay or world-upgrade
+and initial atlas-fixture setup failures. C2 also retains the initially
+over-broad global atlas-disjointness failure; the approved native contract
+forbids block/material shadowing while preserving legacy true-item lookup.
+No gameplay or world-upgrade
 qualification is implied by source/asset checks.
+
+The parent's migration-probe module remains an unchanged 1.10/1.12 source
+fixture writer and was not rebuilt by this child. Native C2 profiles instead
+use the pinned native AdvantageWorksTestHarness; they do not load that legacy
+probe. No native variant or unrun legacy-probe build is claimed as passing.

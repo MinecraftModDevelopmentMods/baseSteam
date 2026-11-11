@@ -659,9 +659,11 @@ def blocksAtlasPath = 'assets/minecraft/atlases/blocks.json'
 def itemsAtlasPath = 'assets/minecraft/atlases/items.json'
 def steamAtlasPaths = [blocksAtlasPath, itemsAtlasPath]
 def steamDrillAtlas = [sources: [[type: 'single', resource: 'basesteam:entity/drill_bit']]]
-def verifySteamDrillAtlas = { Object atlas ->
-    if (atlas != steamDrillAtlas) {
-        throw new GradleException('Steam block/item atlases must stitch only basesteam:entity/drill_bit as a single source')
+def steamItemsAtlas = [sources: [[type: 'directory', source: 'items', prefix: 'items/']]]
+def verifySteamAtlas = { String path, Object atlas ->
+    def expected = path == blocksAtlasPath ? steamDrillAtlas : steamItemsAtlas
+    if (!steamAtlasPaths.contains(path) || atlas != expected) {
+        throw new GradleException("Steam ${path} must contain only ${expected}; block and item sources must remain disjoint")
     }
 }
 def verifyPackagedAssetNamespaces = { ZipFile zip ->
@@ -674,7 +676,7 @@ def verifyPackagedAssetNamespaces = { ZipFile zip ->
     }
     steamAtlasPaths.each { path ->
         zip.getInputStream(zip.getEntry(path)).withCloseable { input ->
-            verifySteamDrillAtlas(new JsonSlurper().parse(input, 'UTF-8'))
+            verifySteamAtlas(path, new JsonSlurper().parse(input, 'UTF-8'))
         }
     }
 }
@@ -1356,27 +1358,40 @@ tasks.register('verifyModelAssets') {
 
         Set<String> atlasPrefixes = ['block/', 'item/'] as Set<String>
         Set<String> singleSprites = [] as Set<String>
-        steamAtlases.each { steamAtlas ->
+        steamAtlasPaths.each { String atlasPath ->
+            File steamAtlas = new File(resourceRoot, atlasPath)
             if (!steamAtlas.isFile()) throw new GradleException("Missing native Steam atlas ${steamAtlas}")
             def atlas = new JsonSlurper().parse(steamAtlas)
-            verifySteamDrillAtlas(atlas)
-            singleSprites.addAll(atlas.sources.collect { it.resource })
+            verifySteamAtlas(atlasPath, atlas)
+            singleSprites.addAll(atlas.sources.findAll { it.type == 'single' }.collect { it.resource })
+            atlasPrefixes.addAll(atlas.sources.findAll { it.type == 'directory' }.collect { it.prefix })
         }
+        Set<String> itemAtlasPrefixes = ['item/', 'items/'] as Set<String>
         Set<String> powerAdvantageAssets = new ZipFile(powerAdvantageDeobfJar).withCloseable { zip ->
-            Set<String> sharedPrefixes = null
+            Map<String, Set<String>> sharedPrefixes = [:]
             steamAtlasPaths.each { atlasPath ->
                 def atlasEntry = zip.getEntry(atlasPath)
                 if (atlasEntry == null) throw new GradleException("basePower is missing native atlas ${atlasPath}")
                 zip.getInputStream(atlasEntry).withCloseable { input ->
                     def atlas = new JsonSlurper().parse(input, 'UTF-8')
+                    if (atlasPath == itemsAtlasPath) verifySteamAtlas(atlasPath, atlas)
                     // Power's directory sources preserve the existing texture IDs across namespaces.
                     Set<String> prefixes = atlas.sources.findAll {
                         it.type == 'directory' && it.source instanceof String && it.prefix == it.source + '/'
                     }.collect { it.prefix } as Set<String>
-                    sharedPrefixes = sharedPrefixes == null ? prefixes : sharedPrefixes.intersect(prefixes)
+                    sharedPrefixes[atlasPath] = prefixes
                 }
             }
-            atlasPrefixes.addAll(sharedPrefixes)
+            Set<String> collisions = sharedPrefixes[blocksAtlasPath].intersect(sharedPrefixes[itemsAtlasPath])
+            collisions.retainAll(['blocks/', 'materials/'])
+            if (!collisions.isEmpty()) {
+                throw new GradleException("basePower shadows block/material directories in the item atlas: ${collisions}")
+            }
+            if (!sharedPrefixes[blocksAtlasPath].containsAll(['blocks/', 'materials/', 'items/'])) {
+                throw new GradleException('basePower block atlas must retain legacy blocks/, materials/ and generated-item items/ sources')
+            }
+            sharedPrefixes.values().each { atlasPrefixes.addAll(it) }
+            itemAtlasPrefixes.addAll(sharedPrefixes[itemsAtlasPath])
             zip.entries().collect { it.name } as Set<String>
         }
         def verifyReference = { String reference, String assetType, String sourcePath ->
@@ -1398,6 +1413,10 @@ tasks.register('verifyModelAssets') {
             if (assetType == 'textures' && !singleSprites.contains(reference)
                     && !atlasPrefixes.any { path.startsWith(it) }) {
                 throw new GradleException("${sourcePath} references unstitched blocks atlas texture ${reference}")
+            }
+            if (assetType == 'textures' && new File(sourcePath).toPath().startsWith(new File(modelRoot, 'block').toPath())
+                    && itemAtlasPrefixes.any { path.startsWith(it) }) {
+                throw new GradleException("${sourcePath} references an item-atlas texture from a block model: ${reference}")
             }
         }
 
