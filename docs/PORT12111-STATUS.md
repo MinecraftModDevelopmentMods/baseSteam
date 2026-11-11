@@ -1,6 +1,8 @@
 # Steam on Minecraft 1.21.11
 
-The coordinated local Power/Base Metals callback fixes are pinned below.
+Candidate B pins the local Power vanilla-registry delta fix and the Base
+Metals callback fix below. Candidate A and its evidence remain preserved
+separately under build/qualified-A-63eef004; its results are not relabelled B.
 The forced 43-task source/release suite, actual Eclipse ECJ scopes, all four
 GameTests and both packaged save/reopen profiles pass against these pins.
 The ordinary Steam player jar remains byte-identical to the frozen candidate:
@@ -15,8 +17,8 @@ The starting source is manually accepted 1.21.1 commit
 GameTests are a baseline, not qualification of this port.
 
 The approved local basePower 2.4.15.121111 integration candidate is pinned to
-1f5085f1cc7adbcb1bd8cd1062601d490e5749f3 and native jar SHA-256
-D8BA2501148845FFE1659569D1CB00C242C462123CB5A6B89D68FC346CABA7E9
+3c94944d300462badfbd88cef9f5f1dd6a51c32a and native jar SHA-256
+71E0E84F217AA33F4F190D26A44D236461C95BE4D5A3832B5DED214B883A3AD6
 with exact native unit-bootstrap and registry-support source hashes. The
 default local dependency paths pass without path overrides. Public release
 file IDs for local-only candidates remain empty and hosted publication gates
@@ -77,9 +79,11 @@ transport on Windows. The earlier default native-availability selection failed
 the strict stderr gate on the platform's Log4j/Netty unsupported kqueue/epoll
 probe; its failed receipt is retained, not waived as a clean default run.
 The parent's pure-platform receipt independently shows the same diagnostic.
-Cold/path-with-spaces reproducibility is recorded separately under
-build/repro path with spaces 34, using the repaired inputs and no dependency
-path overrides. Combined migration/endurance and manual acceptance remain
+The empty-cache platform proof is preserved under build/repro path with
+spaces 34. B's independent path-with-spaces reproduction is recorded under
+build/repro path with spaces 36, with a fresh source stage and the same
+native-engine cache, not another cold download. It uses B's exact pins and
+no dependency path overrides. Combined migration/endurance and manual acceptance remain
 separate parent/user gates; these isolated checks do not establish them.
 Nothing has been pushed, tagged or published.
 
@@ -106,10 +110,10 @@ malformed selectors. ItemPredicate.CODEC controls prove the native discovery
 predicates remain restrictive and expose the ignored old item field.
 The generator's 24 checked-in unlocks remain unchanged and --check passes.
 Earlier evidence is under ignored build/native-independent-26 and
-build/steam-native-compile-22. Current repaired-pin evidence is under
-build/native-repaired-33, build/ecj-native61-repaired-33,
-build/steam-gametest-native61-repaired-33 and
-evidence/packaged-server-native61-repaired-33-{with,without}-metals-nio.
+build/steam-native-compile-22. Current B-pin evidence is under
+build/native-B-35, build/ecj-native61-B-35,
+build/steam-gametest-native61-B-35 and
+evidence/packaged-server-native61-B-35-{with,without}-metals-nio.
 All three rebuilt Steam archives match the frozen artifacts byte for byte.
 Earlier source/archive/ECJ and old-pin cold receipts remain under
 build/native-pinned-28 and build/repro path with spaces 32. Failed attempts remain
