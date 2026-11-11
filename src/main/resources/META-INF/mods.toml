@@ -1,6 +1,7 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="GPL-3.0-only"
+showAsResourcePack=false
 issueTrackerURL="https://github.com/MinecraftModDevelopmentMods/baseSteam/issues"
 
 [[mods]]
@@ -21,7 +22,7 @@ side="BOTH"
 [[dependencies.basesteam]]
 modId="basemetals"
 mandatory=false
-versionRange="[3.1.2.121011,4.0.0)"
+versionRange="[3.1.2.121111,4.0.0)"
 ordering="AFTER"
 side="BOTH"
 

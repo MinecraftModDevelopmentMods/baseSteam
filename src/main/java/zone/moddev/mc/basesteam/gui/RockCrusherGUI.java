@@ -1,6 +1,6 @@
 package zone.moddev.mc.basesteam.gui;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 
 import zone.moddev.mc.basepower.math.Integer2D;
@@ -11,7 +11,7 @@ public class RockCrusherGUI extends SimpleMachineGUI{
 
 	public RockCrusherGUI() {
 		super(
-				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/rock_crusher.png"),
+				Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/rock_crusher.png"),
 				Integer2D.fromCoordinates(44,19, 44,88, 62,88, 80,88, 98,88, 116,88)
 		);
 	}

@@ -91,7 +91,7 @@ public class OptionalCrushingRecipeContractTest {
             assertFalse(condition, baseGuard(json(condition)));
     }
 
-    @Test public void nativeForge52CodecRetainsTheExactProviderIdentity() {
+    @Test public void nativeForge61CodecRetainsTheExactProviderIdentity() {
         JsonObject guard = json("{\"type\":\"forge:mod_loaded\",\"modid\":\"basemetals\"}");
         ModLoadedCondition condition = ModLoadedCondition.CODEC.codec().parse(JsonOps.INSTANCE, guard).getOrThrow();
         assertSame(ModLoadedCondition.CODEC, condition.codec());
@@ -106,9 +106,8 @@ public class OptionalCrushingRecipeContractTest {
         for (String machine : MACHINES) {
             JsonObject recipe = recipes.get("crushing_" + machine + ".json");
             assertEquals("Only the original payload plus conditions is expected", 4, recipe.size());
-            JsonObject ingredient = recipe.getAsJsonObject("ingredient");
-            assertEquals(1, ingredient.size());
-            assertEquals("basesteam:" + machine, ingredient.get("item").getAsString());
+            assertTrue(recipe.get("ingredient").isJsonPrimitive());
+            assertEquals("basesteam:" + machine, recipe.get("ingredient").getAsString());
             JsonObject output = recipe.getAsJsonObject("result");
             assertEquals(machine.equals("steam_tank") ? 1 : 2, output.size());
             assertEquals(machine.equals("steam_governor") ? "basepower:sprocket"

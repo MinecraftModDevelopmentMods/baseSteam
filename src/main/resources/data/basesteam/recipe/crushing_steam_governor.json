@@ -1,8 +1,6 @@
 {
   "type": "basemetals:crushing",
-  "ingredient": {
-    "item": "basesteam:steam_governor"
-  },
+  "ingredient": "basesteam:steam_governor",
   "result": {
     "id": "basepower:sprocket",
     "count": 2

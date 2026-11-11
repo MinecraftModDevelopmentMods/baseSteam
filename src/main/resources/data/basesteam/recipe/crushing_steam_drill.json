@@ -1,8 +1,6 @@
 {
   "type": "basemetals:crushing",
-  "ingredient": {
-    "item": "basesteam:steam_drill"
-  },
+  "ingredient": "basesteam:steam_drill",
   "result": {
     "id": "basesteam:steam_governor",
     "count": 2

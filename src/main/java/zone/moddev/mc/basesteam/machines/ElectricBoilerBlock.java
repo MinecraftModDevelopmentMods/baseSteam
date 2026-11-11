@@ -16,7 +16,7 @@ public class ElectricBoilerBlock  extends cyano.poweradvantage.api.simple.BlockS
 
 
 	public ElectricBoilerBlock() {
-		super(machineProperties(0.75F), Power.steam_power, ElectricBoilerTileEntity.ELECTRIC_POWER, Fluids.fluidConduit_general);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_boiler_electric")), Power.steam_power, ElectricBoilerTileEntity.ELECTRIC_POWER, Fluids.fluidConduit_general);
 	}
 
 	@Override

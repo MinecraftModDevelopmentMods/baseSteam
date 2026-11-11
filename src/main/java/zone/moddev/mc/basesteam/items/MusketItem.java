@@ -24,7 +24,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.CustomData;
@@ -32,10 +32,10 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.phys.AABB;
@@ -56,18 +56,18 @@ import net.minecraft.tags.TagKey;
 @SuppressWarnings("deprecation")
 public class MusketItem extends net.minecraft.world.item.Item{
 	private static final TagKey<Block> FRAGILE_TARGETS = TagKey.create(Registries.BLOCK,
-			ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "musket_fragile"));
+			Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, "musket_fragile"));
 	
 	
 	public static final String NBT_DATA_KEY_LOADED = "loaded";
 	public static final double MAX_RANGE = 64;
 	private static final int maxUseTime = 7200;
 
-	private static final TagKey<Item> BLACKPOWDER_AMMO_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ammo/blackpowder"));
-	private static final TagKey<Item> STEEL_INGOT_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ingots/steel"));
+	private static final TagKey<Item> BLACKPOWDER_AMMO_TAG = ItemTags.create(Identifier.fromNamespaceAndPath("forge", "ammo/blackpowder"));
+	private static final TagKey<Item> STEEL_INGOT_TAG = ItemTags.create(Identifier.fromNamespaceAndPath("forge", "ingots/steel"));
 
 	public MusketItem(Item.Properties properties){
-		super(properties.durability(250).attributes(ItemAttributeModifiers.builder()
+		super(properties.durability(250).enchantable(1).repairable(STEEL_INGOT_TAG).attributes(ItemAttributeModifiers.builder()
 				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID,
 						getMeleeDamage(), AttributeModifier.Operation.ADD_VALUE),
 						EquipmentSlotGroup.MAINHAND)
@@ -86,39 +86,34 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 	
 	@Override
-	public int getEnchantmentValue(){
-		return 1;
-	}
-	
-	@Override
-	public UseAnim getUseAnimation(ItemStack stack){
+	public ItemUseAnimation getUseAnimation(ItemStack stack){
 		if(isLoaded(stack)){
-			return UseAnim.BOW;
+			return ItemUseAnimation.BOW;
 		} else {
-			return UseAnim.BLOCK;
+			return ItemUseAnimation.BLOCK;
 		}
 	}
 	
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level world, Player playerEntity, InteractionHand hand){
+	public InteractionResult use(Level world, Player playerEntity, InteractionHand hand){
 		ItemStack srcItemStack = playerEntity.getItemInHand(hand);
-		if(hand != InteractionHand.MAIN_HAND) return InteractionResultHolder.pass(srcItemStack);
-		if(isNotLoaded(srcItemStack) && !hasAmmo(playerEntity, srcItemStack)) return InteractionResultHolder.fail(srcItemStack);
+		if(hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+		if(isNotLoaded(srcItemStack) && !hasAmmo(playerEntity, srcItemStack)) return InteractionResult.FAIL;
 		if(isNotLoaded(srcItemStack) && Enchantments.level(Enchantments.rapid_reload, srcItemStack, world.registryAccess()) > 0){
 			// instant reload
 			decrementAmmo(playerEntity,srcItemStack);
 			startLoad(srcItemStack);
 			playSound(SoundEvents.LEVER_CLICK,world,playerEntity);
 			finishLoad(srcItemStack);
-			return InteractionResultHolder.success(srcItemStack);
+			return InteractionResult.SUCCESS;
 		}
 		playerEntity.startUsingItem(hand);
-		return InteractionResultHolder.success(srcItemStack);
+		return InteractionResult.SUCCESS;
 	}
 	
 	@Override
 	public void onUseTick(Level level, LivingEntity player, ItemStack stack, int count){
-		if(level.isClientSide && count % 7 == 3 && isNotLoaded(stack)){
+		if(level.isClientSide() && count % 7 == 3 && isNotLoaded(stack)){
 			// indicator to player that the gun is loading
 			player.playSound(SoundType.STONE.getStepSound(), 0.5f, 1.0f);
 		}
@@ -139,12 +134,13 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 	
 	@Override
-	public void releaseUsing(ItemStack stack, Level worldIn, LivingEntity playerIn, int timeLeft) {
+	public boolean releaseUsing(ItemStack stack, Level worldIn, LivingEntity playerIn, int timeLeft) {
 		if(isAlmostLoaded(stack)){
 			finishLoad(stack);
 		} else if(isLoaded(stack)){
 			fire(stack,playerIn,worldIn);
 		}
+		return true;
 	}
 	
 	protected void fire(ItemStack srcItemStack, LivingEntity playerEntity,
@@ -159,7 +155,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		Vec3 lookVector = playerEntity.getLookAngle();
 		spawnParticle(ParticleTypes.EXPLOSION_EMITTER, world,
 				playerEntity.getX()+lookVector.x, playerEntity.getY()+playerEntity.getEyeHeight()+lookVector.y, playerEntity.getZ() + lookVector.z);
-		if(world.isClientSide){
+		if(world.isClientSide()){
 			playerEntity.setXRot(playerEntity.getXRot() - 15);
 			return;
 		}
@@ -178,7 +174,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		final Level.ExplosionInteraction explosionInteraction = Level.ExplosionInteraction.TNT;
 		if(rayTrace instanceof EntityHitResult){
 			Entity e = ((EntityHitResult) rayTrace).getEntity();
-			e.hurt(Power.musketDamage(world), getShotDamage());
+			e.hurtServer((ServerLevel)world, Power.musketDamage(world), getShotDamage());
 			if(explosive > 0){
 				int lvl = explosive;
 				world.explode(playerEntity, e.getX(), e.getY()+0.5, e.getZ(),
@@ -200,8 +196,9 @@ public class MusketItem extends net.minecraft.world.item.Item{
 				if (bs.is(FRAGILE_TARGETS)) {
 					world.destroyBlock(coord, true);
 				} else if (bs.getBlock() instanceof TntBlock) {
-					TntBlock.explode(world, coord);
-					world.removeBlock(coord, false);
+					if (bs.getBlock().onCaughtFire(bs, world, coord, null, null)) {
+						world.removeBlock(coord, false);
+					}
 				}
 			}
 			if(explosive > 0){
@@ -248,15 +245,14 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 	
 	@Override
-	public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker)
+	public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker)
 	{
 		stack.hurtAndBreak(1, attacker, EquipmentSlot.MAINHAND);
-		return true;
 	}
 	
 	/** plays a sound at the player location */
 	protected void playSound(SoundEvent sound, Level world, Entity e){
-		if (!world.isClientSide)
+		if (!world.isClientSide())
 		{
 			playSoundAtPosition(e.getX(), e.getY(), e.getZ(), sound,SoundSource.PLAYERS,1F,1F,world);
 		}
@@ -280,7 +276,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 
 	private static byte loadedState(ItemStack musket) {
 		CustomData data = musket.get(DataComponents.CUSTOM_DATA);
-		return data == null ? 0 : data.copyTag().getByte(NBT_DATA_KEY_LOADED);
+		return data == null ? 0 : data.copyTag().getByteOr(NBT_DATA_KEY_LOADED, (byte)0);
 	}
 	
 	public static boolean isLoaded(ItemStack musket){
@@ -304,8 +300,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 			if (playerEntity.isCreative()
 					|| Enchantments.level(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket, e.registryAccess()) > 0
 					|| Enchantments.level(Enchantments.powderless, musket, e.registryAccess()) > 0) return true;
-			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
-				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
+			for (int i = 0; i < playerEntity.getInventory().getNonEquipmentItems().size(); i++) {
+				ItemStack inventoryStack = playerEntity.getInventory().getItem(i);
 				if (inventoryStack.isEmpty()) continue;
 				if (inventoryStack.is(BLACKPOWDER_AMMO_TAG)) return true;
 			}
@@ -320,12 +316,12 @@ public class MusketItem extends net.minecraft.world.item.Item{
 			if (playerEntity.isCreative()
 					|| Enchantments.level(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket, e.registryAccess()) > 0
 					|| Enchantments.level(Enchantments.powderless, musket, e.registryAccess()) > 0) return;
-			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
-				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
+			for (int i = 0; i < playerEntity.getInventory().getNonEquipmentItems().size(); i++) {
+				ItemStack inventoryStack = playerEntity.getInventory().getItem(i);
 				if (inventoryStack.isEmpty()) continue;
 				if (inventoryStack.is(BLACKPOWDER_AMMO_TAG)) {
 					inventoryStack.shrink(1);
-					if (inventoryStack.isEmpty()) playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
+					if (inventoryStack.isEmpty()) playerEntity.getInventory().setItem(i, ItemStack.EMPTY);
 					return;
 				}
 			}
@@ -338,7 +334,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		Vec3 rayDirection = source.getLookAngle();
 		Vec3 loadedEnd = loadedRayEnd(rayOrigin, rayOrigin.add(rayDirection.scale(maxRange)), w::hasChunkAt);
 		if(loadedEnd.equals(rayOrigin)) return BlockHitResult.miss(rayOrigin,
-				net.minecraft.core.Direction.getNearest(rayDirection.x, rayDirection.y, rayDirection.z), BlockPos.containing(rayOrigin));
+				net.minecraft.core.Direction.getApproximateNearest(rayDirection.x, rayDirection.y, rayDirection.z), BlockPos.containing(rayOrigin));
 		BlockHitResult terrainHit = w.clip(new ClipContext(rayOrigin, loadedEnd,
 				ClipContext.Block.COLLIDER, ClipContext.Fluid.SOURCE_ONLY, source));
 		Vec3 rayEnd = terrainHit.getLocation();
@@ -416,24 +412,17 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		return Math.min(a, b);
 	}
 	
-	/**
-	 * Return whether this item is repairable in an anvil.
-	 */
-	@Override public boolean isValidRepairItem(ItemStack srcItemStack, ItemStack rawMaterial)
-	{
-		// repair with steel ingots
-		return rawMaterial.is(STEEL_INGOT_TAG);
-	}
-	
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, net.minecraft.world.item.TooltipFlag flag){
-		super.appendHoverText(stack,context,list,flag);
-		list.add(Component.translatable("tooltip.musket.damage", (int)MusketItem.getShotDamage()));
+	public void appendHoverText(ItemStack stack, TooltipContext context,
+            net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> list,
+            net.minecraft.world.item.TooltipFlag flag){
+		super.appendHoverText(stack,context,display,list,flag);
+		list.accept(Component.translatable("tooltip.musket.damage", (int)MusketItem.getShotDamage()));
 		if(isLoaded(stack)){
-			list.add(Component.translatable("tooltip.musket.loaded"));
+			list.accept(Component.translatable("tooltip.musket.loaded"));
 		} else {
-			list.add(Component.translatable("tooltip.musket.unloaded"));
-			list.add(Component.translatable("tooltip.musket.ammo", Component.translatable("item.basesteam.blackpowder_cartridge")));
+			list.accept(Component.translatable("tooltip.musket.unloaded"));
+			list.accept(Component.translatable("tooltip.musket.ammo", Component.translatable("item.basesteam.blackpowder_cartridge")));
 		}
 	}
 

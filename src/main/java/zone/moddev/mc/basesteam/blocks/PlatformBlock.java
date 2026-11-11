@@ -24,7 +24,7 @@ public class PlatformBlock extends Block {
     };
 
     public PlatformBlock() {
-        super(SteamBlockProperties.metalHelper(2000.0F)
+        super(SteamBlockProperties.metalHelper("platform", 2000.0F)
                 .isRedstoneConductor((state, world, pos) -> false)
                 .isSuffocating((state, world, pos) -> false)
                 .isViewBlocking((state, world, pos) -> false));
@@ -36,7 +36,8 @@ public class PlatformBlock extends Block {
     @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPES[state.getValue(HEIGHT)]; }
 
     @Override
-    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
+    public void neighborChanged(BlockState state, Level world, BlockPos pos, Block block,
+            net.minecraft.world.level.redstone.Orientation orientation, boolean moving) {
         if (!canBlockStay(world, pos)) world.destroyBlock(pos, true);
     }
 

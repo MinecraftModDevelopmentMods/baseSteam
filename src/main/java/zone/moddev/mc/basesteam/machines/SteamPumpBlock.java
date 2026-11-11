@@ -22,7 +22,7 @@ public class SteamPumpBlock extends cyano.poweradvantage.api.simple.BlockSimpleP
 
 	
 	public SteamPumpBlock() {
-		super(machineProperties(0.75F), Power.steam_power, Fluids.fluidConduit_general);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_pump")), Power.steam_power, Fluids.fluidConduit_general);
 	}
 
 	@Override
@@ -56,20 +56,14 @@ public class SteamPumpBlock extends cyano.poweradvantage.api.simple.BlockSimpleP
 		return !ConduitType.areSameType(Power.steam_power, type);
 	}
 	@Override
-	public void onRemove(BlockState state, Level w, BlockPos coord, BlockState newState, boolean isMoving) {
-		if (state.getBlock() != newState.getBlock()) destroyPipe(w, coord);
-		super.onRemove(state, w, coord, newState, isMoving);
-	}
-
-	@Override
-	public void wasExploded(Level w, BlockPos coord, Explosion boom){
+	public void wasExploded(net.minecraft.server.level.ServerLevel w, BlockPos coord, Explosion boom){
 		destroyPipe(w, coord);
 		super.wasExploded(w, coord, boom);
 	}
 	
 	
-	private void destroyPipe(Level w, BlockPos coord) {
-		if(w.isClientSide) return;
+	static void destroyPipe(Level w, BlockPos coord) {
+		if(w.isClientSide()) return;
 		// destroy connected drill bits
 		BlockPos c = coord.below();
 		while(c.getY() > 0 && w.getBlockState(c).getBlock() == Blocks.pump_pipe_steam){

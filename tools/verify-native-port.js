@@ -25,9 +25,10 @@ for (const name of files(resources).filter(name => /\.(json|mcmeta)$/.test(name)
   json.set(name, JSON.parse(text));
 }
 assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {
-  pack_format: 34, supported_formats: {min_inclusive: 34, max_inclusive: 48}, description: 'baseSteam'
+  min_format: [94, 1], max_format: [94, 1], description: 'baseSteam'
 });
 const metadata = read(`${resources}/META-INF/mods.toml`);
+assert.match(metadata, /^showAsResourcePack=false$/m);
 assert.match(metadata, /modId="basesteam"/);
 assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[\$\{poweradvantage_version\},3\.0\.0\)"/);
 assert.match(metadata, /modId="basemetals"\r?\nmandatory=false/);
@@ -105,6 +106,13 @@ for (const id of pickaxe.values.map(value => value.split(':')[1]).filter(id => !
 }
 const tests = files('src/test/java').filter(name => name.endsWith('.java'));
 const testCount = tests.reduce((sum, name) => sum + (read(name).match(/@Test\b/g) || []).length, 0);
-console.log(`BASESTEAM_NATIVE1211_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
+for (const id of [...pickaxe.values.map(value => value.split(':')[1]),
+  'steam_governor', 'steam_drill_bit', 'blackpowder_cartridge', 'musket']) {
+  assert(json.has(`${assets}/items/${id}.json`), `Missing native item definition: ${id}`);
+}
+for (const name of source) {
+  assert(!/ResourceLocation|net\.minecraftforge\.eventbus\.api\.(?:IEventBus|SubscribeEvent)/.test(read(name)), name);
+}
+console.log(`BASESTEAM_NATIVE12111_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
 console.log('Source checks only. Compilation, executed tests, packaged runtime and manual acceptance are separate.');
 require('./verify-enchantment-data');

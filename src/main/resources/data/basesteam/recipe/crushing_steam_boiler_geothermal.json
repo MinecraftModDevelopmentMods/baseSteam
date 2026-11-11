@@ -1,8 +1,6 @@
 {
   "type": "basemetals:crushing",
-  "ingredient": {
-    "item": "basesteam:steam_boiler_geothermal"
-  },
+  "ingredient": "basesteam:steam_boiler_geothermal",
   "result": {
     "id": "basesteam:steam_governor",
     "count": 2

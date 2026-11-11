@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "basesteam:older_musket_alias_and_top_level_wear_survive_power_migration",
+  "environment": "minecraft:default",
+  "structure": "basesteam:basesteam_empty",
+  "max_ticks": 100
+}

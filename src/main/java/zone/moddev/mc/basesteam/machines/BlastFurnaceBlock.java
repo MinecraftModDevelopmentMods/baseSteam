@@ -16,7 +16,7 @@ public class BlastFurnaceBlock extends cyano.poweradvantage.api.simple.BlockSimp
 
 	
 	public BlastFurnaceBlock() {
-		super(machineProperties(0.75F), Power.steam_power);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_furnace")), Power.steam_power);
 	}
 
 	@Override

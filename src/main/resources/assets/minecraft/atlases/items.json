@@ -1,0 +1,5 @@
+{
+  "sources": [
+    { "type": "single", "resource": "basesteam:entity/drill_bit" }
+  ]
+}

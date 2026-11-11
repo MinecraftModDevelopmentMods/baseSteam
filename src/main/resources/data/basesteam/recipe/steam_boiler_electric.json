@@ -6,21 +6,11 @@
     "pmp"
   ],
   "key": {
-    "X": {
-      "tag": "forge:wires"
-    },
-    "Y": {
-      "item": "minecraft:bucket"
-    },
-    "g": {
-      "tag": "forge:governors"
-    },
-    "p": {
-      "tag": "forge:plates/iron"
-    },
-    "m": {
-      "tag": "forge:frames/steel"
-    }
+    "X": "#forge:wires",
+    "Y": "minecraft:bucket",
+    "g": "#forge:governors",
+    "p": "#forge:plates/iron",
+    "m": "#forge:frames/steel"
   },
   "result": {
     "id": "basesteam:steam_boiler_electric"

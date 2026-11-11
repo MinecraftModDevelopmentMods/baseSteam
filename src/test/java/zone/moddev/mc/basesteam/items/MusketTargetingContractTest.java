@@ -55,8 +55,8 @@ public class MusketTargetingContractTest {
                 .findFirst().orElseThrow(() -> new AssertionError("Missing Minecraft's onUseTick override"));
         boolean clientGate = false, loadGate = false, sound = false;
         for (AbstractInsnNode instruction : useTick.instructions.toArray()) {
-            if (instruction instanceof FieldInsnNode field && field.name.equals("isClientSide")) clientGate = true;
             if (!(instruction instanceof MethodInsnNode call)) continue;
+            if (call.name.equals("isClientSide")) clientGate = true;
             if (call.name.equals("isNotLoaded")) loadGate = true;
             if (call.name.equals("playSound")) {
                 assertTrue("Reload sound must be client-only and stop when loaded", clientGate && loadGate);

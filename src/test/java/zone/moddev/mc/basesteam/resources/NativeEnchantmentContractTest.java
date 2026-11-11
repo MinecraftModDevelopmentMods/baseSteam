@@ -17,7 +17,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -43,17 +43,18 @@ public class NativeEnchantmentContractTest {
         NativeTestBootstrap.start();
         Items.init();
         Items.allItems.forEach((id, item) -> {
-            ResourceLocation key = ResourceLocation.fromNamespaceAndPath("basesteam", id);
+            Identifier key = Identifier.fromNamespaceAndPath("basesteam", id);
             if (!ForgeRegistries.ITEMS.containsKey(key)) ForgeRegistries.ITEMS.register(key, item);
             assertSame(item, ForgeRegistries.ITEMS.getValue(key));
         });
         previousTags = new HashMap<>();
-        BuiltInRegistries.ITEM.getTags().forEach(pair ->
-                previousTags.put(pair.getFirst(), pair.getSecond().stream().toList()));
+        BuiltInRegistries.ITEM.freeze();
+        BuiltInRegistries.ITEM.getTags().forEach(tag ->
+                previousTags.put(tag.key(), tag.stream().toList()));
         var tags = new HashMap<>(previousTags);
-        tags.put(ItemTags.create(ResourceLocation.parse("basesteam:muskets")),
+        tags.put(ItemTags.create(Identifier.parse("basesteam:muskets")),
                 List.of(Items.blackpowder_musket.builtInRegistryHolder()));
-        BuiltInRegistries.ITEM.bindTags(tags);
+        NativeTestBootstrap.bindItemTags(tags);
         var enchantments = new MappedRegistry<>(Registries.ENCHANTMENT, Lifecycle.stable());
         registries = new RegistryAccess.ImmutableRegistryAccess(Stream.concat(
                 NativeTestBootstrap.registries().registries(),
@@ -61,7 +62,7 @@ public class NativeEnchantmentContractTest {
         var ops = registries.createSerializationContext(JsonOps.INSTANCE);
         for (var key : KEYS) {
             try (var reader = Files.newBufferedReader(Path.of(
-                    "src/main/resources/data/basesteam/enchantment", key.location().getPath() + ".json"))) {
+                    "src/main/resources/data/basesteam/enchantment", key.identifier().getPath() + ".json"))) {
                 Enchantment value = Enchantment.DIRECT_CODEC.parse(ops, JsonParser.parseReader(reader)).getOrThrow();
                 enchantments.register(key, value, RegistrationInfo.BUILT_IN);
             }
@@ -70,7 +71,7 @@ public class NativeEnchantmentContractTest {
     }
 
     @AfterClass public static void restoreTags() {
-        if (previousTags != null) BuiltInRegistries.ITEM.bindTags(previousTags);
+        if (previousTags != null) NativeTestBootstrap.bindItemTags(previousTags);
     }
 
     @Test public void nativeDefinitionsRetainEveryLegacyCostLevelWeightAndSlot() {
@@ -105,7 +106,8 @@ public class NativeEnchantmentContractTest {
         zone.moddev.mc.basesteam.items.MusketItem.startLoad(stack);
         zone.moddev.mc.basesteam.items.MusketItem.finishLoad(stack);
         zone.moddev.mc.basesteam.items.MusketItem.unload(stack);
-        ItemStack restored = ItemStack.parse(registries, stack.save(registries)).orElseThrow();
+        ItemStack restored = ItemStack.CODEC.parse(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
+                ItemStack.CODEC.encodeStart(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), stack).getOrThrow()).getOrThrow();
         assertEquals(original, restored.get(DataComponents.ENCHANTMENTS));
         assertEquals(123, restored.getDamageValue());
         for (var key : KEYS)
@@ -116,11 +118,11 @@ public class NativeEnchantmentContractTest {
         var stack = new ItemStack(Items.blackpowder_musket);
         assertThrows(IllegalStateException.class,
                 () -> Enchantments.level(Enchantments.recoil, stack, RegistryAccess.EMPTY));
-        var missing = ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.parse("basesteam:missing"));
+        var missing = ResourceKey.create(Registries.ENCHANTMENT, Identifier.parse("basesteam:missing"));
         assertThrows(IllegalStateException.class, () -> Enchantments.level(missing, stack, registries));
     }
 
     private static Holder.Reference<Enchantment> holder(ResourceKey<Enchantment> key) {
-        return registries.registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(key);
+        return registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key);
     }
 }

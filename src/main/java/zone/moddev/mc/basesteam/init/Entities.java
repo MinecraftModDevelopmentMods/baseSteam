@@ -4,8 +4,8 @@ package zone.moddev.mc.basesteam.init;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.resources.Identifier;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -61,8 +61,8 @@ public final class Entities {
 
     private static <T extends BlockEntity> BlockEntityType<T> register(
             RegisterEvent event, String id, BlockEntityType.BlockEntitySupplier<T> factory, Block block) {
-        BlockEntityType<T> type = BlockEntityType.Builder.<T>of(factory, block).build(null);
-        event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), () -> type);
+        BlockEntityType<T> type = new BlockEntityType<>(factory, java.util.Set.of(block));
+        event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, id), () -> type);
         return type;
     }
 }

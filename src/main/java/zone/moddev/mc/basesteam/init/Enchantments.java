@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /** Stable save identities; holders belong to the current world's data-driven registry. */
 public final class Enchantments {
@@ -20,11 +20,11 @@ public final class Enchantments {
 
     public static int level(ResourceKey<Enchantment> enchantment, ItemStack stack, RegistryAccess registries) {
         return EnchantmentHelper.getItemEnchantmentLevel(
-                registries.registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(enchantment), stack);
+                registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(enchantment), stack);
     }
 
     private static ResourceKey<Enchantment> key(String path) {
         return ResourceKey.create(Registries.ENCHANTMENT,
-                ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, path));
+                Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, path));
     }
 }

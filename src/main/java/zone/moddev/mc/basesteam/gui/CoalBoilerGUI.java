@@ -1,6 +1,6 @@
 package zone.moddev.mc.basesteam.gui;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 
 import zone.moddev.mc.basepower.math.Integer2D;
@@ -11,7 +11,7 @@ public class CoalBoilerGUI extends SimpleMachineGUI{
 
 	public CoalBoilerGUI() {
 		super(
-				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/coal_boiler.png"),
+				Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/coal_boiler.png"),
 				new Integer2D[] {new Integer2D(80,80)}
 		);
 	}

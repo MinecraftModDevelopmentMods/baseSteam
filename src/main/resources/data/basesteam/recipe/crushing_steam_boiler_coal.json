@@ -1,8 +1,6 @@
 {
   "type": "basemetals:crushing",
-  "ingredient": {
-    "item": "basesteam:steam_boiler_coal"
-  },
+  "ingredient": "basesteam:steam_boiler_coal",
   "result": {
     "id": "basesteam:steam_governor",
     "count": 2

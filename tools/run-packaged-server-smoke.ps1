@@ -13,9 +13,9 @@ $ErrorActionPreference = 'Stop'
 $project = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $forge = (Resolve-Path -LiteralPath $ForgeInstall).Path
 $pins = Get-Content -Raw -LiteralPath (Join-Path $project 'gradle.properties') | ConvertFrom-StringData
-if ($pins.minecraft_version -ne '1.21.1' -or $pins.forge_version -ne '52.1.0' -or
+if ($pins.minecraft_version -ne '1.21.11' -or $pins.forge_version -ne '61.1.0' -or
         $pins.poweradvantage_source_ref -cnotmatch '^[0-9a-f]{40}$') {
-    throw 'An exact Forge 52.1.0 candidate and committed Power source pin are required.'
+    throw 'An exact Forge 61.1.0 candidate and committed Power source pin are required.'
 }
 $java = (Resolve-Path -LiteralPath $JavaExe).Path
 $javaVersion = (& $java -version 2>&1 | Out-String).Trim()
@@ -34,10 +34,10 @@ if (!$PowerJar) {
     $PowerJar = Join-Path $project "../../PowerAdvantage/build/libs/basePower-$($pins.poweradvantage_version).jar"
 }
 if (!$BaseMetalsJar) {
-    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/.verification-basemetals1211/Advantage shared hook/build/libs/BaseMetals-$($pins.basemetals_version).jar"
+    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/.verification-basemetals12111/Advantage shared hook/build/libs/BaseMetals-$($pins.basemetals_version).jar"
 }
 if (!$OreSpawnJar) {
-    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS1211/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
+    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS12111/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
 }
 $mods = [ordered]@{
     $steamName = @{ Path = (Join-Path $project "build/libs/$steamName"); Sha256 = $steamSha }
@@ -57,7 +57,7 @@ $forgeJars = [ordered]@{
 }
 foreach ($file in $forgeJars.Keys) {
     if ($forgeJars[$file] -cnotmatch '^[A-F0-9]{64}$') {
-        throw "Supply the coordinated Forge 52.1.0 runtime hash in gradle.properties: $file"
+        throw "Supply the coordinated Forge 61.1.0 runtime hash in gradle.properties: $file"
     }
     if ((Get-FileHash -LiteralPath (Join-Path $forge $file)).Hash -cne $forgeJars[$file]) {
         throw "Installed Forge runtime hash mismatch: $file"
@@ -110,7 +110,7 @@ try {
     $start.RedirectStandardInput = $true
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
-    foreach ($argument in @('-Xms512m', '-Xmx3g', '-Djava.net.preferIPv6Addresses=system', '-jar', $shim, '--nogui')) {
+    foreach ($argument in @('-Xms512m', '-Xmx3g', '-XX:ActiveProcessorCount=4', '-Djava.net.preferIPv6Addresses=system', '-jar', $shim, '--nogui')) {
         $start.ArgumentList.Add($argument)
     }
     $process = [System.Diagnostics.Process]::Start($start)

@@ -5,14 +5,14 @@ import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 import zone.moddev.mc.basepower.math.Integer2D;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.machines.SteamPumpTileEntity;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import cyano.poweradvantage.api.fluid.FluidStack;
 
 public class SteamPumpGUI extends SimpleMachineGUI{
 
 	public SteamPumpGUI() {
 		super(
-				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/steam_pump.png"),
+				Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/steam_pump.png"),
 				new Integer2D[0]
 		);
 	}

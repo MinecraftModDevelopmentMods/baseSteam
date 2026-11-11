@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "basesteam:native_resources_load_with_expected_ids",
+  "environment": "minecraft:default",
+  "structure": "basesteam:basesteam_empty",
+  "max_ticks": 100
+}

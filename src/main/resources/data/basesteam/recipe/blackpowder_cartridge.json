@@ -6,15 +6,9 @@
     "p"
   ],
   "key": {
-    "L": {
-      "tag": "forge:nuggets/lead"
-    },
-    "g": {
-      "item": "minecraft:gunpowder"
-    },
-    "p": {
-      "item": "minecraft:paper"
-    }
+    "L": "#forge:nuggets/lead",
+    "g": "minecraft:gunpowder",
+    "p": "minecraft:paper"
   },
   "result": {
     "id": "basesteam:blackpowder_cartridge"

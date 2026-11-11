@@ -25,19 +25,20 @@ public class MusketPersistenceTest {
         stack.setDamageValue(123);
         assertTrue(MusketItem.isNotLoaded(stack));
         MusketItem.startLoad(stack);
-        assertEquals(2, data(stack).getByte("loaded"));
+        assertEquals(2, data(stack).getByteOr("loaded", (byte)0));
         assertTrue(MusketItem.isAlmostLoaded(stack));
         MusketItem.finishLoad(stack);
-        assertEquals(1, data(stack).getByte("loaded"));
+        assertEquals(1, data(stack).getByteOr("loaded", (byte)0));
         assertTrue(MusketItem.isLoaded(stack.copy()));
         var registries = NativeTestBootstrap.registries();
-        ItemStack restored = ItemStack.parse(registries, stack.save(registries)).orElseThrow();
+        ItemStack restored = ItemStack.CODEC.parse(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
+                ItemStack.CODEC.encodeStart(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), stack).getOrThrow()).getOrThrow();
         assertTrue(MusketItem.isLoaded(restored));
         assertEquals(123, restored.getDamageValue());
         MusketItem.unload(stack);
-        assertEquals(0, data(stack).getByte("loaded"));
+        assertEquals(0, data(stack).getByteOr("loaded", (byte)0));
         assertTrue(MusketItem.isNotLoaded(stack));
-        assertEquals("legacy", data(stack).getString("owner"));
+        assertEquals("legacy", data(stack).getStringOr("owner", ""));
         assertEquals(123, stack.getDamageValue());
         assertTrue(MusketItem.isLoaded(restored));
     }

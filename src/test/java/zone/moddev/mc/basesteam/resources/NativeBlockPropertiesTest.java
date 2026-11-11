@@ -13,7 +13,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,7 +49,7 @@ public class NativeBlockPropertiesTest {
 
     @Test public void remainsNonOpaque() {
         for (BlockState state : states()) {
-            assertFalse(state.toString(), state.isSolidRender(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+            assertFalse(state.toString(), state.isSolidRender());
         }
     }
 
@@ -58,7 +57,7 @@ public class NativeBlockPropertiesTest {
         // Native opacity is 1, not 0, for a non-solid block with a full-cube outline.
         int expected = height < 0 || height == 4 ? 1 : 0;
         for (BlockState state : states()) {
-            assertEquals(state.toString(), expected, state.getLightBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+            assertEquals(state.toString(), expected, state.getLightBlock());
         }
     }
 
@@ -92,7 +91,7 @@ public class NativeBlockPropertiesTest {
                     state.canBeReplaced(net.minecraft.world.level.material.Fluids.WATER));
             assertEquals(height < 0 ? PushReaction.BLOCK : PushReaction.NORMAL, state.getPistonPushReaction());
         }
-        if (height >= 0) assertEquals(BuiltInLootTables.EMPTY, block.getLootTable());
+        if (height >= 0) assertTrue("Hidden helpers have no native loot-table key", block.getLootTable().isEmpty());
     }
 
     @Test public void fullCollisionHelpersNeitherSuffocateNorBlockTheView() {

@@ -5,14 +5,14 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerTrades;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerTrades;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.ItemCost;
 import net.minecraftforge.event.village.VillagerTradesEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 
@@ -24,7 +24,7 @@ public final class Villages {
 
     @SubscribeEvent
     public static void addTrades(VillagerTradesEvent event) {
-        VillagerProfession profession = event.getType();
+        net.minecraft.resources.ResourceKey<VillagerProfession> profession = event.getType();
         List<VillagerTrades.ItemListing> novice = event.getTrades().get(1);
         if (profession == VillagerProfession.ARMORER || profession == VillagerProfession.TOOLSMITH
                 || profession == VillagerProfession.WEAPONSMITH || profession == VillagerProfession.LIBRARIAN) {
@@ -36,12 +36,12 @@ public final class Villages {
             novice.add(sell(Items.blackpowder_musket, 10, 15));
         }
         if (profession == VillagerProfession.CLERIC) {
-            event.getTrades().get(3).add((trader, random) -> {
+            event.getTrades().get(3).add((level, trader, random) -> {
                 int enchantmentLevel = 5 + random.nextInt(15);
                 ItemStack musket = EnchantmentHelper.enchantItem(random,
                         new ItemStack(Items.blackpowder_musket), enchantmentLevel,
-                        trader.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
-                                .getTag(EnchantmentTags.NON_TREASURE).orElseThrow().stream());
+                        trader.registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+                                .getOrThrow(EnchantmentTags.NON_TREASURE).stream());
                 int price = Math.min(randomPrice(random, 15, 25) + enchantmentLevel, 64);
                 return offer(price, musket);
             });
@@ -49,7 +49,7 @@ public final class Villages {
     }
 
     private static VillagerTrades.ItemListing sell(Item item, int min, int max) {
-        return (trader, random) -> {
+        return (level, trader, random) -> {
             int price = randomPrice(random, min, max);
             return offer(price < 0 ? 1 : price, new ItemStack(item, price < 0 ? -price : 1));
         };

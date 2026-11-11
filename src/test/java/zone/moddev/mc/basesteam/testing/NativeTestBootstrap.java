@@ -8,7 +8,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistry;
@@ -35,17 +34,7 @@ public final class NativeTestBootstrap {
 
         // Plain JUnit has no mod loader to dispatch these two Forge registry phases.
         if (ForgeRegistries.FLUID_TYPES.get() == null) {
-            var registries = ForgeRegistries.class.getDeclaredField("registries");
-            registries.setAccessible(true);
-            DeferredRegister<?> fluidTypes = ((List<?>) registries.get(null)).stream()
-                    .map(DeferredRegister.class::cast)
-                    .filter(registry -> ForgeRegistries.Keys.FLUID_TYPES.equals(registry.getRegistryKey()))
-                    .findFirst().orElseThrow();
-            var event = new NewRegistryEvent();
-            invokeRegistryPhase(fluidTypes, "createRegistry", event);
-            var fill = NewRegistryEvent.class.getDeclaredMethod("fill");
-            fill.setAccessible(true);
-            fill.invoke(event);
+            createForgeRegistry(ForgeRegistries.Keys.FLUID_TYPES);
         }
 
         var vanillaTypes = ForgeMod.class.getDeclaredField("VANILLA_FLUID_TYPES");
@@ -56,7 +45,34 @@ public final class NativeTestBootstrap {
                 event.newInstance(ForgeRegistries.Keys.FLUID_TYPES, ForgeRegistries.FLUID_TYPES.get(), null));
     }
 
-    private static void invokeRegistryPhase(DeferredRegister<?> register, String phase, Event event)
+    public static synchronized void registerCraftingSerializers() throws ReflectiveOperationException {
+        start();
+        if (ForgeRegistries.INGREDIENT_SERIALIZERS.get() == null)
+            createForgeRegistry(ForgeRegistries.Keys.INGREDIENT_SERIALIZERS);
+        var field = ForgeMod.class.getDeclaredField("INGREDIENT_SERIALIZERS");
+        field.setAccessible(true);
+        var register = (DeferredRegister<?>) field.get(null);
+        if (register.getEntries().stream().allMatch(net.minecraftforge.registries.RegistryObject::isPresent)) return;
+        var event = RegisterEvent.class.getDeclaredConstructor(ResourceKey.class, ForgeRegistry.class, Registry.class);
+        event.setAccessible(true);
+        invokeRegistryPhase(register, "handleEvent", event.newInstance(
+                ForgeRegistries.Keys.INGREDIENT_SERIALIZERS, ForgeRegistries.INGREDIENT_SERIALIZERS.get(), null));
+    }
+
+    private static void createForgeRegistry(ResourceKey<?> key) throws ReflectiveOperationException {
+        var registries = ForgeRegistries.class.getDeclaredField("registries");
+        registries.setAccessible(true);
+        DeferredRegister<?> register = ((List<?>) registries.get(null)).stream()
+                .map(DeferredRegister.class::cast).filter(value -> key.equals(value.getRegistryKey()))
+                .findFirst().orElseThrow();
+        var event = new NewRegistryEvent();
+        invokeRegistryPhase(register, "createRegistry", event);
+        var fill = NewRegistryEvent.class.getDeclaredMethod("fill");
+        fill.setAccessible(true);
+        fill.invoke(event);
+    }
+
+    private static void invokeRegistryPhase(DeferredRegister<?> register, String phase, Object event)
             throws ReflectiveOperationException {
         // The launch-only EventBus transform is not present in plain JUnit.
         Class<?> dispatcher = Class.forName(DeferredRegister.class.getName() + "$EventDispatcher");
@@ -65,6 +81,16 @@ public final class NativeTestBootstrap {
         var method = dispatcher.getDeclaredMethod(phase, event.getClass());
         method.setAccessible(true);
         method.invoke(constructor.newInstance(register), event);
+    }
+
+    public static void bindItemTags(java.util.Map<net.minecraft.tags.TagKey<net.minecraft.world.item.Item>,
+            List<net.minecraft.core.Holder<net.minecraft.world.item.Item>>> tags) {
+        var registry = (net.minecraft.core.MappedRegistry<net.minecraft.world.item.Item>)BuiltInRegistries.ITEM;
+        registry.unfreeze();
+        registry.bindAllTagsToEmpty();
+        BuiltInRegistries.ITEM.freeze();
+        BuiltInRegistries.ITEM.prepareTagReload(new net.minecraft.tags.TagLoader.LoadResult<>(
+                net.minecraft.core.registries.Registries.ITEM, tags)).apply();
     }
 
     private static final class NativeRegistries {

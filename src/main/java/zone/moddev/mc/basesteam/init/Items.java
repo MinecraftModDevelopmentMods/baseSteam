@@ -4,9 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -28,10 +28,10 @@ public final class Items {
     /** Constructs items during the Forge item registry event. */
     public static synchronized void init() {
         if (initialized) return;
-        steam_governor = add("steam_governor", new Item(new Item.Properties()));
-        steam_drill_bit = add("steam_drill_bit", new Item(new Item.Properties()));
-        blackpowder_cartridge = add("blackpowder_cartridge", new Item(new Item.Properties()));
-        blackpowder_musket = add("musket", new MusketItem(new Item.Properties().stacksTo(1)));
+        steam_governor = add("steam_governor", new Item(properties("steam_governor")));
+        steam_drill_bit = add("steam_drill_bit", new Item(properties("steam_drill_bit")));
+        blackpowder_cartridge = add("blackpowder_cartridge", new Item(properties("blackpowder_cartridge")));
+        blackpowder_musket = add("musket", new MusketItem(properties("musket").stacksTo(1)));
         initialized = true;
     }
 
@@ -40,12 +40,18 @@ public final class Items {
         return item;
     }
 
+    private static Item.Properties properties(String path) {
+        return new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(
+                net.minecraft.core.registries.Registries.ITEM,
+                Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, path)));
+    }
+
     @SubscribeEvent
     public static void register(RegisterEvent event) {
         if (!ForgeRegistries.Keys.ITEMS.equals(event.getRegistryKey())) return;
         init();
         event.register(ForgeRegistries.Keys.ITEMS, registry -> allItems.forEach((id, item) -> {
-            registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
+            registry.register(Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
             ItemGroups.show(item);
         }));
     }

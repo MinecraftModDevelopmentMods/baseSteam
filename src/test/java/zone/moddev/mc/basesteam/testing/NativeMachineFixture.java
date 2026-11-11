@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -98,12 +98,12 @@ public final class NativeMachineFixture implements TestRule {
             this.block = block;
             this.getter = getter;
             this.setter = setter;
-            type = BlockEntityType.Builder.of(factory, block).build(null);
+            type = new BlockEntityType<>(factory, java.util.Set.of(block));
             ForgeRegistry<BlockEntityType<?>> registry = (ForgeRegistry<BlockEntityType<?>>) ForgeRegistries.BLOCK_ENTITY_TYPES;
             boolean locked = registry.isLocked();
             registry.unfreeze();
             try {
-                registry.register(ResourceLocation.fromNamespaceAndPath("basesteam", id), type);
+                registry.register(Identifier.fromNamespaceAndPath("basesteam", id), type);
             } finally {
                 if (locked) registry.freeze();
             }

@@ -16,7 +16,7 @@ public class SteamElevatorBlock extends cyano.poweradvantage.api.simple.BlockSim
 
 	
 	public SteamElevatorBlock() {
-		super(machineProperties(0.75F), Power.steam_power);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_elevator")), Power.steam_power);
 	}
 
 	@Override

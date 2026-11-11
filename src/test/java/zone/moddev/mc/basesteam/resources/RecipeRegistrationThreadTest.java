@@ -17,7 +17,7 @@ public class RecipeRegistrationThreadTest {
         assertEquals(1L, mod.methods.stream().filter(method -> method.name.equals("<init>"))
                 .flatMap(RecipeRegistrationThreadTest::calls)
                 .filter(call -> call.owner.equals(CONDITIONS) && call.name.equals("register")
-                        && call.desc.equals("(Lnet/minecraftforge/eventbus/api/IEventBus;)V"))
+                        && call.desc.equals("(Lnet/minecraftforge/eventbus/api/bus/BusGroup;)V"))
                 .count());
         assertFalse(mod.methods.stream().filter(method -> method.name.equals("commonSetup"))
                 .flatMap(RecipeRegistrationThreadTest::calls).anyMatch(call -> call.owner.equals(CONDITIONS)));

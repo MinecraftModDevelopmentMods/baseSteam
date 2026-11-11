@@ -21,7 +21,7 @@ public class CoalBoilerBlock extends cyano.poweradvantage.api.simple.BlockSimple
 
 	
 	public CoalBoilerBlock() {
-		super(machineProperties(0.75F), Power.steam_power, Fluids.fluidConduit_general);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_boiler_coal")), Power.steam_power, Fluids.fluidConduit_general);
 	}
 
 	@Override

@@ -1,7 +1,8 @@
 package zone.moddev.mc.basesteam.machines;
 
 import cyano.poweradvantage.api.ConduitType;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -200,16 +201,16 @@ public class RockCrusherTileEntity extends cyano.poweradvantage.api.simple.TileE
 	}
 	
 	@Override
-	protected void saveAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
-		super.saveAdditional(tagRoot, registries);
+	protected void saveAdditional(ValueOutput tagRoot){
+		super.saveAdditional(tagRoot);
 		tagRoot.putShort("progress",(short)progress);
 	}
 	
 	@Override
-	protected void loadAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
-		super.loadAdditional(tagRoot, registries);
-		if(tagRoot.contains("progress")){
-			progress = tagRoot.getShort("progress");
+	protected void loadAdditional(ValueInput tagRoot){
+		super.loadAdditional(tagRoot);
+		if(tagRoot.read("progress", com.mojang.serialization.Codec.SHORT).isPresent()){
+			progress = tagRoot.getShortOr("progress", (short)0);
 		}
 	}
 

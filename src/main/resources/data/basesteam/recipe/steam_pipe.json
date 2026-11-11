@@ -6,9 +6,7 @@
     "xxx"
   ],
   "key": {
-    "x": {
-      "tag": "forge:ingots/brass"
-    }
+    "x": "#forge:ingots/brass"
   },
   "result": {
     "id": "basesteam:steam_pipe",

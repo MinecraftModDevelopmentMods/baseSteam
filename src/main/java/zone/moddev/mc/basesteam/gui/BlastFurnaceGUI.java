@@ -3,7 +3,7 @@ package zone.moddev.mc.basesteam.gui;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import cyano.poweradvantage.api.simple.SimpleMachineGUI;
 
 import zone.moddev.mc.basepower.math.Integer2D;
@@ -14,14 +14,14 @@ public class BlastFurnaceGUI extends SimpleMachineGUI{
 
 	public BlastFurnaceGUI() {
 		super(
-				ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/steam_furnace.png"),
+				Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/gui/container/steam_furnace.png"),
 				Integer2D.fromCoordinates(29,80, 93,19, 111,19, 129,19, 93,80, 111,80, 129,80)
 		);
 		for(int i = 4; i < 7; i++)super.specialSlots.put(i, (SlotContext c)->new Slot(c.machineInventory,c.slotIndex,c.screenPositionX,c.screenPositionY){
 			@Override
 			public void onTake(Player player, ItemStack stack)
 			{
-				stack.onCraftedBy(player.level(), player, stack.getCount());
+				stack.onCraftedBy(player, stack.getCount());
 				super.onTake(player, stack);
 			}
 			@Override
