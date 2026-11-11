@@ -1,5 +1,7 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeMachineFixture;
+
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -27,19 +29,20 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class SteamDrillPersistenceTest {
+    @org.junit.Rule public final NativeMachineFixture machineTypes = new NativeMachineFixture();
     @BeforeClass public static void bootstrapNativeRegistries() {
         NativeTestBootstrap.start();
     }
 
     @Test public void retainsLegacyProgressUntilWorldIsAttached() {
-        SteamDrillTileEntity drill = new SteamDrillTileEntity();
+        SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
         drill.loadWithComponents(target(94), NativeTestBootstrap.registries());
         drill.prepareDataFieldsForSync();
         assertEquals(94, drill.getDataFieldArray()[1]);
     }
 
     @Test public void clearsPreviousProgressOnReadingAnUntargetedTile() {
-        SteamDrillTileEntity drill = new SteamDrillTileEntity();
+        SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
         drill.loadWithComponents(target(94), NativeTestBootstrap.registries());
         drill.loadWithComponents(new CompoundTag(), NativeTestBootstrap.registries());
         drill.prepareDataFieldsForSync();
@@ -53,7 +56,7 @@ public class SteamDrillPersistenceTest {
             CompoundTag state = new CompoundTag();
             state.putString("Name", "minecraft:stone");
             tag.put("TargetState", state);
-            SteamDrillTileEntity drill = new SteamDrillTileEntity();
+            SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
             drill.loadWithComponents(tag, NativeTestBootstrap.registries());
             assertEquals(facing, field(drill, "savedFacing"));
             assertEquals(new BlockPos(2048, 80, 2049), field(drill, "targetBlockCoord"));
@@ -65,7 +68,7 @@ public class SteamDrillPersistenceTest {
     }
 
     @Test public void loadingAnotherTileDoesNotKeepPreviousFacing() throws Exception {
-        SteamDrillTileEntity drill = new SteamDrillTileEntity();
+        SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
         CompoundTag tag = target(94);
         tag.putByte("Facing", (byte) Direction.UP.get3DDataValue());
         drill.loadWithComponents(tag, NativeTestBootstrap.registries());
@@ -86,7 +89,7 @@ public class SteamDrillPersistenceTest {
         stack.putByte("Slot", (byte) 4);
         items.add(stack);
         tag.put("Items", items);
-        SteamDrillTileEntity drill = new SteamDrillTileEntity();
+        SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
         drill.loadWithComponents(tag, NativeTestBootstrap.registries());
         assertEquals(37.5F, drill.getEnergy(Power.steam_power), 0.0F);
         ItemStack output = drill.getItem(4);
@@ -95,7 +98,7 @@ public class SteamDrillPersistenceTest {
     }
 
     @Test public void drillOutputDoesNotMergeStacksWithDifferentComponents() {
-        SteamDrillTileEntity drill = new SteamDrillTileEntity();
+        SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
         ItemStack first = new ItemStack(net.minecraft.world.item.Items.COBBLESTONE, 8);
         CustomData.update(DataComponents.CUSTOM_DATA, first, tag -> tag.putString("source", "first"));
         ItemStack different = new ItemStack(net.minecraft.world.item.Items.COBBLESTONE, 4);
@@ -145,7 +148,7 @@ public class SteamDrillPersistenceTest {
             tag.putInt("targetX", target.getX());
             tag.putInt("targetY", target.getY());
             tag.putInt("targetZ", target.getZ());
-            SteamDrillTileEntity drill = new SteamDrillTileEntity(origin, new SteamDrillBlock().defaultBlockState());
+            SteamDrillTileEntity drill = new SteamDrillTileEntity(origin, NativeMachineFixture.state("steam_drill"));
             drill.loadWithComponents(tag, NativeTestBootstrap.registries());
             assertNull(field(drill, "savedFacing"));
             assertEquals(direction, infer.invoke(drill));

@@ -18,12 +18,14 @@ function files(dir) {
 }
 const json = new Map();
 for (const name of files(resources).filter(name => /\.(json|mcmeta)$/.test(name))) {
+  assert(!/\/data\/[^/]+\/(?:recipes|advancements|loot_tables|structures)\//.test(name), name);
+  assert(!/\/data\/[^/]+\/tags\/(?:items|blocks)\//.test(name), name);
   const text = read(name);
   assert(!/steamadvantage|poweradvantage/.test(name + text), name);
   json.set(name, JSON.parse(text));
 }
 assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {
-  pack_format: 32, supported_formats: {min_inclusive: 32, max_inclusive: 41}, description: 'baseSteam'
+  pack_format: 34, supported_formats: {min_inclusive: 34, max_inclusive: 48}, description: 'baseSteam'
 });
 const metadata = read(`${resources}/META-INF/mods.toml`);
 assert.match(metadata, /modId="basesteam"/);
@@ -51,7 +53,7 @@ function verifyModelReferences(value, name) {
 for (const [name, content] of json) {
   if (name.startsWith(assets)) verifyModelReferences(content, name);
 }
-for (const sourceRoot of ['src/main/java', 'src/test/java']) {
+for (const sourceRoot of ['src/main/java', 'src/test/java', 'src/gametest/java']) {
   for (const name of files(sourceRoot).filter(name => name.endsWith('.java'))) {
     const declared = /^package\s+([\w.]+);/m.exec(read(name))?.[1];
     const expected = path.posix.dirname(name.slice(sourceRoot.length + 1)).replaceAll('/', '.');
@@ -93,15 +95,16 @@ const entities = read(`${java}/init/Entities.java`);
 assert(entities.includes('BlockEntityType.BlockEntitySupplier<T> factory'));
 const ids = [...entities.matchAll(/register\(event, "([^"]+)"/g)].map(match => match[1]);
 assert.equal(ids.length, 12);
-const pickaxe = json.get(`${resources}/data/minecraft/tags/blocks/mineable/pickaxe.json`);
+const pickaxe = json.get(`${resources}/data/minecraft/tags/block/mineable/pickaxe.json`);
 assert.equal(pickaxe.replace, false);
 assert.equal(new Set(pickaxe.values).size, 17);
 for (const id of ids) assert(pickaxe.values.includes(`${mod}:${id}`), id);
 for (const id of pickaxe.values.map(value => value.split(':')[1]).filter(id => !['drillbit', 'platform', 'pump_pipe_steam'].includes(id))) {
-  const loot = json.get(`${data}/loot_tables/blocks/${id}.json`);
+  const loot = json.get(`${data}/loot_table/blocks/${id}.json`);
   assert.equal(loot.pools[0].entries[0].name, `${mod}:${id}`);
 }
 const tests = files('src/test/java').filter(name => name.endsWith('.java'));
 const testCount = tests.reduce((sum, name) => sum + (read(name).match(/@Test\b/g) || []).length, 0);
-console.log(`BASESTEAM_NATIVE1206_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
+console.log(`BASESTEAM_NATIVE1211_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
 console.log('Source checks only. Compilation, executed tests, packaged runtime and manual acceptance are separate.');
+require('./verify-enchantment-data');

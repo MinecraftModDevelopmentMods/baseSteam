@@ -1,5 +1,7 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeMachineFixture;
+
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import cyano.poweradvantage.api.fluid.FluidStack;
 import java.lang.reflect.Method;
@@ -15,11 +17,9 @@ import static org.junit.Assert.*;
 
 /** Pure capacity planning; native operating regressions live in SteamOperationalCases. */
 public class SteamOperationalStillCapacityTest {
+    @org.junit.Rule public final NativeMachineFixture machineTypes = new NativeMachineFixture();
     @BeforeClass public static void bootstrap() {
         NativeTestBootstrap.start();
-        if (Entities.STEAM_STILL == null) {
-            Entities.STEAM_STILL = BlockEntityType.Builder.of(SteamStillTileEntity::new, Blocks.STONE).build(null);
-        }
     }
 
     @Test public void fullOutputCannotPlanOrDebitAnyInput() throws Exception {
@@ -55,7 +55,7 @@ public class SteamOperationalStillCapacityTest {
     }
 
     @Test public void mismatchedProductIsNotOverwritten() throws Exception {
-        SteamStillTileEntity still = new SteamStillTileEntity();
+        SteamStillTileEntity still = new SteamStillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_still"));
         still.getOutputTank().setFluid(new FluidStack(Fluids.WATER, 10));
         FluidStack input = new FluidStack(Fluids.WATER, 200);
         assertEquals(0, plan(still, recipe(2, 1), input));
@@ -73,7 +73,7 @@ public class SteamOperationalStillCapacityTest {
     }
 
     private static SteamStillTileEntity still(int output) {
-        SteamStillTileEntity still = new SteamStillTileEntity();
+        SteamStillTileEntity still = new SteamStillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_still"));
         if (output > 0) still.getOutputTank().setFluid(new FluidStack(Fluids.LAVA, output));
         return still;
     }

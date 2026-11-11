@@ -1,5 +1,7 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeMachineFixture;
+
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 import java.lang.reflect.Method;
@@ -16,6 +18,7 @@ import org.junit.runners.Parameterized;
 /** Calls each actual boiler method; no stand-in fill/drain implementation or world ticks. */
 @RunWith(Parameterized.class)
 public class WaterBoilerFluidBoundaryTest {
+    @org.junit.Rule public final NativeMachineFixture machineTypes = new NativeMachineFixture();
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> boilers() {
         return Arrays.asList(new Object[][]{{CoalBoilerTileEntity.class},
@@ -27,15 +30,9 @@ public class WaterBoilerFluidBoundaryTest {
     public WaterBoilerFluidBoundaryTest(Class<?> type) { this.type = type; }
     @BeforeClass public static void bootstrap() {
         NativeTestBootstrap.start();
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(CoalBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_ELECTRIC == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_ELECTRIC = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(ElectricBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_GEOTHERMAL == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_GEOTHERMAL = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(GeothermalBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
     }
     @Before public void createActualBoiler() throws Exception {
-        boiler = type.getConstructor().newInstance();
+        boiler = NativeMachineFixture.create(type.asSubclass(net.minecraft.world.level.block.entity.BlockEntity.class));
         tank = (FluidTank) type.getMethod("getTank").invoke(boiler);
     }
 

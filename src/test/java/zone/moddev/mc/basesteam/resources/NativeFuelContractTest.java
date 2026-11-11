@@ -36,7 +36,7 @@ public class NativeFuelContractTest {
         try (MultiPackResourceManager resources = new MultiPackResourceManager(
                 PackType.SERVER_DATA, List.of(ServerPacksSource.createVanillaPackSource()))) {
             TagLoader<Holder<Item>> reader = new TagLoader<>(
-                    id -> BuiltInRegistries.ITEM.getHolder(ResourceKey.create(Registries.ITEM, id)), "tags/items");
+                    id -> BuiltInRegistries.ITEM.getHolder(ResourceKey.create(Registries.ITEM, id)), "tags/item");
             Map<TagKey<Item>, List<Holder<Item>>> loaded = new HashMap<>();
             reader.loadAndBuild(resources).forEach((id, tag) -> loaded.put(ItemTags.create(id), List.copyOf(tag)));
             assertTrue(loaded.containsKey(ItemTags.NON_FLAMMABLE_WOOD));

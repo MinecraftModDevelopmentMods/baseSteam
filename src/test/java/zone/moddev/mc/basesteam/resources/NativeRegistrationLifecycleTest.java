@@ -20,11 +20,11 @@ public class NativeRegistrationLifecycleTest {
         assertFalse(calls("SteamAdvantage", "<init>").stream().anyMatch(call -> call.owner.startsWith(INIT)));
     }
 
-    @Test public void owningRegisterEventsInitializeBlocksItemsAndEnchantments() throws Exception {
+    @Test public void owningRegisterEventsInitializeBlocksAndItemsButEnchantmentsAreDataDriven() throws Exception {
         assertTrue(calls("init/Blocks", "registerBlocks").stream().anyMatch(call -> initializes(call, "Blocks")));
         assertTrue(calls("init/Items", "register").stream().anyMatch(call -> initializes(call, "Items")));
-        assertTrue(calls("init/Enchantments", "registerEnchantments").stream()
-                .anyMatch(call -> initializes(call, "Enchantments")));
+        assertFalse(calls("init/Enchantments", "<clinit>").stream()
+                .anyMatch(call -> call.owner.startsWith("net/minecraftforge/registries/")));
         assertFalse(calls("init/Blocks", "registerBlockItems").stream().anyMatch(call -> initializes(call, "Blocks")));
         assertFalse(calls("init/Items", "init").stream().anyMatch(call -> initializes(call, "Blocks")));
         assertFalse(calls("init/Recipes", "init").stream()

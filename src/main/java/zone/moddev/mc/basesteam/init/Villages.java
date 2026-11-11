@@ -1,6 +1,8 @@
 package zone.moddev.mc.basesteam.init;
 
 import java.util.List;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -36,8 +38,10 @@ public final class Villages {
         if (profession == VillagerProfession.CLERIC) {
             event.getTrades().get(3).add((trader, random) -> {
                 int enchantmentLevel = 5 + random.nextInt(15);
-                ItemStack musket = EnchantmentHelper.enchantItem(trader.level().enabledFeatures(), random,
-                        new ItemStack(Items.blackpowder_musket), enchantmentLevel, false);
+                ItemStack musket = EnchantmentHelper.enchantItem(random,
+                        new ItemStack(Items.blackpowder_musket), enchantmentLevel,
+                        trader.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+                                .getTag(EnchantmentTags.NON_TREASURE).orElseThrow().stream());
                 int price = Math.min(randomPrice(random, 15, 25) + enchantmentLevel, 64);
                 return offer(price, musket);
             });

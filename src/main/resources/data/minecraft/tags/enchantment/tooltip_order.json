@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "basesteam:high_explosive",
+    "basesteam:powderless",
+    "basesteam:rapid_reload",
+    "basesteam:recoil"
+  ]
+}

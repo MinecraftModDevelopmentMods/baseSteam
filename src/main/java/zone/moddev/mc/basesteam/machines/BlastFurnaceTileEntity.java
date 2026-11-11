@@ -6,7 +6,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.nbt.CompoundTag;
@@ -333,8 +333,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 
 	private ItemStack getSmeltingResult(ItemStack input) {
 		if (input == null || input.isEmpty() || getLevel() == null) return ItemStack.EMPTY;
-		SimpleContainer inventory = new SimpleContainer(1);
-		inventory.setItem(0, input);
+		SingleRecipeInput inventory = new SingleRecipeInput(input);
 		return getLevel().getRecipeManager().getRecipeFor(RecipeType.SMELTING, inventory, getLevel())
 				.map(recipe -> recipe.value().assemble(inventory, getLevel().registryAccess())).orElse(ItemStack.EMPTY);
 	}

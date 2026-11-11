@@ -1,5 +1,7 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeMachineFixture;
+
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 import cyano.poweradvantage.api.IPowerMachine;
@@ -18,6 +20,7 @@ import org.junit.runners.Parameterized;
 /** Save notifications only; native restart reports remain the disk-persistence evidence. */
 @RunWith(Parameterized.class)
 public class WaterBoilerTankNotificationTest {
+    @org.junit.Rule public final NativeMachineFixture machineTypes = new NativeMachineFixture();
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> boilers() { return Arrays.asList(new Object[][]{{"electric"}, {"geothermal"}}); }
     private final String type;
@@ -25,10 +28,6 @@ public class WaterBoilerTankNotificationTest {
     public WaterBoilerTankNotificationTest(String type) { this.type = type; }
     @BeforeClass public static void bootstrap() {
         NativeTestBootstrap.start();
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_ELECTRIC == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_ELECTRIC = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(ElectricBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_GEOTHERMAL == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_GEOTHERMAL = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(GeothermalBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
     }
     @Before public void createRealBoiler() {
         probe = type.equals("electric") ? new ElectricProbe() : new GeothermalProbe();
@@ -129,6 +128,7 @@ public class WaterBoilerTankNotificationTest {
         void changed(FluidTank tank) { dirtyCalls++; savedTank = tank.writeToNBT(new CompoundTag()).copy(); }
     }
     private static final class ElectricProbe extends ElectricBoilerTileEntity implements Probe {
+        ElectricProbe() { super(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_electric")); }
         private final SaveWitness witness = new SaveWitness();
         private Level testWorld = world(false);
         @Override public Level getLevel() { return testWorld; }
@@ -139,6 +139,7 @@ public class WaterBoilerTankNotificationTest {
         @Override public void side(boolean client) { testWorld = world(client); }
     }
     private static final class GeothermalProbe extends GeothermalBoilerTileEntity implements Probe {
+        GeothermalProbe() { super(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_geothermal")); }
         private final SaveWitness witness = new SaveWitness();
         private Level testWorld = world(false);
         @Override public Level getLevel() { return testWorld; }

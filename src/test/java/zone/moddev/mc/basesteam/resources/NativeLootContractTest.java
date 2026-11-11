@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 
 public class NativeLootContractTest {
     private static final Path ROOT = Paths.get("src/main/resources");
-    private static final Path TABLES = ROOT.resolve("data/basesteam/loot_tables/blocks");
+    private static final Path TABLES = ROOT.resolve("data/basesteam/loot_table/blocks");
 
     @Test public void ordinaryBlocksKeepOneSelfDropWithExplosionSurvival() throws Exception {
         for (String id : new String[] { "steam_pipe", "steam_track", "steam_boiler_coal",
@@ -39,12 +39,12 @@ public class NativeLootContractTest {
         }
     }
 
-    @Test public void packUsesNative1206ResourceAndDataFormats() throws Exception {
+    @Test public void packUsesNative1211ResourceAndDataFormats() throws Exception {
         JsonObject pack = read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack");
-        assertEquals(32, pack.get("pack_format").getAsInt());
+        assertEquals(34, pack.get("pack_format").getAsInt());
         JsonObject supported = pack.getAsJsonObject("supported_formats");
-        assertEquals(32, supported.get("min_inclusive").getAsInt());
-        assertEquals(41, supported.get("max_inclusive").getAsInt());
+        assertEquals(34, supported.get("min_inclusive").getAsInt());
+        assertEquals(48, supported.get("max_inclusive").getAsInt());
         assertFalse(pack.has("forge:server_data_pack_format"));
         assertFalse(pack.has("forge:resource_pack_format"));
         assertFalse(pack.has("forge:data_pack_format"));

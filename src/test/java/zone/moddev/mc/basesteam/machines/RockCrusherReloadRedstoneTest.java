@@ -1,5 +1,7 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeMachineFixture;
+
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 import java.lang.reflect.Field;
@@ -10,12 +12,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class RockCrusherReloadRedstoneTest {
+    @org.junit.Rule public final NativeMachineFixture machineTypes = new NativeMachineFixture();
     @BeforeClass public static void bootstrap() {
         NativeTestBootstrap.start();
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_CRUSHER == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_CRUSHER = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(RockCrusherTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_FURNACE == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_FURNACE = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(BlastFurnaceTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
     }
 
     @Test public void resumedWorkCannotBeDecrementedBeforeTheFirstLiveControlSample() throws Exception {
@@ -72,10 +71,12 @@ public class RockCrusherReloadRedstoneTest {
         return (ControlWorld) allocator.getMethod("allocateInstance", Class.class).invoke(field.get(null), ControlWorld.class);
     }
     private static final class ProbeCrusher extends RockCrusherTileEntity {
+        ProbeCrusher() { super(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_crusher")); }
         ControlWorld testWorld;
         @Override public Level getLevel() { return testWorld; }
     }
     private static final class ProbeFurnace extends BlastFurnaceTileEntity {
+        ProbeFurnace() { super(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_furnace")); }
         ControlWorld testWorld;
         @Override public Level getLevel() { return testWorld; }
     }

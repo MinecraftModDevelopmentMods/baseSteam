@@ -20,7 +20,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class OptionalCrushingRecipeContractTest {
-    private static final Path RECIPES = Paths.get("src/main/resources/data/basesteam/recipes");
+    private static final Path RECIPES = Paths.get("src/main/resources/data/basesteam/recipe");
     private static final String[] MACHINES = {"steam_boiler_coal", "steam_boiler_electric",
             "steam_boiler_geothermal", "steam_crusher", "steam_drill", "steam_elevator",
             "steam_furnace", "steam_governor", "steam_tank"};
@@ -91,7 +91,7 @@ public class OptionalCrushingRecipeContractTest {
             assertFalse(condition, baseGuard(json(condition)));
     }
 
-    @Test public void nativeForge50CodecRetainsTheExactProviderIdentity() {
+    @Test public void nativeForge52CodecRetainsTheExactProviderIdentity() {
         JsonObject guard = json("{\"type\":\"forge:mod_loaded\",\"modid\":\"basemetals\"}");
         ModLoadedCondition condition = ModLoadedCondition.CODEC.codec().parse(JsonOps.INSTANCE, guard).getOrThrow();
         assertSame(ModLoadedCondition.CODEC, condition.codec());

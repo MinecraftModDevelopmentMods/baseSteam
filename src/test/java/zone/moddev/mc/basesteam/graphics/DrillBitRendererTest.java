@@ -62,7 +62,9 @@ public class DrillBitRendererTest {
         PoseStack.Pose caller = matrices.last();
         try {
             DrillBitRenderer.renderGeometry(Direction.Axis.X, 37, matrices, new RecordingBuffer() {
-                @Override public void endVertex() { throw new IllegalStateException("submission failed"); }
+                @Override public VertexConsumer addVertex(float x, float y, float z) {
+                    throw new IllegalStateException("submission failed");
+                }
             }, LIGHT, OVERLAY);
             fail("Expected vertex submission failure");
         } catch (IllegalStateException expected) {
@@ -81,29 +83,24 @@ public class DrillBitRendererTest {
 
     private static class RecordingBuffer implements VertexConsumer {
         final List<Vertex> vertices = new ArrayList<>();
-        private Vertex vertex = new Vertex();
+        private Vertex vertex;
 
-        @Override public VertexConsumer vertex(double x, double y, double z) {
+        @Override public VertexConsumer addVertex(float x, float y, float z) {
+            vertex = new Vertex();
+            vertices.add(vertex);
             vertex.position[0] = x; vertex.position[1] = y; vertex.position[2] = z;
             return this;
         }
-        @Override public VertexConsumer color(int red, int green, int blue, int alpha) {
+        @Override public VertexConsumer setColor(int red, int green, int blue, int alpha) {
             vertex.color[0] = red; vertex.color[1] = green; vertex.color[2] = blue; vertex.color[3] = alpha;
             return this;
         }
-        @Override public VertexConsumer uv(float u, float v) { vertex.u = u; vertex.v = v; return this; }
-        @Override public VertexConsumer overlayCoords(int u, int v) { vertex.overlay = u | v << 16; return this; }
-        @Override public VertexConsumer uv2(int u, int v) { vertex.light = u | v << 16; return this; }
-        @Override public VertexConsumer normal(float x, float y, float z) {
+        @Override public VertexConsumer setUv(float u, float v) { vertex.u = u; vertex.v = v; return this; }
+        @Override public VertexConsumer setUv1(int u, int v) { vertex.overlay = u | v << 16; return this; }
+        @Override public VertexConsumer setUv2(int u, int v) { vertex.light = u | v << 16; return this; }
+        @Override public VertexConsumer setNormal(float x, float y, float z) {
             vertex.normal[0] = x; vertex.normal[1] = y; vertex.normal[2] = z;
             return this;
-        }
-        @Override public void endVertex() { vertices.add(vertex); vertex = new Vertex(); }
-        @Override public void defaultColor(int red, int green, int blue, int alpha) {
-            throw new AssertionError("Drill vertices must retain their explicit colour attributes");
-        }
-        @Override public void unsetDefaultColor() {
-            throw new AssertionError("Drill rendering must not change the caller's default colour state");
         }
     }
 }

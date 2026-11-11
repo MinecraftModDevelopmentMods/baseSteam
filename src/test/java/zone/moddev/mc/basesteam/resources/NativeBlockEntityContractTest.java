@@ -1,5 +1,7 @@
 package zone.moddev.mc.basesteam.resources;
 
+import zone.moddev.mc.basesteam.testing.NativeMachineFixture;
+
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,14 +21,12 @@ import zone.moddev.mc.basesteam.machines.*;
 import static org.junit.Assert.*;
 
 public class NativeBlockEntityContractTest {
+    @org.junit.Rule public final NativeMachineFixture machineTypes = new NativeMachineFixture();
     @BeforeClass public static void bootstrap() { NativeTestBootstrap.start(); }
 
     @Test public void everyProductionFactoryOwnsItsActualNativePositionAndState() {
         BlockPos pos = new BlockPos(2053, 81, -2049);
-        for (Block block : new Block[] { new CoalBoilerBlock(), new ElectricBoilerBlock(),
-                new GeothermalBoilerBlock(), new OilBoilerBlock(), new BlastFurnaceBlock(),
-                new RockCrusherBlock(), new SteamDrillBlock(), new SteamElevatorBlock(),
-                new SteamPumpBlock(), new SteamStillBlock(), new SteamTankBlock(), new DrillBitBlock() }) {
+        for (Block block : NativeMachineFixture.blocks()) {
             BlockState state = block.defaultBlockState();
             BlockEntity tile = ((EntityBlock) block).newBlockEntity(pos, state);
             assertNotNull(block.getClass().getName(), tile);
@@ -38,7 +38,7 @@ public class NativeBlockEntityContractTest {
     @Test public void drillLoadCannotReplaceDestinationNativePositionOrFacing() {
         BlockPos destination = new BlockPos(-2050, 83, 2048);
         for (Direction direction : Direction.values()) {
-            BlockState state = new SteamDrillBlock().defaultBlockState().setValue(SteamDrillBlock.FACING, direction);
+            BlockState state = NativeMachineFixture.state("steam_drill").setValue(SteamDrillBlock.FACING, direction);
             SteamDrillTileEntity drill = new SteamDrillTileEntity(destination, state);
             CompoundTag saved = new CompoundTag();
             saved.putInt("x", 7); saved.putInt("y", 9); saved.putInt("z", 11);
@@ -63,6 +63,16 @@ public class NativeBlockEntityContractTest {
             block.getTicker(null, block.defaultBlockState(), Entities.DRILLBIT)
                     .tick(null, tile.getBlockPos(), tile.getBlockState(), tile);
             assertEquals(0, tile.rotation, 0);
+        } finally { Entities.DRILLBIT = previous; }
+    }
+
+    @Test public void nativeConstructorStillRejectsAMismatchedTypeAndBlock() {
+        BlockEntityType<DrillBitTileEntity> previous = Entities.DRILLBIT;
+        try {
+            Entities.DRILLBIT = BlockEntityType.Builder.of(DrillBitTileEntity::new,
+                    net.minecraft.world.level.block.Blocks.STONE).build(null);
+            assertThrows(IllegalStateException.class, () -> new DrillBitTileEntity(
+                    BlockPos.ZERO, NativeMachineFixture.state("drillbit")));
         } finally { Entities.DRILLBIT = previous; }
     }
 }

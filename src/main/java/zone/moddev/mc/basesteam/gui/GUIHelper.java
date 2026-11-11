@@ -66,7 +66,6 @@ public abstract class GUIHelper {
 		float angle = (1f - value) * PI;
 		float offsetX = pivotX;
 		float offsetY = pivotY;
-		BufferBuilder renderer = Tesselator.getInstance().getBuilder();
 
 		float sin = Mth.sin(angle);
 		float cos = Mth.cos(angle);
@@ -101,13 +100,14 @@ public abstract class GUIHelper {
 		v[3] = v[0];
 		
 		com.mojang.blaze3d.systems.RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionTexShader);
-		renderer.begin(com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+		BufferBuilder renderer = Tesselator.getInstance().begin(
+				com.mojang.blaze3d.vertex.VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
 		// (x, y, z, u, v)
 		for(int i = 3; i >= 0; i--){
-			renderer.vertex(x[i], y[i], zLevel).uv(u[i],v[i]).endVertex();;
+			renderer.addVertex(x[i], y[i], zLevel).setUv(u[i],v[i]);
 		}
-		com.mojang.blaze3d.vertex.Tesselator.getInstance().end();
+		com.mojang.blaze3d.vertex.BufferUploader.drawWithShader(renderer.buildOrThrow());
 		
 	}
 	
