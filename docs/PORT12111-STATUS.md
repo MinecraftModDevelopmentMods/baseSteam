@@ -1,5 +1,30 @@
 # Steam on Minecraft 1.21.11
 
+## Current Metadata Correction
+
+Base Metals is REQUIRED on both client and server. The local mods.toml
+declares it exactly once with mandatory=true, ordering AFTER and the unchanged
+version range [3.1.2.121111,4.0.0). Distribution metadata already required it.
+The existing recipe conditions remain defensive data guards; they do not make
+a no-Base-Metals installation supported.
+
+This correction changes player-jar metadata bytes, not version, production
+classes, recipes, configuration or dependency pins. The previous 25EE player
+jar is held under build/required-basemetals-41/held-before, with its checksum
+recorded before editing. Focused native ModInfo regression/static checks and
+any local candidate-byte report are recorded under build/required-basemetals-41.
+These local edits are not a frozen release or whole-world qualification.
+
+Power's approved metadata source 41959572b11dce236df98f23e97c6a3868cdda03
+and SHA-256 C98D2CF163BE2480D9AFB0023BBD2D92D401AE0D50BEF73191235BF3F83774A7
+are now pinned for the consistent default build. The RED attempt used the
+preserved, hash-checked D input without changing its committed pins at that
+stage. No OreSpawn change, publication, version bump or packaged-world/endurance
+campaign is part of this correction. The smoke helper rejects its former
+no-Base-Metals mode before starting a runtime.
+
+## Historical C2 Proof
+
 This is historical C2 candidate qualification against Power134F, not an
 overall family release claim. The parent reports a later, broader chained
 1.13 dimension route exposing a Power dynamic-biome-registry issue; its fix
@@ -78,8 +103,10 @@ All four native GameTests pass, selected by basesteam:* with exact named XML
 results and no failures/skips. Forge 61's test-function registry and native
 test_instance resources are confined to the isolated GameTest source scope.
 The first launch's built-in-only one-test result correctly failed the gate.
-Packaged dedicated startup/save/reopen passes in two separate JVMs for both
-the with-Base-Metals and without-Base-Metals profiles. Every process verifies
+Historical pre-clarification dedicated startup/save/reopen evidence exists
+for both the with-Base-Metals and without-Base-Metals inputs. The latter is
+retained only as old evidence: it is not supported by the current REQUIRED
+dependency policy and does not qualify the new metadata bytes. Every old process verifies
 the exact copied candidate hashes and checks latest/stdout/stderr without
 filtering loader/data errors. These profiles explicitly select native NIO
 transport on Windows. The earlier default native-availability selection failed

@@ -12,6 +12,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($WithoutBaseMetals) {
+    throw 'Base Metals is required by baseSteam; a no-Base-Metals runtime is not supported.'
+}
 $project = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $forge = (Resolve-Path -LiteralPath $ForgeInstall).Path
 $pins = Get-Content -Raw -LiteralPath (Join-Path $project 'gradle.properties') | ConvertFrom-StringData
@@ -46,9 +49,7 @@ $mods = [ordered]@{
     "basePower-$($pins.poweradvantage_version).jar" = @{ Path = $PowerJar; Sha256 = $pins.poweradvantage_player_sha256 }
     "OreSpawn-$($pins.orespawn_version).jar" = @{ Path = $OreSpawnJar; Sha256 = $pins.orespawn_player_sha256 }
 }
-if (!$WithoutBaseMetals) {
-    $mods["BaseMetals-$($pins.basemetals_version).jar"] = @{ Path = $BaseMetalsJar; Sha256 = $pins.basemetals_player_sha256 }
-}
+$mods["BaseMetals-$($pins.basemetals_version).jar"] = @{ Path = $BaseMetalsJar; Sha256 = $pins.basemetals_player_sha256 }
 $forgeVersion = "$($pins.minecraft_version)-$($pins.forge_version)"
 $shim = "forge-$forgeVersion-shim.jar"
 $forgeLib = "libraries/net/minecraftforge/forge/$forgeVersion"

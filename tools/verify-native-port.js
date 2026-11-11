@@ -31,7 +31,7 @@ const metadata = read(`${resources}/META-INF/mods.toml`);
 assert.match(metadata, /^showAsResourcePack=false$/m);
 assert.match(metadata, /modId="basesteam"/);
 assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[\$\{poweradvantage_version\},3\.0\.0\)"/);
-assert.match(metadata, /modId="basemetals"\r?\nmandatory=false/);
+assert.match(metadata, /modId="basemetals"\r?\nmandatory=true/);
 assert.doesNotMatch(metadata, /dependencies\.steamadvantage|modId="(?:steamadvantage|poweradvantage)"/);
 
 function verifyLocalAsset(id, directory, extension, name) {

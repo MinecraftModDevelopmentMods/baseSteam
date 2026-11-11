@@ -52,4 +52,17 @@ public class BuildWorkflowContractTest {
         assertTrue(script.contains("$(value orespawn_public_file_id)"));
         assertTrue(script.contains("sha256sum -c -"));
     }
+
+    @Test public void sourceAndPackageAuditsEnforceRequiredBaseMetalsWithoutAnOptionalLaunchScope() throws Exception {
+        String build = Files.readString(Path.of("build.gradle"));
+        assertEquals(2, build.lines().filter(line -> line.contains("verifyRequiredBaseMetalsMetadata(metadata)")).count());
+        assertTrue(build.contains("Base Metals must be declared exactly once as REQUIRED on BOTH sides"));
+        String readme = Files.readString(Path.of("README.md"));
+        assertTrue(readme.contains("Base Metals is REQUIRED"));
+        assertFalse(readme.contains("-WithoutBaseMetals"));
+        String smoke = Files.readString(Path.of("tools/run-packaged-server-smoke.ps1"));
+        int reject = smoke.indexOf("if ($WithoutBaseMetals)");
+        assertTrue(reject >= 0 && reject < smoke.indexOf("$project ="));
+        assertTrue(smoke.contains("a no-Base-Metals runtime is not supported"));
+    }
 }

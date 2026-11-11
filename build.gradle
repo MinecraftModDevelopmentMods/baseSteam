@@ -461,6 +461,15 @@ def verifyPackFormats = { pack ->
     }
 }
 
+def verifyRequiredBaseMetalsMetadata = { String metadata ->
+    String normalized = metadata.replace('\r\n', '\n')
+    String declaration = 'modId="basemetals"\nmandatory=true\nversionRange="[3.1.2.121111,4.0.0)"\nordering="AFTER"\nside="BOTH"'
+    if (!normalized.contains(declaration)
+            || normalized.readLines().count { it.trim() == 'modId="basemetals"' } != 1) {
+        throw new GradleException('Base Metals must be declared exactly once as REQUIRED on BOTH sides, ordered AFTER, in [3.1.2.121111,4.0.0)')
+    }
+}
+
 tasks.register('verifyReleaseConfiguration') {
     group = 'verification'
     description = 'Validates release identity, target metadata, and dependency policy.'
@@ -519,12 +528,12 @@ tasks.register('verifyReleaseConfiguration') {
         }
         String metadata = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
         ['showAsResourcePack=false', 'modId="basesteam"', 'displayName="baseSteam"',
-         'modId="basepower"\nmandatory=true\nversionRange="[${poweradvantage_version},3.0.0)"',
-         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.121111,4.0.0)"'].each { marker ->
+         'modId="basepower"\nmandatory=true\nversionRange="[${poweradvantage_version},3.0.0)"'].each { marker ->
             if (!metadata.contains(marker)) {
                 throw new GradleException("Source mods.toml is missing ${marker}")
             }
         }
+        verifyRequiredBaseMetalsMetadata(metadata)
     }
 }
 
@@ -782,6 +791,7 @@ tasks.register('verifyReleaseArtifacts') {
             }
             String metadata = zip.getInputStream(zip.getEntry('META-INF/mods.toml'))
                     .getText(StandardCharsets.UTF_8.name())
+            verifyRequiredBaseMetalsMetadata(metadata)
             if (!metadata.contains('modId="basesteam"')
                     || !metadata.contains('showAsResourcePack=false')
                     || !metadata.contains("version=\"${project.mod_version}\"")

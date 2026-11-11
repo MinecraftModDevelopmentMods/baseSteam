@@ -16,10 +16,15 @@ also needs Java 8. Minecraft itself runs on Java 21.
 The default dependency paths use the coordinated 1.21.11 checkouts. This
 candidate needs basePower 2.4.15.121111, Base Metals 3.1.2.121111 and
 OreSpawn 4.1.0.121111 as separate native jars, not bundled copies.
+Base Metals is REQUIRED on both client and server, not an optional integration.
 Exact local source, jar and test-bootstrap pins are in `gradle.properties`.
 They are checked before compilation and tests. Local approval does not
 establish public availability. The Base Metals shared hook and approved Power
-integration commit a1cd197b4b6c3fc9c5d56da254d0f0ae9929fe8c are pinned locally.
+integration commit 41959572b11dce236df98f23e97c6a3868cdda03 are pinned locally.
+The required-dependency metadata correction is local only. Power's approved
+metadata rebuild is pinned, but the changed Steam bytes are not
+a qualified family release. Earlier no-Base-Metals receipts are
+historical evidence, not a supported installation profile.
 The mod root declares server data format 94.1. Forge supplies format 75.x
 metadata for its hidden client resource aggregate. Native resource-reader
 tests cover both paths without codec warnings; see
@@ -46,7 +51,6 @@ $toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
 ./gradlew.bat @toolchains verifyEclipseProductionClasspath
 ./gradlew.bat @toolchains -PsteamGameTestRunId=candidate verifyPlayerDependencies runGameTestServer
 ./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_12111_SERVER_INSTALL -RunId candidate-with-metals -UseNioTransport -Reopen
-./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_12111_SERVER_INSTALL -RunId candidate-without-metals -WithoutBaseMetals -UseNioTransport -Reopen
 ```
 
 Independent source checks: `node tools/verify-native-port.js` and

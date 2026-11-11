@@ -4,6 +4,7 @@ baseSteam 2.2.16.121111 (local Minecraft 1.21.11 source port)
 - Adapt native registration, persistence, recipes, item definitions and drill rendering.
 - Retain registry identities, legacy state keys, recipe payloads and configuration defaults.
 - Use native Forge hidden-client pack metadata with data-format 94.1 at the mod root.
+- Require Base Metals on both client and server in Forge metadata as well as distribution metadata; retain the defensive recipe guards unchanged.
 - Keep block/material sprites, including the drill bit, out of the native item atlas; retain legacy item-icon lookup compatibility.
 - Local source, archive, compiler, GameTest and packaged reopen gates pass; combined world upgrades, endurance and manual acceptance are separate.
 
