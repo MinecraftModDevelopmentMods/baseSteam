@@ -91,7 +91,7 @@ public class OptionalCrushingRecipeContractTest {
             assertFalse(condition, baseGuard(json(condition)));
     }
 
-    @Test public void nativeForge50CodecRetainsTheExactProviderIdentity() {
+    @Test public void nativeForge52CodecRetainsTheExactProviderIdentity() {
         JsonObject guard = json("{\"type\":\"forge:mod_loaded\",\"modid\":\"basemetals\"}");
         ModLoadedCondition condition = ModLoadedCondition.CODEC.codec().parse(JsonOps.INSTANCE, guard).getOrThrow();
         assertSame(ModLoadedCondition.CODEC, condition.codec());
