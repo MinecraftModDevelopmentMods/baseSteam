@@ -1,8 +1,9 @@
-baseSteam 2.2.15.121011 (local Minecraft 1.21.1 candidate)
+baseSteam 2.2.15.121011 (Minecraft 1.21.1 / Forge)
 
 - Target Forge 52.1.0 and Java 21 with basePower 2.4.14.121011.
 - Keep machine balance, saved state, recipes and the whole fluid gauges unchanged.
 - Move musket enchantments to native data while retaining all four IDs and effects.
+- Pin the released basePower, Base Metals and OreSpawn jars used for the upgrade tests.
 
 baseSteam 2.2.14.120061 (Minecraft 1.20.6 / Forge)
 

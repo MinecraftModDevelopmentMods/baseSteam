@@ -1,6 +1,6 @@
 # baseSteam
 
-**Minecraft 1.21.1 (Forge), local candidate 2.2.15.121011.**
+**Minecraft 1.21.1 (Forge), version 2.2.15.121011.**
 
 baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
 and a blackpowder musket to basePower. Items and blocks share the basePower
@@ -14,11 +14,11 @@ wrapper use Temurin 21.0.7+6. Mavenizer uses Java 25; the launcher helper
 also needs Java 8. Minecraft itself runs on Java 21.
 
 The default dependency paths use the coordinated 1.21.1 checkouts. This
-candidate needs basePower 2.4.14.121011, Base Metals 3.1.2.121011 and
+version needs the released basePower 2.4.14.121011, Base Metals 3.1.2.121011 and
 OreSpawn 4.1.0.121011 as separate native jars, not bundled copies.
-Exact local source, jar and test-bootstrap pins are in `gradle.properties`.
-They are checked before compilation and tests. Local approval does not
-establish public availability.
+Exact source, public file, jar and test-bootstrap pins are in `gradle.properties`.
+They are checked before compilation and tests. CurseForge, Maven and GitHub
+releases use the same checked player jar.
 
 The Mavenizer fixture comes from OreSpawn's OS1211 checkout. Another layout
 can use `-Pforge52MavenizerJar=<path>`. The `*DeobfJar` and `*PlayerJar`
