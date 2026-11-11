@@ -2,7 +2,7 @@ package zone.moddev.mc.basesteam.compat;
 
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -36,8 +36,7 @@ public final class BaseMetalsCompat {
     // Resolve the optional recipe type only after Forge confirms Base Metals is installed.
     private static final class LoadedCrushingRecipes {
         private static ItemStack find(Level world, ItemStack input) {
-            SimpleContainer inventory = new SimpleContainer(1);
-            inventory.setItem(0, input.copy());
+            SingleRecipeInput inventory = new SingleRecipeInput(input.copy());
             for (var candidate : world.getRecipeManager().getAllRecipesFor(CrushingRecipe.TYPE.get())) {
                 CrushingRecipe crushing = candidate.value();
                 if (crushing.matches(inventory, world)) {

@@ -13,9 +13,9 @@ $ErrorActionPreference = 'Stop'
 $project = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $forge = (Resolve-Path -LiteralPath $ForgeInstall).Path
 $pins = Get-Content -Raw -LiteralPath (Join-Path $project 'gradle.properties') | ConvertFrom-StringData
-if ($pins.minecraft_version -ne '1.20.6' -or $pins.forge_version -ne '50.2.0' -or
+if ($pins.minecraft_version -ne '1.21.1' -or $pins.forge_version -ne '52.1.0' -or
         $pins.poweradvantage_source_ref -cnotmatch '^[0-9a-f]{40}$') {
-    throw 'An exact Forge 50.2.0 candidate and committed Power source pin are required.'
+    throw 'An exact Forge 52.1.0 candidate and committed Power source pin are required.'
 }
 $java = (Resolve-Path -LiteralPath $JavaExe).Path
 $javaVersion = (& $java -version 2>&1 | Out-String).Trim()
@@ -34,10 +34,10 @@ if (!$PowerJar) {
     $PowerJar = Join-Path $project "../../PowerAdvantage/build/libs/basePower-$($pins.poweradvantage_version).jar"
 }
 if (!$BaseMetalsJar) {
-    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/.verification-basemetals1206/Advantage shared hook/build/libs/BaseMetals-$($pins.basemetals_version).jar"
+    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/.verification-basemetals1211/Advantage shared hook/build/libs/BaseMetals-$($pins.basemetals_version).jar"
 }
 if (!$OreSpawnJar) {
-    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS1206/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
+    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS1211/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
 }
 $mods = [ordered]@{
     $steamName = @{ Path = (Join-Path $project "build/libs/$steamName"); Sha256 = $steamSha }
@@ -51,11 +51,14 @@ $forgeVersion = "$($pins.minecraft_version)-$($pins.forge_version)"
 $shim = "forge-$forgeVersion-shim.jar"
 $forgeLib = "libraries/net/minecraftforge/forge/$forgeVersion"
 $forgeJars = [ordered]@{
-    $shim = '7BECDDA6D36C8359EADA6018C2EDB21C5914C50028C191BE09A39FF9F516E10C'
-    "$forgeLib/forge-$forgeVersion-server.jar" = 'C6F04A819A973CF95159F9C8F7441B0602A9632587F779D712A190A0474AF254'
-    "$forgeLib/forge-$forgeVersion-universal.jar" = 'F6DC2ACAD898F74C716F5F0BC7290463823090A29F4C9FBE12A58B0FD1C5D524'
+    $shim = $pins.forge_server_shim_sha256
+    "$forgeLib/forge-$forgeVersion-server.jar" = $pins.forge_server_sha256
+    "$forgeLib/forge-$forgeVersion-universal.jar" = $pins.forge_universal_sha256
 }
 foreach ($file in $forgeJars.Keys) {
+    if ($forgeJars[$file] -cnotmatch '^[A-F0-9]{64}$') {
+        throw "Supply the coordinated Forge 52.1.0 runtime hash in gradle.properties: $file"
+    }
     if ((Get-FileHash -LiteralPath (Join-Path $forge $file)).Hash -cne $forgeJars[$file]) {
         throw "Installed Forge runtime hash mismatch: $file"
     }

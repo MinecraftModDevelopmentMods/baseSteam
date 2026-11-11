@@ -102,8 +102,7 @@ public class TreasureChests {
 			"                    \"functions\": [\n" +
 			"                        {\n" +
 			"                            \"function\": \"minecraft:enchant_with_levels\",\n" +
-			"                            \"levels\": 10,\n" +
-			"                            \"treasure\": true\n" +
+			"                            \"levels\": 10\n" +
 			"                        }\n" +
 			"                    ]\n" +
 			"                }\n" +

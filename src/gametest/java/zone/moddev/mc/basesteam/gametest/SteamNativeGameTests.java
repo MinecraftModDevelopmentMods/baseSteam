@@ -11,6 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -34,6 +35,7 @@ import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.init.Blocks;
 import zone.moddev.mc.basesteam.init.Entities;
 import zone.moddev.mc.basesteam.init.Items;
+import zone.moddev.mc.basesteam.init.Enchantments;
 import zone.moddev.mc.basesteam.items.MusketItem;
 
 @GameTestHolder(value = SteamAdvantage.MODID, namespace = SteamAdvantage.MODID)
@@ -75,6 +77,7 @@ public final class SteamNativeGameTests {
         tag.putInt("Damage", 249);
         tag.putByte("loaded", (byte) 1);
         tag.putString("owner", "legacy fixture");
+        tag.put("Enchantments", legacyEnchantments("basesteam"));
         legacy.put("tag", tag);
         var registries = helper.getLevel().registryAccess();
         var fixed = DataFixers.getDataFixer().update(References.ITEM_STACK,
@@ -83,12 +86,14 @@ public final class SteamNativeGameTests {
         helper.assertTrue(stack.is(Items.blackpowder_musket), "Converted the wrong item");
         helper.assertTrue(stack.getDamageValue() == 249 && stack.getMaxDamage() == 250, "Lost legacy wear");
         helper.assertTrue(MusketItem.isLoaded(stack), "Lost the legacy loaded byte");
+        assertMusketEnchantments(helper, stack);
         MusketItem.unload(stack);
         ItemStack reloaded = ItemStack.parse(registries, stack.save(registries)).orElseThrow();
         helper.assertTrue(MusketItem.isNotLoaded(reloaded) && reloaded.getDamageValue() == 249,
                 "Changing loaded state must not reset wear");
         helper.assertTrue("legacy fixture".equals(reloaded.get(DataComponents.CUSTOM_DATA).copyTag().getString("owner")),
                 "Changing loaded state must not discard unrelated legacy data");
+        assertMusketEnchantments(helper, reloaded);
         helper.succeed();
     }
 
@@ -100,12 +105,14 @@ public final class SteamNativeGameTests {
         legacy.putShort("Damage", (short) 131);
         CompoundTag tag = new CompoundTag();
         tag.putByte("loaded", (byte) 2);
+        tag.put("Enchantments", legacyEnchantments("steamadvantage"));
         legacy.put("tag", tag);
         LegacyWorldDataHook.prepareLegacyChunk(legacy);
         ItemStack migrated = ItemData.readStack(helper.getLevel().registryAccess(), legacy);
         helper.assertTrue(migrated.is(Items.blackpowder_musket), "The old musket ID was not remapped");
         helper.assertTrue(migrated.getDamageValue() == 131, "The legacy Damage short was lost");
         helper.assertTrue(MusketItem.isAlmostLoaded(migrated), "The partial reload was lost");
+        assertMusketEnchantments(helper, migrated);
         helper.succeed();
     }
 
@@ -113,9 +120,22 @@ public final class SteamNativeGameTests {
     public static void nativeResourcesLoadWithExpectedIds(GameTestHelper helper) {
         var level = helper.getLevel();
         var registries = level.registryAccess();
+        var nativeEnchantments = registries.registryOrThrow(Registries.ENCHANTMENT);
+        for (var key : java.util.List.of(Enchantments.high_explosive, Enchantments.powderless,
+                Enchantments.rapid_reload, Enchantments.recoil)) {
+            var holder = nativeEnchantments.getHolderOrThrow(key);
+            helper.assertTrue(holder.is(net.minecraft.tags.EnchantmentTags.IN_ENCHANTING_TABLE),
+                    "Missing table discovery for " + key.location());
+            helper.assertTrue(holder.is(net.minecraft.tags.EnchantmentTags.TRADEABLE),
+                    "Missing enchanted-book trade discovery for " + key.location());
+            helper.assertTrue(holder.is(net.minecraft.tags.EnchantmentTags.ON_RANDOM_LOOT),
+                    "Missing random loot discovery for " + key.location());
+            helper.assertTrue(holder.value().isPrimaryItem(new ItemStack(Items.blackpowder_musket)),
+                    "Native musket support tag was not bound for " + key.location());
+        }
         var fragile = TagKey.create(Registries.BLOCK, id("musket_fragile"));
         helper.assertTrue(net.minecraft.world.level.block.Blocks.SHORT_GRASS.defaultBlockState().is(fragile),
-                "The 1.20.6 short grass ID must bind the fragile block tag");
+                "The 1.21.1 short grass ID must bind the fragile block tag");
         helper.assertTrue(!net.minecraft.world.level.block.Blocks.STONE.defaultBlockState().is(fragile),
                 "The fragile block tag must not include solid stone");
         var manager = level.getServer().getAdvancements();
@@ -161,5 +181,26 @@ public final class SteamNativeGameTests {
 
     private static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, path);
+    }
+
+    private static ListTag legacyEnchantments(String namespace) {
+        ListTag result = new ListTag();
+        for (String path : java.util.List.of("high_explosive", "powderless", "rapid_reload", "recoil")) {
+            CompoundTag enchantment = new CompoundTag();
+            enchantment.putString("id", namespace + ":" + path);
+            enchantment.putShort("lvl", (short) (path.equals("high_explosive") || path.equals("recoil") ? 5 : 1));
+            result.add(enchantment);
+        }
+        return result;
+    }
+
+    private static void assertMusketEnchantments(GameTestHelper helper, ItemStack stack) {
+        var registries = helper.getLevel().registryAccess();
+        for (var key : java.util.List.of(Enchantments.high_explosive, Enchantments.powderless,
+                Enchantments.rapid_reload, Enchantments.recoil)) {
+            int expected = key.equals(Enchantments.high_explosive) || key.equals(Enchantments.recoil) ? 5 : 1;
+            helper.assertTrue(Enchantments.level(key, stack, registries) == expected,
+                    "Lost legacy enchantment holder or level: " + key.location());
+        }
     }
 }

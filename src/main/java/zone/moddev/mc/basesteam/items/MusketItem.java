@@ -15,7 +15,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -69,8 +68,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 
 	public MusketItem(Item.Properties properties){
 		super(properties.durability(250).attributes(ItemAttributeModifiers.builder()
-				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_UUID,
-						"Weapon modifier", getMeleeDamage(), AttributeModifier.Operation.ADD_VALUE),
+				.add(Attributes.ATTACK_DAMAGE, new AttributeModifier(BASE_ATTACK_DAMAGE_ID,
+						getMeleeDamage(), AttributeModifier.Operation.ADD_VALUE),
 						EquipmentSlotGroup.MAINHAND)
 				.build()));
 	}
@@ -105,7 +104,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		ItemStack srcItemStack = playerEntity.getItemInHand(hand);
 		if(hand != InteractionHand.MAIN_HAND) return InteractionResultHolder.pass(srcItemStack);
 		if(isNotLoaded(srcItemStack) && !hasAmmo(playerEntity, srcItemStack)) return InteractionResultHolder.fail(srcItemStack);
-		if(isNotLoaded(srcItemStack) && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.rapid_reload, srcItemStack) > 0){
+		if(isNotLoaded(srcItemStack) && Enchantments.level(Enchantments.rapid_reload, srcItemStack, world.registryAccess()) > 0){
 			// instant reload
 			decrementAmmo(playerEntity,srcItemStack);
 			startLoad(srcItemStack);
@@ -151,8 +150,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	protected void fire(ItemStack srcItemStack, LivingEntity playerEntity,
 			Level world) {
 		final boolean isPlayer = playerEntity instanceof Player;
-		int explosive = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.high_explosive, srcItemStack);
-		int recoil = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.recoil, srcItemStack);
+		int explosive = Enchantments.level(Enchantments.high_explosive, srcItemStack, world.registryAccess());
+		int recoil = Enchantments.level(Enchantments.recoil, srcItemStack, world.registryAccess());
 		unload(srcItemStack);
 		if(isPlayer && !((Player)playerEntity).isCreative()){
 			srcItemStack.hurtAndBreak(1, playerEntity, EquipmentSlot.MAINHAND);
@@ -303,8 +302,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		if(e instanceof Player) {
 			Player playerEntity = (Player) e;
 			if (playerEntity.isCreative()
-					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket) > 0
-					|| EnchantmentHelper.getItemEnchantmentLevel(Enchantments.powderless, musket) > 0) return true;
+					|| Enchantments.level(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket, e.registryAccess()) > 0
+					|| Enchantments.level(Enchantments.powderless, musket, e.registryAccess()) > 0) return true;
 			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
 				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
 				if (inventoryStack.isEmpty()) continue;
@@ -319,8 +318,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 		if(e instanceof Player) {
 			Player playerEntity = (Player) e;
 			if (playerEntity.isCreative()
-					|| EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket) > 0
-					|| EnchantmentHelper.getItemEnchantmentLevel(Enchantments.powderless, musket) > 0) return;
+					|| Enchantments.level(net.minecraft.world.item.enchantment.Enchantments.INFINITY, musket, e.registryAccess()) > 0
+					|| Enchantments.level(Enchantments.powderless, musket, e.registryAccess()) > 0) return;
 			for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
 				ItemStack inventoryStack = playerEntity.getInventory().items.get(i);
 				if (inventoryStack.isEmpty()) continue;
@@ -439,7 +438,7 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	}
 
 	@Override
-	public int getUseDuration(ItemStack stack)
+	public int getUseDuration(ItemStack stack, LivingEntity user)
 	{
 		if(isLoaded(stack)){
 			return maxUseTime;

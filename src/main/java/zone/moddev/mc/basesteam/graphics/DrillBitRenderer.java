@@ -79,8 +79,8 @@ public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity>
     private static void vertex(PoseStack.Pose transform, VertexConsumer vertices,
             float x, float y, float z, float u, float v,
             float normalX, float normalY, float normalZ, int light, int overlay) {
-        vertices.vertex(transform.pose(), x, y, z).color(255, 255, 255, 255).uv(u, v)
-                .overlayCoords(overlay).uv2(light)
-                .normal(transform, normalX, normalY, normalZ).endVertex();
+        vertices.addVertex(transform.pose(), x, y, z).setColor(255, 255, 255, 255).setUv(u, v)
+                .setOverlay(overlay).setLight(light)
+                .setNormal(transform, normalX, normalY, normalZ);
     }
 }

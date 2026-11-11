@@ -1,5 +1,7 @@
 package zone.moddev.mc.basesteam.machines;
 
+import zone.moddev.mc.basesteam.testing.NativeMachineFixture;
+
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
 import static org.junit.Assert.*;
 
@@ -13,10 +15,9 @@ import org.junit.Test;
 
 /** Save-notification unit witness; actual disk persistence is checked by the native restart rig. */
 public class CoalBoilerFillPersistenceTest {
+    @org.junit.Rule public final NativeMachineFixture machineTypes = new NativeMachineFixture();
     @BeforeClass public static void bootstrap() {
         NativeTestBootstrap.start();
-        if (zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL == null)
-            zone.moddev.mc.basesteam.init.Entities.STEAM_BOILER_COAL = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(CoalBoilerTileEntity::new, net.minecraft.world.level.block.Blocks.STONE).build(null);
     }
 
     @Test public void acceptingTheLastFiveMillibucketsRequestsSavingBeforeAnyTick() {
@@ -185,6 +186,7 @@ public class CoalBoilerFillPersistenceTest {
     }
 
     private static final class SaveWitnessBoiler extends CoalBoilerTileEntity {
+        SaveWitnessBoiler() { super(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_coal")); }
         int dirtyCalls;
         CompoundTag savedTank;
         SaveWorld saveWorld = world(false);

@@ -13,7 +13,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
-apply from: 'gradle/forge50-mavenizer.gradle'
+apply from: 'gradle/forge52-mavenizer.gradle'
 
 group = project.mod_group
 version = project.mod_version
@@ -151,7 +151,7 @@ sourceSets.main.resources {
 def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
 def prepareForgeRunModClasses = tasks.register('prepareForgeRunModClasses', Sync) {
     group = 'ide'
-    description = 'Merges classes and processed resources for Forge 50 launches.'
+    description = 'Merges classes and processed resources for Forge 52 launches.'
     dependsOn tasks.named('classes')
     from sourceSets.main.output
     into forgeRunModClassesDirectory
@@ -230,12 +230,12 @@ repositories {
 // Only code and launch tasks require the exact jars; source/resource checks can run independently.
 def explicitJar = { String property -> providers.gradleProperty(property).map { file(it) }.getOrNull() }
 def powerRoot = '../../PowerAdvantage'
-def baseMetalsRoot = '../../../../BaseMetals/.verification-basemetals1206/Advantage shared hook'
+def baseMetalsRoot = '../../../../BaseMetals/.verification-basemetals1211/Advantage shared hook'
 def powerNativeJar = file("${powerRoot}/build/libs/basePower-${project.poweradvantage_version}.jar")
 def powerAdvantageDeobfJar = explicitJar('powerAdvantageDeobfJar') ?: powerNativeJar
 def baseMetalsDeobfJar = explicitJar('baseMetalsDeobfJar') ?: file(
         "${baseMetalsRoot}/build/libs/BaseMetals-${project.basemetals_version}.jar")
-def oreSpawnRoot = '../../../../MinecraftMineralogy/OS1206/OreSpawn'
+def oreSpawnRoot = '../../../../MinecraftMineralogy/OS1211/OreSpawn'
 def oreSpawnJar = { String variant ->
     explicitJar("oreSpawn${variant}Jar") ?: file(
             "${oreSpawnRoot}/build/libs/OreSpawn-${project.orespawn_version}.jar")
@@ -360,7 +360,7 @@ tasks.named('jar', Jar) {
     }
 }
 
-// Forge 50 runs official names. The player jar needs no SRG remapping.
+// Forge 52 runs official names. The player jar needs no SRG remapping.
 def releaseJar = tasks.register('releaseJar', Jar) {
     dependsOn tasks.named('classes'), 'verifyReleaseDependencies'
     archiveClassifier = null
@@ -437,8 +437,8 @@ def expectedReleaseFiles = providers.provider {
 def preparedReleaseDir = providers.gradleProperty('preparedReleaseDir')
 
 def verifyPackFormats = { pack ->
-    if (pack.pack_format != 32 || pack.supported_formats != [min_inclusive: 32, max_inclusive: 41]) {
-        throw new GradleException('Minecraft 1.20.6 requires resource format 32 and data format 41')
+    if (pack.pack_format != 34 || pack.supported_formats != [min_inclusive: 34, max_inclusive: 48]) {
+        throw new GradleException('Minecraft 1.21.1 requires resource format 34 and data format 48')
     }
 }
 
@@ -447,15 +447,22 @@ tasks.register('verifyReleaseConfiguration') {
     description = 'Validates release identity, target metadata, and dependency policy.'
     doLast {
         verifyPackFormats(new JsonSlurper().parse(file('src/main/resources/pack.mcmeta')).pack)
-        if (project.mod_version != '2.2.14.120061') {
+        Properties wrapper = new Properties()
+        file('gradle/wrapper/gradle-wrapper.properties').withInputStream { wrapper.load(it) }
+        if (wrapper.getProperty('distributionUrl') != 'https://services.gradle.org/distributions/gradle-9.6.1-bin.zip'
+                || wrapper.getProperty('distributionSha256Sum') !=
+                '9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14') {
+            throw new GradleException('Use the checksum-pinned Gradle 9.6.1 wrapper')
+        }
+        if (project.mod_version != '2.2.15.121011') {
             throw new GradleException("Unexpected baseSteam release version: ${project.mod_version}")
         }
-        if (project.minecraft_version != '1.20.6' || project.minecraft_version_range != '[1.20.6]'
-                || project.forge_version != '50.2.0' || project.forge_version_range != '[50.2.0,51)'
-                || project.loader_version_range != '[50,51)'
+        if (project.minecraft_version != '1.21.1' || project.minecraft_version_range != '[1.21.1]'
+                || project.forge_version != '52.1.0' || project.forge_version_range != '[52.1.0,53)'
+                || project.loader_version_range != '[52,53)'
                 || project.mapping_channel != 'official'
-                || project.mapping_version != '1.20.6'
-                || project.mcp_version != '20240429.135109') {
+                || project.mapping_version != '1.21.1'
+                || project.mcp_version != '20240808.132146') {
             throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
         }
         if (project.loader_name != 'forge' || project.loader_code != '1'
@@ -475,11 +482,11 @@ tasks.register('verifyReleaseConfiguration') {
         }
         if (project.cf_requirements != 'basepower,base-metals'
                 || project.cf_optionals != ''
-                || project.cf_versions != '1.20.6') {
+                || project.cf_versions != '1.21.1') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.1.2.120061'
-                || project.orespawn_version != '4.1.0.120061') {
+        if (project.basemetals_version != '3.1.2.121011'
+                || project.orespawn_version != '4.1.0.121011') {
             throw new GradleException('Unexpected development API versions')
         }
         if (project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/basePower') {
@@ -488,13 +495,13 @@ tasks.register('verifyReleaseConfiguration') {
         String mainSource = file(
                 'src/main/java/zone/moddev/mc/basesteam/SteamAdvantage.java').getText('UTF-8')
         if (!mainSource.contains('MODID = "basesteam"')
-                || !mainSource.contains('VERSION = "2.2.14.120061"')) {
+                || !mainSource.contains('VERSION = "2.2.15.121011"')) {
             throw new GradleException('baseSteam source identity changed')
         }
         String metadata = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
         ['modId="basesteam"', 'displayName="baseSteam"',
          'modId="basepower"\nmandatory=true\nversionRange="[${poweradvantage_version},3.0.0)"',
-         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.120061,4.0.0)"'].each { marker ->
+         'modId="basemetals"\nmandatory=false\nversionRange="[3.1.2.121011,4.0.0)"'].each { marker ->
             if (!metadata.contains(marker)) {
                 throw new GradleException("Source mods.toml is missing ${marker}")
             }
@@ -580,7 +587,7 @@ tasks.register('verifyPlayerDependencies') {
     dependsOn tasks.named('verifyCompanionPlayerDependencies')
     doLast {
         committedPin('poweradvantage_source_ref', /[a-f0-9]{40}/)
-        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.120061/)
+        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.121011/)
         auditJar(explicitJar('powerAdvantagePlayerJar') ?: powerNativeJar, 'powerAdvantagePlayerJar', 'poweradvantage_player_sha256',
                 'basepower', project.poweradvantage_version, powerApi)
     }
@@ -591,7 +598,7 @@ tasks.register('verifyNativeDevelopmentDependencies') {
     description = 'Resolves Forge and audits the exact development JARs.'
     dependsOn tasks.named('verifyCompanionDevelopmentDependencies')
     doLast {
-        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.120061/)
+        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.121011/)
         committedPin('poweradvantage_source_ref', /[a-f0-9]{40}/)
         auditJar(powerAdvantageDeobfJar, 'powerAdvantageDeobfJar', 'poweradvantage_deobf_sha256',
                 'basepower', project.poweradvantage_version, powerApi)
@@ -695,12 +702,19 @@ tasks.register('verifyReleaseArtifacts') {
              'zone/moddev/mc/basesteam/machines/SteamPumpTileEntity.class',
              'zone/moddev/mc/basesteam/machines/GeothermalBoilerTileEntity.class',
              'zone/moddev/mc/basesteam/migration/SteamLegacyMigrations.class',
-             'data/basesteam/loot_tables/chests/advantage_parts.json',
+             'data/basesteam/loot_table/chests/advantage_parts.json',
              'assets/basesteam/lang/en_us.json',
              'data/basesteam/damage_type/musket.json',
              'data/basesteam/damage_type/steam_machine.json',
-             'data/basesteam/recipes/steam_pipe.json',
-             'data/basesteam/advancements/recipes/steam_pipe.json'].each { required ->
+             'data/basesteam/recipe/steam_pipe.json',
+             'data/basesteam/enchantment/high_explosive.json',
+             'data/basesteam/enchantment/powderless.json',
+             'data/basesteam/enchantment/rapid_reload.json',
+             'data/basesteam/enchantment/recoil.json',
+             'data/basesteam/tags/item/muskets.json',
+             'data/minecraft/tags/enchantment/non_treasure.json',
+             'data/minecraft/tags/enchantment/tooltip_order.json',
+             'data/basesteam/advancement/recipes/steam_pipe.json'].each { required ->
                 if (!names.contains(required)) {
                     throw new GradleException("Release jar is missing ${required}")
                 }
@@ -709,7 +723,7 @@ tasks.register('verifyReleaseArtifacts') {
              'steam_boiler_geothermal', 'steam_tank', 'steam_furnace', 'steam_crusher',
              'steam_drill', 'steam_elevator', 'steam_switch', 'steam_still', 'steam_pump',
              'steam_boiler_oil'].each { id ->
-                if (!names.contains("data/basesteam/loot_tables/blocks/${id}.json".toString())) {
+                if (!names.contains("data/basesteam/loot_table/blocks/${id}.json".toString())) {
                     throw new GradleException("Release jar is missing native block loot for ${id}")
                 }
             }
@@ -717,7 +731,7 @@ tasks.register('verifyReleaseArtifacts') {
                     .getText(StandardCharsets.UTF_8.name()))
             verifyPackFormats(resourcePack.pack)
             ['agent-notes/', '.codex/', 'src/test/', 'zone/moddev/mc/basesteam/testing/',
-             'zone/moddev/mc/basesteam/gametest/', 'data/basesteam/structures/basesteam_empty.nbt',
+             'zone/moddev/mc/basesteam/gametest/', 'data/basesteam/structure/basesteam_empty.nbt',
              'fernflower_abstract_parameter_names.txt',
               'cyano/poweradvantage/', 'zone/moddev/mc/basepower/', 'zone/moddev/mc/poweradvantage/',
               'zone/moddev/mc/steamadvantage/', 'assets/steamadvantage/', 'data/steamadvantage/',
@@ -727,6 +741,10 @@ tasks.register('verifyReleaseArtifacts') {
                 if (names.any { it.contains(forbidden) }) {
                     throw new GradleException("Release jar contains forbidden entry matching ${forbidden}")
                 }
+            }
+            if (names.any { it ==~ /data\/[^\/]+\/(?:recipes|advancements|loot_tables|structures)\/.*/
+                    || it ==~ /data\/[^\/]+\/tags\/(?:items|blocks)\/.*/ }) {
+                throw new GradleException('Release jar contains pre-1.21 datapack registry directories')
             }
             String metadata = zip.getInputStream(zip.getEntry('META-INF/mods.toml'))
                     .getText(StandardCharsets.UTF_8.name())
@@ -1221,7 +1239,7 @@ tasks.register('verifyEclipseProductionClasspath') {
                     || (name == 'runClient.launch' && !arguments.startsWith('--launcher-side client '))
                     || !vmArguments.contains('--add-opens java.base/java.lang.invoke=ALL-UNNAMED')
                     || contents.contains('net.minecraftforge.userdev.LaunchTesting')) {
-                throw new GradleException("${name} must retain the native Forge 50 bootstrap and Java 21 module access")
+                throw new GradleException("${name} must retain the native Forge 52 bootstrap and Java 21 module access")
             }
             if (launch.booleanAttribute.find {
                 it.@key.text() == 'org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE'
@@ -1279,7 +1297,7 @@ tasks.register('verifyEclipseProductionClasspath') {
             String target = name == 'runClient.launch' ? 'forge_userdev_client' : 'forge_userdev_server'
             if (!arguments.contains("--launchTarget ${target}")
                     || !arguments.contains("forge-${project.minecraft_version}-${project.forge_version}-metadata.zip")) {
-                throw new GradleException("${name} does not target the exact Forge 50 development runtime")
+                throw new GradleException("${name} does not target the exact Forge 52 development runtime")
             }
         }
     }
@@ -1424,7 +1442,7 @@ tasks.register('verifyRepositoryHygiene') {
 tasks.register('verifyRecipeTagGuards') {
     group = 'verification'
     description = 'Rejects recipes that can collapse when a Forge material tag is empty.'
-    File recipeRoot = file("src/main/resources/data/${project.mod_id}/recipes")
+    File recipeRoot = file("src/main/resources/data/${project.mod_id}/recipe")
     inputs.dir(recipeRoot)
     doLast {
         Closure collectTags
@@ -1474,7 +1492,35 @@ tasks.register('verifyRecipeTagGuards') {
     }
 }
 
+tasks.register('verifyDataPackLayout') {
+    group = 'verification'
+    description = 'Rejects obsolete datapack paths and missing data-driven musket enchantments.'
+    inputs.dir('src/main/resources/data')
+    inputs.dir('src/gametest/resources/data')
+    doLast {
+        List<String> obsolete = files(fileTree('src/main/resources/data'),
+                fileTree('src/gametest/resources/data')).files.collect {
+            relativePath(it).replace('\\', '/')
+        }.findAll { it ==~ /.*\/data\/[^\/]+\/(?:recipes|advancements|loot_tables|structures)\/.*/
+                || it ==~ /.*\/data\/[^\/]+\/tags\/(?:items|blocks)\/.*/ }
+        if (!obsolete.isEmpty()) throw new GradleException("Obsolete datapack directories: ${obsolete}")
+        if (!file('src/gametest/resources/data/basesteam/structure/basesteam_empty.nbt').isFile()) {
+            throw new GradleException('Missing native GameTest structure path')
+        }
+        ['high_explosive', 'powderless', 'rapid_reload', 'recoil'].each { id ->
+            File definition = file("src/main/resources/data/basesteam/enchantment/${id}.json")
+            if (!definition.isFile()) throw new GradleException("Missing musket enchantment: ${id}")
+            Map value = new JsonSlurper().parse(definition) as Map
+            if (value.supported_items != '#basesteam:muskets' || value.slots != ['mainhand']
+                    || value.effects != [:]) {
+                throw new GradleException("Unexpected native musket enchantment contract: ${id}")
+            }
+        }
+    }
+}
+
 tasks.named('check') {
+    dependsOn tasks.named('verifyDataPackLayout')
     dependsOn verifyJavaSourceLayout
     dependsOn tasks.named('verifyReleaseConfiguration')
     dependsOn tasks.named('verifyModelAssets')

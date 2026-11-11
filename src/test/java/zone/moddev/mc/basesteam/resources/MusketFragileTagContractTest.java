@@ -18,7 +18,7 @@ public class MusketFragileTagContractTest {
     @BeforeClass public static void bootstrap() { NativeTestBootstrap.start(); }
 
     @Test public void vanillaDefaultsMatchThePreviousMaterialRule() throws Exception {
-        Path path = Path.of("src/main/resources/data/basesteam/tags/blocks/musket_fragile.json");
+        Path path = Path.of("src/main/resources/data/basesteam/tags/block/musket_fragile.json");
         try (var reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             var tag = JsonParser.parseReader(reader).getAsJsonObject();
             assertFalse("Other packs must be able to extend the fragile block list", tag.get("replace").getAsBoolean());
@@ -30,7 +30,7 @@ public class MusketFragileTagContractTest {
             assertTrue(blocks.contains("minecraft:torch"));
             assertTrue(blocks.contains("minecraft:short_grass"));
             for (String id : blocks) {
-                assertTrue("Unregistered Forge 50 block would invalidate the tag: " + id,
+                assertTrue("Unregistered Forge 52 block would invalidate the tag: " + id,
                         BuiltInRegistries.BLOCK.containsKey(ResourceLocation.parse(id)));
             }
             assertFalse(blocks.contains("minecraft:tnt"));

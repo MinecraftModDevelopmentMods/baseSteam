@@ -21,7 +21,7 @@ side="BOTH"
 [[dependencies.basesteam]]
 modId="basemetals"
 mandatory=false
-versionRange="[3.1.2.120061,4.0.0)"
+versionRange="[3.1.2.121011,4.0.0)"
 ordering="AFTER"
 side="BOTH"
 
