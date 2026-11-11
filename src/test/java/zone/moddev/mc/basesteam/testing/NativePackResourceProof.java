@@ -55,23 +55,30 @@ public final class NativePackResourceProof {
         Path javaExecutable = Path.of(System.getProperty("java.home"), "bin", "java");
         if (!Files.isExecutable(javaExecutable)) javaExecutable = javaExecutable.resolveSibling("java.exe");
         Path log = evidence.resolve("forge-resources.log");
-        Process process = new ProcessBuilder(javaExecutable.toString(), "-XX:ActiveProcessorCount=4", "-Xmx512m",
+        ProcessBuilder builder = new ProcessBuilder(javaExecutable.toString(), "-XX:ActiveProcessorCount=4", "-Xmx512m",
+                "-Dterminal.jline=false",
                 "--add-opens", "java.base/java.lang.invoke=ALL-UNNAMED", "-cp", classpath,
                 NativePackResourceProof.class.getName(), Path.of("build/resources/main").toAbsolutePath().toString(),
                 evidence.toString()).directory(evidence.toFile())
-                .redirectErrorStream(true).redirectOutput(log.toFile()).start();
+                .redirectInput(ProcessBuilder.Redirect.PIPE).redirectErrorStream(true).redirectOutput(log.toFile());
+        builder.environment().put("TERM", "dumb");
+        Process process = builder.start();
         if (!process.waitFor(90, TimeUnit.SECONDS)) {
             process.destroyForcibly().waitFor();
             throw new AssertionError("Native Forge resource proof timed out: " + log);
         }
         String output = Files.readString(log);
         if (process.exitValue() != 0) throw new AssertionError("Native Forge resource proof failed: " + log + "\n" + output);
+        requireCleanOutput(output, log);
+        receipt = JsonParser.parseString(Files.readString(evidence.resolve("receipt.json"))).getAsJsonObject();
+        return receipt.deepCopy();
+    }
+
+    static void requireCleanOutput(String output, Path log) {
         if (java.util.regex.Pattern.compile("(?m)(?:\\[[^\\r\\n]*\\b(?:WARN|ERROR|FATAL)\\b[^\\r\\n]*\\]|\\bmain (?:WARN|ERROR|FATAL)\\b)")
                 .matcher(output).find()) {
             throw new AssertionError("Native Forge resource diagnostic in " + log + "\n" + output);
         }
-        receipt = JsonParser.parseString(Files.readString(evidence.resolve("receipt.json"))).getAsJsonObject();
-        return receipt.deepCopy();
     }
 
     public static void main(String[] args) throws Exception {
@@ -105,6 +112,12 @@ public final class NativePackResourceProof {
         var logger = (org.apache.logging.log4j.core.Logger)LogManager.getRootLogger();
         logger.addAppender(appender);
         JsonObject result = new JsonObject();
+        JsonObject child = new JsonObject();
+        child.addProperty("terminalJline", System.getProperty("terminal.jline"));
+        child.addProperty("term", System.getenv("TERM"));
+        child.addProperty("consoleAttached", System.console() != null);
+        child.addProperty("terminalCreated", net.minecrell.terminalconsole.TerminalConsoleAppender.getTerminal() != null);
+        result.add("childProcess", child);
         try {
             for (PackType type : PackType.values()) {
                 PackRepository repository = new PackRepository();

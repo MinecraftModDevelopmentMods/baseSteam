@@ -43,10 +43,7 @@ public class NativeItemAtlasContractTest {
     @Test public void pinnedNativeAtlasesResolveEveryModelWithoutBlockMaterialCollisions() throws Exception {
         Properties pins = new Properties();
         try (var input = Files.newInputStream(Path.of("gradle.properties"))) { pins.load(input); }
-        Path power = Path.of("../../PowerAdvantage/build/libs/basePower-"
-                + pins.getProperty("poweradvantage_version") + ".jar");
-        assertEquals(pins.getProperty("poweradvantage_deobf_sha256"), HexFormat.of().withUpperCase()
-                .formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(power))));
+        Path power = pinnedPower(pins, System.getProperty("basesteam.nativePowerJar"));
         var steam = new PathPackResources.PathResourcesSupplier(Path.of("src/main/resources"));
         var parent = new FilePackResources.FileResourcesSupplier(power);
         assertEquals(Identifier.withDefaultNamespace("items"), AtlasIds.ITEMS);
@@ -118,6 +115,33 @@ public class NativeItemAtlasContractTest {
             assertTrue("Omitting Power must still expose the missing shared material",
                     missing.contains(Identifier.parse("basesteam:materials/steel_dark_hole")));
         }
+    }
+
+    @Test public void missingVerifiedPowerPathIsRejected() {
+        assertThrows(AssertionError.class, () -> pinnedPower(new Properties(), null));
+    }
+
+    @Test public void wrongPowerBytesAreRejectedEvenInAPathWithSpaces() throws Exception {
+        Path directory = Files.createTempDirectory("baseSteam dependency with spaces ");
+        Path wrong = directory.resolve("basePower.jar");
+        try {
+            Files.write(wrong, new byte[] {1, 2, 3});
+            Properties pins = new Properties();
+            pins.setProperty("poweradvantage_deobf_sha256", "0".repeat(64));
+            assertThrows(AssertionError.class, () -> pinnedPower(pins, wrong.toString()));
+        } finally {
+            Files.deleteIfExists(wrong);
+            Files.deleteIfExists(directory);
+        }
+    }
+
+    private static Path pinnedPower(Properties pins, String configured) throws Exception {
+        assertNotNull("Gradle must supply its verified Power dependency to the atlas test", configured);
+        Path power = Path.of(configured).toAbsolutePath().normalize();
+        assertTrue("Missing verified Power dependency: " + power, Files.isRegularFile(power));
+        assertEquals(pins.getProperty("poweradvantage_deobf_sha256"), HexFormat.of().withUpperCase()
+                .formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(power))));
+        return power;
     }
 
     private static Set<Identifier> sprites(ResourceManager resources, Identifier atlas, Set<String> directories)

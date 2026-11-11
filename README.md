@@ -1,6 +1,6 @@
 # baseSteam
 
-**Minecraft 1.21.11 (Forge), local source port 2.2.16.121111.**
+**Minecraft 1.21.11 (Forge), baseSteam 2.2.16.121111.**
 
 baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
 and a blackpowder musket to basePower. Items and blocks share the basePower
@@ -21,9 +21,12 @@ Exact local source, jar and test-bootstrap pins are in `gradle.properties`.
 They are checked before compilation and tests. Local approval does not
 establish public availability. The Base Metals shared hook and approved Power
 integration commit 41959572b11dce236df98f23e97c6a3868cdda03 are pinned locally.
-The required-dependency metadata correction is local only. Power's approved
-metadata rebuild is pinned, but the changed Steam bytes are not
-a qualified family release. Earlier no-Base-Metals receipts are
+The 1.21.11 port is accepted for release. The current family has passed the
+combined machine, upgrade, graphical and two-world 30-minute endurance checks.
+Publication is still pending the dependency releases and hosted checks; these
+local pins have not been replaced with released inputs. The full record is
+in basePower's
+`docs/1.21.11/QUALIFICATION.md`. Earlier no-Base-Metals receipts are
 historical evidence, not a supported installation profile.
 The mod root declares server data format 94.1. Forge supplies format 75.x
 metadata for its hidden client resource aggregate. Native resource-reader
@@ -41,7 +44,6 @@ With the pinned local dependencies available:
 ```powershell
 $env:JAVA_HOME = "$env:USERPROFILE/.jdks/temurin-21.0.7+6"
 $env:GRADLE_USER_HOME = 'D:/GradleCaches/basesteam-12111-port'
-$env:JAVA_TOOL_OPTIONS = '-XX:ActiveProcessorCount=4'
 $jdk8 = "$env:USERPROFILE/.jdks/temurin-8.0.502+7/jdk8u502-b07"
 $jdks = "$env:JAVA_HOME,$env:USERPROFILE/.jdks/jdk-25.0.3+9,$jdk8"
 $toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
@@ -52,6 +54,24 @@ $toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
 ./gradlew.bat @toolchains -PsteamGameTestRunId=candidate verifyPlayerDependencies runGameTestServer
 ./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_12111_SERVER_INSTALL -RunId candidate-with-metals -UseNioTransport -Reopen
 ```
+
+For a checkout outside the sibling-folder layout, unit tests also need the
+verified Power test bootstrap and its two source files. Build Power first,
+then supply these paths as well as the dependency-jar overrides:
+
+```text
+-PforgeCapabilityBootstrapJar=<Power checkout>/build/unit-bootstrap/forge-native-unit-bootstrap.jar
+-PforgeCapabilityBootstrapSource=<Power checkout>/test-rig/unit-bootstrap/ForgeCapabilityBootstrap.java
+-PforgeUnitRegistriesSource=<Power checkout>/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/ForgeUnitRegistries.java
+```
+
+The atlas test uses the same verified Power jar selected for compilation;
+it does not look for a second copy in a fixed local folder. Missing or
+changed inputs fail the checks. The current source check passes 252 unit
+tests. Native resource tests disable interactive terminal setup in their
+child process, while keeping warnings and errors fatal.
+Keep Java option environment variables unset
+when running the packaged family rig; it records its own runtime arguments.
 
 Independent source checks: `node tools/verify-native-port.js` and
 `node tools/generate-recipe-unlocks.js --check`.
@@ -68,10 +88,11 @@ Steam retains machine IDs and saved fields, drill directions, musket wear
 and loading, and all four musket enchantments. The singular datapack folders
 do not change logical recipe or advancement identities.
 
-Use basePower's migration rig for whole-world checks. Before accepting the
-port, check machines, restarts, redstone, all drill directions, elevators,
+Use basePower's migration rig for whole-world checks. For your own world,
+check machines, restarts, redstone, all drill directions, elevators,
 GUI captions, whole fluid gauges, track transparency and musket effects
-in-game. Automated, packaged and manual acceptance are separate gates.
+in-game. Release acceptance does not turn the remaining manual checks into
+automated passes or qualify every modpack.
 See the [1.21.11 notes](docs/PORT12111-STATUS.md). The
 [1.21.1 notes](docs/PORT1211-STATUS.md) describe the accepted source baseline,
 not qualification of this port.

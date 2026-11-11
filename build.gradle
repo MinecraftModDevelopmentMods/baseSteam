@@ -340,6 +340,7 @@ tasks.named('test', Test) {
         }
         logger.lifecycle("basePower test bootstrap: ${bootstrapJar.canonicalPath} SHA-256 ${actualHash}")
         systemProperty 'basesteam.nativePackClasspath', sourceSets.test.runtimeClasspath.asPath
+        systemProperty 'basesteam.nativePowerJar', powerAdvantageDeobfJar.canonicalPath
         jvmArgs "-javaagent:${bootstrapJar.canonicalPath}"
         jvmArgs '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED'
     }

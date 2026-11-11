@@ -1,6 +1,61 @@
 # Steam on Minecraft 1.21.11
 
-## Current Metadata Correction
+## Accepted For Release
+
+The current `F23DDC4ABB36A1C4C7A4205151FBB6DDFD25397E86909E1C0B146C4089B747E0`
+player jar was accepted for release on 11 November 2026 with Power C98D,
+Electric 5466, Base Metals 598D and OreSpawn DE39. Publication was authorized
+in dependency order, but has not happened yet. The local dependency pins are
+unchanged pending the released dependency source, jar hash and public file ID.
+basePower's `docs/1.21.11/QUALIFICATION.md` records the full hashes and limits.
+
+The current frozen family passes 132 finite jobs, upgrades, chunk/network and
+drill lifecycle tests, recipes, world generation, oils, graphical checks and
+two 30-minute endurance worlds with full restarts. Independent replay passes
+all 66 checkpoints and exact final stopped machine data. These are new
+current-jar results; the C2 evidence below remains historical.
+
+The current forced, uncached source check passes all 252 unit tests with no
+failures, errors or skips. This includes the portable Power atlas-test input
+controls and two noninteractive native resource-test regressions. The child
+uses terminal.jline=false with pipes and TERM=dumb, verifies 161 client and
+91 server files, and rejects WARN, ERROR and FATAL diagnostics unchanged.
+Its failing pre-fix receipt is preserved.
+
+The earlier clean-path and normal builds, and the fresh real Eclipse compiler
+run, passed all 250 tests before those two terminal regressions were added.
+Those receipts are not relabelled as 252-test runs. All three jars reproduce
+exactly and four fresh native source GameTests pass. No Steam production
+change was needed during this rerun. Connected-player interaction
+and live-world visual limits remain recorded; acceptance does not relabel
+unrun checks as passes.
+
+## Publication Preparation
+
+The following is the preparation status on 11 November 2026.
+
+The local Power source pin remains 41959572b11dce236df98f23e97c6a3868cdda03;
+the Base Metals shared-hook pin remains 616d527e50e4bf0137eeb9c44fa586e34a0452a0.
+Their public file IDs remain empty. CI and CodeQL deliberately require merged
+upstream source and checksum-matching public jars before compilation. Those
+gates must stay closed until the dependency releases are verified.
+
+The upstream master-1.21.11 branch still points at merged 1.21.1 tip
+b145f8d1a7c2a148f8f259faec7b203cf146b6b5, which is an ancestor of this port.
+There is no hosted check for the local Steam HEAD or 2.2.16.121111 tag yet.
+The current CI upload list names the correct player, sources and Javadoc
+jars. Its out-of-layout build supplies the Power bootstrap and both audited
+sources, and the atlas test now uses that same verified dependency jar.
+
+The default-branch publisher needs the 1.21.11 Java 21 route and a sealed
+release-registry entry. Only the route is prepared locally; the entry must
+wait for the merged source and its successful CI artifact. The tag validator
+checks the build job, not CodeQL or wrapper validation. No effective upstream
+branch rules were returned by the audit, so all three successful checks must
+also be verified before release. No tag, dispatch or publication is part of
+this preparation.
+
+## Dependency Metadata Correction History
 
 Base Metals is REQUIRED on both client and server. The local mods.toml
 declares it exactly once with mandatory=true, ordering AFTER and the unchanged
