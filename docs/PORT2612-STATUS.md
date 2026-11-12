@@ -27,7 +27,7 @@ unit-test result.
 ## Dependency Gate
 
 Current local integration inputs are Power 2.4.16.2601021 source
-e565f99284de5e6c7860d378abc43b96d9faa5ee/player CC94656A, the approved Base
+b947b4b81f3508fa220a212b41157ed2f801909f/player 5309E7C4, the approved Base
 Metals 3.1.2.2601021 hook source 331fa46914f854db71a8c33500cc559a8878b7d3/
 player 67862388, and the exact parent fixture08 jar and three audited Java
 sources. The generated unit-support copies are test-only, hash-checked and never
@@ -290,6 +290,40 @@ nine closed JVMs, but those scoped passes do not qualify07 or waive that failure
 All07 results and failures remain preserved. No further07 campaign or preseal
 is permitted. The08 physical reruns await both its frozen profile and the short
 legacy-generation gate.
+
+## Candidate09 Dependency Qualification
+
+Power source is b947b4b81f3508fa220a212b41157ed2f801909f, player
+5309E7C433933F1426543310611292BF80388A476836139F0117E6A7E5C9AFC1.
+The bootstrap and three helper-source hashes were reverified and are unchanged.
+BM and OS retain their exact existing pins. Steam changes only its dependency
+pin and notes, not production code, resources, version or gameplay.
+
+The default-path full release run passes all 46 executed tasks and 276 unit
+tests with zero failures, errors or skips. Dependency, resource, artifact,
+checksum, Javadoc and Eclipse metadata audits pass. Fresh independent ECJ
+compiles all 60 main, 54 test and three GameTest sources, verifies the complete
+compiled JUnit inventory, and executes all 276 tests with zero failures,
+ignored tests or assumptions.
+
+The isolated path-with-spaces build also passes 46 tasks and 276 tests and
+reproduces all three release archives exactly. The verified native engine and
+dependency cache are reused; no unseeded cold-download claim is made. Player
+SHA-256 stays
+4A4E7D8C3704DCF17F46EBB55A7A908A6E1B547FCAB93E3B6782EE32E49301CB.
+Every one of its 333 entries matches08, including all classes, resources and
+the manifest. Sources and Javadoc retain the same exact hashes recorded above.
+Evidence: build/native2612-candidate09-qualification and
+build/ecj-native2612-candidate09-full-01/receipt.json.
+
+The five08 physical campaigns subsequently passed with 469 audited raw JSON
+packets, nine closed JVMs and all 34 imported oracle files unchanged. Those
+bounded results remain historical. The parent's08 released110/112 first-boot
+quartz-import failures are preserved; restart passes do not waive them.
+New09 physical campaigns await the parent's frozen profile and early gate.
+The optional Mineralogy assessment is read-only. Core and versioned endurance
+guards still require exactly six jars. The three Mineralogy-only scopes remain
+explicitly SKIPPED; no full interoperability claim includes them.
 
 ## Remaining Qualification
 
