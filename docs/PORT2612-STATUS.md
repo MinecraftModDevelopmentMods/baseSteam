@@ -27,7 +27,7 @@ unit-test result.
 ## Dependency Gate
 
 Current local integration inputs are Power 2.4.16.2601021 source
-0ac874de66f792c6efca5bccd0536b1b113fb786/player 618C3F96, the approved Base
+9f6ffb30a14efe4360fee0cbdfa52dc8090a9819/player 05031F1A, the approved Base
 Metals 3.1.2.2601021 hook source 331fa46914f854db71a8c33500cc559a8878b7d3/
 player 67862388, and the exact parent fixture08 jar and three audited Java
 sources. The generated unit-support copies are test-only, hash-checked and never
@@ -172,7 +172,7 @@ evidence/packaged-server-native2612-frozen51de-final-01/receipt.json.
 
 ## Candidate06 Atlas And Dependency Checks
 
-Current Power source is 0ac874de66f792c6efca5bccd0536b1b113fb786, player
+Power source at this historical checkpoint is 0ac874de66f792c6efca5bccd0536b1b113fb786, player
 618C3F96736392CE2853575F5A6A076EAC2A9B9F76F9303D86DEF58E418857D0.
 The BM source is 331fa46914f854db71a8c33500cc559a8878b7d3, player
 6786238835D4D8A653C769F3B0E61D226959146300E17523799CFDF17540FD19.
@@ -228,6 +228,37 @@ _verification/base-2612-port-20261112/native2612-machines-networks-06/
 finite-candidate06-handoff-01.json, SHA-256
 7536216856051A46CD22CF6F12AF39CD12D6CF475C37F2AC27DF405A7B1383D2.
 These results do not claim global family qualification or manual acceptance.
+
+## Candidate07 Dependency Qualification
+
+Power source is 9f6ffb30a14efe4360fee0cbdfa52dc8090a9819, player
+05031F1A3DCF25A405D9222E65619F7173C37CCF57B76308B72F741CA0E5198C.
+The bootstrap jar and all three helper-source hashes are unchanged and were
+reverified before retargeting. BM and OS keep their exact candidate06 pins.
+This update changes dependency pins and notes only, not Steam gameplay code or
+resources. New child qualification is recorded separately from candidate06.
+
+The default-path release build executes all 46 tasks and all 276 unit tests
+with zero failures, errors or skips. Native dependency, artifact, checksum,
+resource, Javadoc and Eclipse audits pass against the new Power bytes. Fresh
+independent ECJ compiles 60 main, 54 test and three GameTest sources and runs
+the full 276-test inventory with zero failures, ignored tests or assumptions.
+The complete compiled-inventory guard remains enabled.
+
+The isolated path-with-spaces build also executes 46 tasks and 276 tests and
+reproduces all three release archives exactly. Its verified native engine and
+dependency cache are reused; this is not an unseeded cold-download claim.
+Player SHA-256 remains
+4A4E7D8C3704DCF17F46EBB55A7A908A6E1B547FCAB93E3B6782EE32E49301CB,
+sources FFA80BE16EF72CAEF38B16B6A79FB46952C7369E2F1E3770F2A184E805F6A03B,
+and Javadoc 4C9BFA077DF88E78C480ED058FF8C02F85C31DFB1834E78D9DA7B1777D6DE085.
+All 333 player entries, including every class, resource and manifest, match06.
+The fresh pin-bound receipts are under build/native2612-candidate07-qualification
+and build/ecj-native2612-candidate07-full-01/receipt.json.
+
+No new GameTest, packaged-world or physical campaign is claimed for07 here.
+The five physical campaigns remain held until the parent supplies the sealed07
+profile. The06 receipts remain unchanged historical evidence.
 
 ## Remaining Qualification
 
