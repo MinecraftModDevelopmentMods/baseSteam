@@ -18,8 +18,8 @@ Base Metals 3.1.2.2601021 hook, plus released OreSpawn 4.1.0.2601021.
 They remain separate Forge jars on both client and server, not bundled copies.
 Base Metals is REQUIRED on both client and server, not an optional integration.
 The default build paths use the coordinated 26.1.2 checkouts. The current local
-inputs are Power source e49a2e94/player 3D9A, Base Metals source 13d4c4e3/player
-491166 and OreSpawn 6D5C. Exact source, jar and fixture08 bootstrap pins are in
+inputs are Power source 0ac874de/player 618C, Base Metals source 331fa469/player
+678623 and OreSpawn 6D5C. Exact source, jar and fixture08 bootstrap pins are in
 gradle.properties. These are local integration inputs, not a public release or
 family qualification. No 1.21.11 dependency is substituted.
 
@@ -61,7 +61,7 @@ then supply these paths as well as the dependency-jar overrides:
 
 The atlas test uses the same verified Power jar selected for compilation;
 it does not look for a second copy in a fixed local folder. Missing or
-changed inputs fail the checks. The current local 26.1.2 source passes 273 unit
+changed inputs fail the checks. The current local 26.1.2 source passes 276 unit
 tests and a fresh independent ECJ run of the same complete inventory. The
 scoped runtime and reproducibility results are in the port status below;
 they do not imply family or manual acceptance. Native resource tests disable interactive terminal setup in their

@@ -5,6 +5,7 @@ baseSteam 2.2.17.2601021 (Minecraft 26.1.2 / Forge, LOCAL PORT IN PROGRESS)
 - Use native 26.1.2 recipe assembly and resource metadata while retaining strict positive and negative checks.
 - Handle fuels without a crafting remainder in both boilers and blast furnaces; keep exact fuel consumption and container returns.
 - Remove obsolete no-op crushing registration during common setup; keep all nine data-driven salvage recipes and their original mode conditions.
+- Register explicit, owned block and item sprites so small textures from another mod cannot break atlas loading.
 - Require the coordinated native Power and Base Metals hook pins before compiling or qualifying a candidate.
 - No 26.1.2 publication or gameplay acceptance is claimed.
 

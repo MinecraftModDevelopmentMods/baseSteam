@@ -27,9 +27,9 @@ unit-test result.
 ## Dependency Gate
 
 Current local integration inputs are Power 2.4.16.2601021 source
-e49a2e947e066a0f0e497982c2d5db596dfe11d9/player 3D9ACF8B, the approved Base
-Metals 3.1.2.2601021 hook source 13d4c4e38bf74d76f2f69f307dc55d13a81e8674/
-player 4911669B, and the exact parent fixture08 jar and three audited Java
+0ac874de66f792c6efca5bccd0536b1b113fb786/player 618C3F96, the approved Base
+Metals 3.1.2.2601021 hook source 331fa46914f854db71a8c33500cc559a8878b7d3/
+player 67862388, and the exact parent fixture08 jar and three audited Java
 sources. The generated unit-support copies are test-only, hash-checked and never
 packaged or committed. Old Power/BM jars are not target inputs or substitutes.
 
@@ -120,14 +120,15 @@ inputs above. The old property file and player jar are held under
 build/native2612-candidate02-qualification/held-inputs. Candidate02-bound child
 results are recorded separately; candidate01 failures are not relabelled.
 
-## Frozen 51DE Child Results
+## Candidate05 Child Results
 
-Current local Power source: e49a2e947e066a0f0e497982c2d5db596dfe11d9.
+Power source at this historical checkpoint: e49a2e947e066a0f0e497982c2d5db596dfe11d9.
 Power player: 3D9ACF8B86DD1B443B138C61E5E1C5BAAC3059D83EED83B8E6E927BC501CA446.
 Steam player and deobf:
 51DE7B6C58DA2DF5116352364B34E5B12FE5A22AA1DD2A487D472EF2E83A0AC3.
-All bootstrap/registry/loader source pins are unchanged. BM and OS retain the
-exact inputs recorded above. This is local source integration, not publication.
+All bootstrap/registry/loader source pins are unchanged. This checkpoint used
+BM source 13d4c4e38bf74d76f2f69f307dc55d13a81e8674/player 4911669B and the
+unchanged OS input. This is local source integration, not publication.
 
 Actual family operations exposed a nullable crafting-remainder NPE in the coal
 boiler and blast furnace. Four actual-method cases failed with that NPE before
@@ -168,6 +169,65 @@ unseeded cold-download claim. All failed and intermediate B5/7E9 receipts remain
 Current evidence is under build/native2612-apocalyptic-repair, the ECJ receipt is
 build/ecj-native2612-frozen51de-final-02/receipt.json, and the packaged receipt is
 evidence/packaged-server-native2612-frozen51de-final-01/receipt.json.
+
+## Candidate06 Atlas And Dependency Checks
+
+Current Power source is 0ac874de66f792c6efca5bccd0536b1b113fb786, player
+618C3F96736392CE2853575F5A6A076EAC2A9B9F76F9303D86DEF58E418857D0.
+The BM source is 331fa46914f854db71a8c33500cc559a8878b7d3, player
+6786238835D4D8A653C769F3B0E61D226959146300E17523799CFDF17540FD19.
+OS and the three frozen unit-helper sources remain unchanged.
+
+Steam player and deobf are
+4A4E7D8C3704DCF17F46EBB55A7A908A6E1B547FCAB93E3B6782EE32E49301CB.
+Only the two atlas JSON entries differ from 51DE; all compiled classes and the
+manifest are byte-identical. Steam registers 24 block/entity/material sprites
+and three item sprites as explicit native singles. It does not register foreign
+namespaces or global directory sources. IDs are disjoint across both atlases.
+
+The obsolete directory-only test and build audit both failed against the new
+resources before their validators were updated. The new checks validate exact
+source shape, ownership, physical files and disjoint IDs before combining the
+native sprite inventory. Actual Forge 64 SpriteSources and Material codecs,
+resource managers and source loaders prove all model references resolve; the
+native Material identifies a sprite rather than a fixed block/item atlas.
+Directory, alias, foreign namespace, missing-file, duplicate, malformed-type and
+cross-atlas controls remain strict, as do missing/wrong-hash Power inputs.
+
+The default-path full release suite passes 46 executed tasks and 276 tests with
+zero failures, errors or skips. Fresh ECJ compiles all three Eclipse scopes and
+runs the complete same inventory with zero ignored tests or assumptions.
+Evidence: build/native2612-atlas-context-qualification and
+build/ecj-native2612-candidate06-atlas-full-01/receipt.json. The earlier 05
+receipts remain historical and are not qualification of candidate06.
+
+The isolated path-with-spaces verification build also passes all 46 tasks and
+276 tests. All three release jars match the ordinary build byte-for-byte. It
+reuses the verified native engine/dependency cache, not a new cold download.
+Each recipe mode passes the four named source GameTests and the ten native
+trade placements with 1,280 generated offers. APOCALYPTIC retains all nine
+salvage recipe codec/output/negative checks; NORMAL and TECH_PROGRESSION require
+their absence. The current packaged Steam jar passes a separate two-process
+startup, save, stop and reopen check. JVM caps are explicit command-line options
+and all three inherited JVM option variables are absent in these receipts.
+
+The five assigned finite campaigns were rerun against the separately frozen
+candidate06 profile 9F4C019B, not relabelled from 05. Harvest checks 271 cases
+before and after restart. Lifecycle covers twelve movement/mining cases, five
+physical chunk cycles and saved-progress/legacy-read/changed-target controls.
+Partial networks and bridge reconnection cover all three power lanes. Extended
+drills cover eighteen routes, 72 moves, four partial-unload cycles, both reload
+orders, eighteen blocked/energy/redstone cases and 21 restart cases. All pass.
+Harvest, lifecycle and extended include cold JVM restarts; partial and bridge
+are physical-unload campaigns without an additional JVM restart.
+
+The read-only raw audit covers 471 JSON packets, native ticket geometry, all
+nine real JVMs closed and unchanged profile, six jars, seed and imported oracle
+sources. Seventeen adapter unit tests pass. The scoped finite receipt is
+_verification/base-2612-port-20261112/native2612-machines-networks-06/
+finite-candidate06-handoff-01.json, SHA-256
+7536216856051A46CD22CF6F12AF39CD12D6CF475C37F2AC27DF405A7B1383D2.
+These results do not claim global family qualification or manual acceptance.
 
 ## Remaining Qualification
 

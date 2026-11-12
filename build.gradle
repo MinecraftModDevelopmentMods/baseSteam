@@ -725,12 +725,52 @@ tasks.register('verifyReleaseDependencies') {
 def blocksAtlasPath = 'assets/minecraft/atlases/blocks.json'
 def itemsAtlasPath = 'assets/minecraft/atlases/items.json'
 def steamAtlasPaths = [blocksAtlasPath, itemsAtlasPath]
-def steamDrillAtlas = [sources: [[type: 'single', resource: 'basesteam:entity/drill_bit']]]
-def steamItemsAtlas = [sources: [[type: 'directory', source: 'items', prefix: 'items/']]]
+def steamAtlasResources = [
+    (blocksAtlasPath): [
+        'blocks/coal_boiler_front', 'blocks/electric_boiler_back', 'blocks/electric_boiler_front',
+        'blocks/geothermal_boiler_side', 'blocks/geothermal_boiler_top', 'blocks/oil_tank_end',
+        'blocks/platform_top', 'blocks/rock_crusher_front', 'blocks/rock_crusher_top',
+        'blocks/steam_drill_bottom', 'blocks/steam_drill_top', 'blocks/steam_elevator_side',
+        'blocks/steam_furnace_front', 'blocks/steam_furnace_top', 'blocks/steam_pipe',
+        'blocks/steam_pump_front', 'blocks/steam_pump_side', 'blocks/steam_switch_off',
+        'blocks/steam_switch_on', 'entity/drill_bit', 'materials/bolted_copper',
+        'materials/bolted_iron', 'materials/iron', 'materials/steel_dark_hole'
+    ].collect { "basesteam:${it}".toString() } as Set,
+    (itemsAtlasPath): ['items/blackpowder_cartridge', 'items/steam_drill_bit', 'items/steam_governor']
+            .collect { "basesteam:${it}".toString() } as Set
+]
+def verifyOwnedAtlas = { String path, Object atlas, String owner, Set<String> registered, Closure exists ->
+    if (!(atlas instanceof Map) || atlas.keySet() != ['sources'] as Set
+            || !(atlas.sources instanceof List) || atlas.sources.isEmpty()) {
+        throw new GradleException("${owner} ${path} requires nonempty explicit native sprite sources")
+    }
+    Set<String> sprites = [] as Set
+    atlas.sources.each { source ->
+        if (!(source instanceof Map) || source.keySet() != ['type', 'resource'] as Set
+                || source.type != 'minecraft:single' || !(source.resource instanceof String)
+                || !(source.resource ==~ /${owner}:[a-z0-9_\/-]+/)
+                || source.resource.contains('..')) {
+            throw new GradleException("${owner} ${path} must contain only owned, unaliased native single sprites")
+        }
+        String sprite = source.resource
+        if (!registered.add(sprite)) throw new GradleException("Duplicate sprite across native atlases: ${sprite}")
+        String spritePath = sprite.substring(sprite.indexOf(':') + 1)
+        if (path == itemsAtlasPath && !spritePath.startsWith('items/')) {
+            throw new GradleException("${owner} item atlas must not register block/material sprites: ${sprite}")
+        }
+        if (!exists("assets/${owner}/textures/${spritePath}.png".toString())) {
+            throw new GradleException("${owner} ${path} registers missing sprite ${sprite}")
+        }
+        sprites.add(sprite)
+    }
+    sprites
+}
 def verifySteamAtlas = { String path, Object atlas ->
-    def expected = path == blocksAtlasPath ? steamDrillAtlas : steamItemsAtlas
-    if (!steamAtlasPaths.contains(path) || atlas != expected) {
-        throw new GradleException("Steam ${path} must contain only ${expected}; block and item sources must remain disjoint")
+    Set<String> actual = verifyOwnedAtlas(path, atlas, 'basesteam', [] as Set) { String resource ->
+        file("src/main/resources/${resource}").isFile()
+    }
+    if (!steamAtlasPaths.contains(path) || actual != steamAtlasResources[path]) {
+        throw new GradleException("Steam ${path} must retain its exact owned native sprite inventory")
     }
 }
 def verifyPackagedAssetNamespaces = { ZipFile zip ->
@@ -741,9 +781,14 @@ def verifyPackagedAssetNamespaces = { ZipFile zip ->
     if (foreignAssets.sort() != steamAtlasPaths.sort(false)) {
         throw new GradleException("${zip.name} must contain only ${steamAtlasPaths} outside ${steamAssets}; found ${foreignAssets}")
     }
+    Set<String> registered = [] as Set
     steamAtlasPaths.each { path ->
         zip.getInputStream(zip.getEntry(path)).withCloseable { input ->
-            verifySteamAtlas(path, new JsonSlurper().parse(input, 'UTF-8'))
+            def atlas = new JsonSlurper().parse(input, 'UTF-8')
+            verifySteamAtlas(path, atlas)
+            verifyOwnedAtlas(path, atlas, 'basesteam', registered) { String resource ->
+                zip.getEntry(resource) != null
+            }
         }
     }
 }
@@ -1476,42 +1521,27 @@ tasks.register('verifyModelAssets') {
             new JsonSlurper().parse(jsonFile)
         }
 
-        Set<String> atlasPrefixes = ['block/', 'item/'] as Set<String>
-        Set<String> singleSprites = [] as Set<String>
+        Set<String> registeredSprites = [] as Set<String>
         steamAtlasPaths.each { String atlasPath ->
             File steamAtlas = new File(resourceRoot, atlasPath)
             if (!steamAtlas.isFile()) throw new GradleException("Missing native Steam atlas ${steamAtlas}")
             def atlas = new JsonSlurper().parse(steamAtlas)
             verifySteamAtlas(atlasPath, atlas)
-            singleSprites.addAll(atlas.sources.findAll { it.type == 'single' }.collect { it.resource })
-            atlasPrefixes.addAll(atlas.sources.findAll { it.type == 'directory' }.collect { it.prefix })
+            verifyOwnedAtlas(atlasPath, atlas, 'basesteam', registeredSprites) { String resource ->
+                new File(resourceRoot, resource).isFile()
+            }
         }
-        Set<String> itemAtlasPrefixes = ['item/', 'items/'] as Set<String>
         Set<String> powerAdvantageAssets = new ZipFile(powerAdvantageDeobfJar).withCloseable { zip ->
-            Map<String, Set<String>> sharedPrefixes = [:]
             steamAtlasPaths.each { atlasPath ->
                 def atlasEntry = zip.getEntry(atlasPath)
                 if (atlasEntry == null) throw new GradleException("basePower is missing native atlas ${atlasPath}")
                 zip.getInputStream(atlasEntry).withCloseable { input ->
                     def atlas = new JsonSlurper().parse(input, 'UTF-8')
-                    if (atlasPath == itemsAtlasPath) verifySteamAtlas(atlasPath, atlas)
-                    // Power's directory sources preserve the existing texture IDs across namespaces.
-                    Set<String> prefixes = atlas.sources.findAll {
-                        it.type == 'directory' && it.source instanceof String && it.prefix == it.source + '/'
-                    }.collect { it.prefix } as Set<String>
-                    sharedPrefixes[atlasPath] = prefixes
+                    verifyOwnedAtlas(atlasPath, atlas, 'basepower', registeredSprites) { String resource ->
+                        zip.getEntry(resource) != null
+                    }
                 }
             }
-            Set<String> collisions = sharedPrefixes[blocksAtlasPath].intersect(sharedPrefixes[itemsAtlasPath])
-            collisions.retainAll(['blocks/', 'materials/'])
-            if (!collisions.isEmpty()) {
-                throw new GradleException("basePower shadows block/material directories in the item atlas: ${collisions}")
-            }
-            if (!sharedPrefixes[blocksAtlasPath].containsAll(['blocks/', 'materials/', 'items/'])) {
-                throw new GradleException('basePower block atlas must retain legacy blocks/, materials/ and generated-item items/ sources')
-            }
-            sharedPrefixes.values().each { atlasPrefixes.addAll(it) }
-            itemAtlasPrefixes.addAll(sharedPrefixes[itemsAtlasPath])
             zip.entries().collect { it.name } as Set<String>
         }
         def verifyReference = { String reference, String assetType, String sourcePath ->
@@ -1530,13 +1560,9 @@ tasks.register('verifyModelAssets') {
                 throw new GradleException(
                         "${sourcePath} references missing ${assetType} asset ${reference}")
             }
-            if (assetType == 'textures' && !singleSprites.contains(reference)
-                    && !atlasPrefixes.any { path.startsWith(it) }) {
-                throw new GradleException("${sourcePath} references unstitched blocks atlas texture ${reference}")
-            }
-            if (assetType == 'textures' && new File(sourcePath).toPath().startsWith(new File(modelRoot, 'block').toPath())
-                    && itemAtlasPrefixes.any { path.startsWith(it) }) {
-                throw new GradleException("${sourcePath} references an item-atlas texture from a block model: ${reference}")
+            // Native 26 Material stores only a sprite ID; ownership and disjointness were checked above.
+            if (assetType == 'textures' && !registeredSprites.contains("${namespace}:${path}".toString())) {
+                throw new GradleException("${sourcePath} references unregistered native sprite ${reference}")
             }
         }
 
