@@ -1,12 +1,14 @@
 # baseSteam
 
-**Minecraft 26.1.2 (Forge), baseSteam 2.2.17.2601021. Accepted for release.**
+**Minecraft 26.1.2 (Forge), baseSteam 2.2.17.2601021.**
 
 The frozen profile12 family has completed automated qualification and manual
 testing. See the
 [family qualification record](../../PowerAdvantage/docs/26.1.2/QUALIFICATION.md)
 for the exact tested jars, completed checks and scope limits. Manual acceptance
-is complete. Publication is being prepared; this version is not public yet.
+is complete. [This release is available on CurseForge](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9577519),
+MMD Maven and GitHub Releases. All three player-jar downloads match the tested
+checksum.
 
 baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
 and a blackpowder musket to basePower. Items and blocks share the basePower
