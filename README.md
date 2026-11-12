@@ -13,20 +13,19 @@ Target: Forge 61.1.0, official Minecraft 1.21.11 mappings and MCP
 wrapper use Temurin 21.0.7+6. Mavenizer uses Java 25; the launcher helper
 also needs Java 8. Minecraft itself runs on Java 21.
 
-The default dependency paths use the coordinated 1.21.11 checkouts. This
-candidate needs basePower 2.4.15.121111, Base Metals 3.1.2.121111 and
-OreSpawn 4.1.0.121111 as separate native jars, not bundled copies.
+Install [basePower 2.4.15.121111](https://github.com/MinecraftModDevelopmentMods/basePower/releases/tag/2.4.15.121111),
+[Base Metals 3.1.2.121111](https://www.curseforge.com/minecraft/mc-mods/base-metals/files/9566738)
+and [OreSpawn 4.1.0.121111](https://www.curseforge.com/minecraft/mc-mods/mmd-orespawn/files/9268464)
+as separate Forge 1.21.11 jars on both client and server, not bundled copies.
 Base Metals is REQUIRED on both client and server, not an optional integration.
-Exact local source, jar and test-bootstrap pins are in `gradle.properties`.
-They are checked before compilation and tests. Local approval does not
-establish public availability. The Base Metals shared hook and approved Power
-integration commit 41959572b11dce236df98f23e97c6a3868cdda03 are pinned locally.
-The 1.21.11 port is accepted for release. The current family has passed the
-combined machine, upgrade, graphical and two-world 30-minute endurance checks.
-Publication is still pending the dependency releases and hosted checks; these
-local pins have not been replaced with released inputs. The full record is
-in basePower's
-`docs/1.21.11/QUALIFICATION.md`. Earlier no-Base-Metals receipts are
+The default build paths use the coordinated 1.21.11 checkouts. Exact released
+source, jar and test-bootstrap pins are in `gradle.properties` and are checked
+before compilation and tests.
+
+This version has passed automated qualification and manual acceptance. The
+[qualification record](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-1.21.11/docs/1.21.11/QUALIFICATION.md)
+records the machine, upgrade, graphical and two-world endurance checks and
+their coverage limits. Earlier no-Base-Metals receipts are
 historical evidence, not a supported installation profile.
 The mod root declares server data format 94.1. Forge supplies format 75.x
 metadata for its hidden client resource aggregate. Native resource-reader
@@ -39,7 +38,7 @@ can use `-Pforge61MavenizerJar=<path>`. The `*DeobfJar` and `*PlayerJar`
 properties select separate development and packaged inputs; both must
 satisfy the committed checksums.
 
-With the pinned local dependencies available:
+With the pinned released dependencies available locally:
 
 ```powershell
 $env:JAVA_HOME = "$env:USERPROFILE/.jdks/temurin-21.0.7+6"
@@ -75,8 +74,8 @@ when running the packaged family rig; it records its own runtime arguments.
 
 Independent source checks: `node tools/verify-native-port.js` and
 `node tools/generate-recipe-unlocks.js --check`.
-Hosted CI and CodeQL require merged sources and checksum-matching public
-downloads before compiling. Pending local pins cannot pass that gate.
+Hosted CI and CodeQL verify merged dependency sources and checksum-matching
+public downloads before compiling.
 
 ## Old Worlds
 

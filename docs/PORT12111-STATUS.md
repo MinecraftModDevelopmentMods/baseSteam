@@ -1,15 +1,41 @@
 # Steam on Minecraft 1.21.11
 
-## Accepted For Release
+## Public Dependency Pins
+
+The 12 November 2026 build uses released basePower 2.4.15.121111 source
+9b0043483d79d3e575895f12aeb0dde7ef6c4890, CurseForge file 9566998, and Base
+Metals 3.1.2.121111 source 6f4c44e4d0a68bca3838fb025c09cddfaaa08fe8,
+CurseForge file 9566738. Their player hashes remain C98D and 598D; the native
+unit-bootstrap and source pins are unchanged.
+
+The actual releaseJar task was forced with the verified public Power jar.
+The resulting Steam player remains
+F23DDC4ABB36A1C4C7A4205151FBB6DDFD25397E86909E1C0B146C4089B747E0.
+All 324 payload entries, including 69 classes and the manifest, are identical
+to the accepted Steam jar. No production or resource change was needed.
+Earlier jar-task handoffs checked the existing player bytes but did not prove
+a fresh player build; the releaseJar receipt records that correction.
+
+The default-path full release suite passes all 45 tasks and 252 unit tests
+without failures, errors or skips. Fresh Eclipse ECJ output compiles the main,
+test and GameTest scopes and executes all 252 unit tests without ignored tests
+or assumptions. All four named native source GameTests pass. The independent
+source-archive build and packaged Steam restart witness have separate receipts.
+
+Steam publication is held for its hosted checks and the parent's fresh
+final-hash family restart, 1800-second endurance and independent replay gate.
+New qualification receipts remain separate from the earlier family below.
+
+## Accepted Family Proof (11 November)
 
 The current `F23DDC4ABB36A1C4C7A4205151FBB6DDFD25397E86909E1C0B146C4089B747E0`
 player jar was accepted for release on 11 November 2026 with Power C98D,
 Electric 5466, Base Metals 598D and OreSpawn DE39. Publication was authorized
-in dependency order, but has not happened yet. The local dependency pins are
-unchanged pending the released dependency source, jar hash and public file ID.
+in dependency order. This section records the pre-public-pin family, including
+the earlier Electric 5466 jar; it does not qualify the later Electric 7128 jar.
 basePower's `docs/1.21.11/QUALIFICATION.md` records the full hashes and limits.
 
-The current frozen family passes 132 finite jobs, upgrades, chunk/network and
+That frozen family passes 132 finite jobs, upgrades, chunk/network and
 drill lifecycle tests, recipes, world generation, oils, graphical checks and
 two 30-minute endurance worlds with full restarts. Independent replay passes
 all 66 checkpoints and exact final stopped machine data. These are new
@@ -30,7 +56,7 @@ change was needed during this rerun. Connected-player interaction
 and live-world visual limits remain recorded; acceptance does not relabel
 unrun checks as passes.
 
-## Publication Preparation
+## Historical Publication Preparation
 
 The following is the preparation status on 11 November 2026.
 
@@ -72,7 +98,7 @@ These local edits are not a frozen release or whole-world qualification.
 
 Power's approved metadata source 41959572b11dce236df98f23e97c6a3868cdda03
 and SHA-256 C98D2CF163BE2480D9AFB0023BBD2D92D401AE0D50BEF73191235BF3F83774A7
-are now pinned for the consistent default build. The RED attempt used the
+were pinned for the default build at that stage. The RED attempt used the
 preserved, hash-checked D input without changing its committed pins at that
 stage. No OreSpawn change, publication, version bump or packaged-world/endurance
 campaign is part of this correction. The smoke helper rejects its former
