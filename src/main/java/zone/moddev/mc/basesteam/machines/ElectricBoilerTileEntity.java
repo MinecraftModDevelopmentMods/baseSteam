@@ -70,7 +70,7 @@ public class ElectricBoilerTileEntity extends cyano.poweradvantage.api.simple.Ti
 			if(!redstone && getEnergy(ELECTRIC_POWER) >= ELECTRICITY_PER_TICK){
 				boilWater();
 				// play steam sounds occasionally
-				if(getLevel().random.nextInt(100) == 0){
+				if(getLevel().getRandom().nextInt(100) == 0){
 					playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 				}
 				if(timeSinceSound > 200){

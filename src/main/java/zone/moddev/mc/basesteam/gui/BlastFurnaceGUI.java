@@ -55,7 +55,6 @@ guiContainer.blit(arrowTexture, x+79, y+35, 0, 0, arrowLength, 17); // x, y, tex
 	 * the GUI
 	 * @param z This is the z coordinate (no units) into the depth of the screen
 	 */
-	@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 	@Override
 	public void drawGUIDecorations(Object srcEntity, GUIContainer guiContainer, int x, int y, float  z){
 		

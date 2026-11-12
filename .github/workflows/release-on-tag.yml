@@ -37,9 +37,9 @@ jobs:
           minecraft_version="$(value minecraft_version)"
           loader_name="$(value loader_name)"
           loader_code="$(value loader_code)"
-          if [[ "$minecraft_version" != '1.21.11' || "$(value forge_version)" != '61.1.0' ||
-                "$(value mapping_version)" != '1.21.11' || "$(value mcp_version)" != '20251223.124241' ]]; then
-            echo 'Expected the exact Minecraft 1.21.11 Forge 61.1.0 release target' >&2
+          if [[ "$minecraft_version" != '26.1.2' || "$(value forge_version)" != '64.1.5' ||
+                "$(value mapping_version)" != '26.1.2' || "$(value mcp_version)" != '20260409.101008' ]]; then
+            echo 'Expected the exact Minecraft 26.1.2 Forge 64.1.5 release target' >&2
             exit 1
           fi
 

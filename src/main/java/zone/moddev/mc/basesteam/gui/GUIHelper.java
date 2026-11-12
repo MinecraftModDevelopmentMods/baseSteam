@@ -6,7 +6,6 @@ import org.joml.Matrix3x2fStack;
 import net.minecraft.resources.Identifier;
 import cyano.poweradvantage.api.fluid.FluidStack;
 
-@net.minecraftforge.api.distmarker.OnlyIn(net.minecraftforge.api.distmarker.Dist.CLIENT)
 public abstract class GUIHelper {
 
 

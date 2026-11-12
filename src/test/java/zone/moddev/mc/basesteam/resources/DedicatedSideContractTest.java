@@ -12,7 +12,7 @@ public class DedicatedSideContractTest {
     private static final String ROOT = "/zone/moddev/mc/basesteam/";
     private static final String ONLY_IN = "Lnet/minecraftforge/api/distmarker/OnlyIn;";
 
-    @Test public void machineMenusStayCommonAndDecorationMethodsStayClientOnly() throws Exception {
+    @Test public void machineMenusRetainLegacyClientCallbacksWithoutUnsupportedSideMarkers() throws Exception {
         for (String name : List.of("BlastFurnace", "CoalBoiler", "ElectricBoiler", "GeothermalBoiler",
                 "OilBoiler", "RockCrusher", "SteamDrill", "SteamPump", "SteamStill", "SteamTank")) {
             ClassNode menu = read("gui/" + name + "GUI");
@@ -23,17 +23,43 @@ public class DedicatedSideContractTest {
                     .toList();
             assertFalse("Expected at least the decoration override: " + name, clientSignatures.isEmpty());
             for (var method : clientSignatures) {
-                assertTrue(name + "#" + method.name + " leaks a client class on the server",
+                assertFalse(name + "#" + method.name + " must not rely on unsupported mod-side stripping",
                         clientOnly(method.visibleAnnotations) || clientOnly(method.invisibleAnnotations));
             }
         }
     }
 
-    @Test public void renderingHelpersAndRegistrationAreEntirelyClientOnly() throws Exception {
+    @Test public void renderingHelpersRemainBehindTheActualClientDistributionGuard() throws Exception {
         for (String name : List.of("gui/GUIHelper", "graphics/ClientRegistration", "graphics/DrillBitRenderer")) {
             ClassNode node = read(name);
-            assertTrue(name, clientOnly(node.visibleAnnotations) || clientOnly(node.invisibleAnnotations));
+            assertFalse(name, clientOnly(node.visibleAnnotations) || clientOnly(node.invisibleAnnotations));
         }
+        var constructor = read("SteamAdvantage").methods.stream()
+                .filter(method -> method.name.equals("<init>")).findFirst().orElseThrow();
+        var instructions = java.util.Arrays.asList(constructor.instructions.toArray());
+        int call = -1;
+        int guard = -1;
+        boolean literalClient = false;
+        for (int index = 0; index < instructions.size(); index++) {
+            var instruction = instructions.get(index);
+            if (instruction instanceof org.objectweb.asm.tree.FieldInsnNode field) {
+                if (field.owner.equals("net/minecraftforge/fml/loading/FMLEnvironment") && field.name.equals("dist"))
+                    guard = index;
+                if (field.owner.equals("net/minecraftforge/api/distmarker/Dist") && field.name.equals("CLIENT"))
+                    literalClient = true;
+            }
+            if (instruction instanceof org.objectweb.asm.tree.MethodInsnNode method
+                    && method.owner.equals("zone/moddev/mc/basesteam/graphics/ClientRegistration")
+                    && method.name.equals("register")) call = index;
+        }
+        assertTrue("Client registration must follow the native distribution read", guard >= 0 && guard < call && literalClient);
+        boolean guarded = false;
+        for (int index = guard + 1; index < call; index++) {
+            if (instructions.get(index) instanceof org.objectweb.asm.tree.JumpInsnNode jump
+                    && jump.getOpcode() == org.objectweb.asm.Opcodes.IF_ACMPNE
+                    && instructions.indexOf(jump.label) > call) guarded = true;
+        }
+        assertTrue("The non-client branch must skip the renderer registration call", guarded);
     }
 
     private static boolean clientOnly(List<AnnotationNode> annotations) {
@@ -46,7 +72,7 @@ public class DedicatedSideContractTest {
         try (InputStream input = DedicatedSideContractTest.class.getResourceAsStream(ROOT + path + ".class")) {
             assertNotNull(path, input);
             ClassNode node = new ClassNode();
-            new ClassReader(input).accept(node, ClassReader.SKIP_CODE);
+            new ClassReader(input).accept(node, 0);
             return node;
         }
     }

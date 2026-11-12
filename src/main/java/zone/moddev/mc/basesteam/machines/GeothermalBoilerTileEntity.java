@@ -78,7 +78,7 @@ public class GeothermalBoilerTileEntity extends cyano.poweradvantage.api.simple.
 			if(!redstone && tank.getFluidAmount() > 0 && temperature >= ACTIVATION_TEMPERATURE){
 				boilWater();
 				// play steam sounds occasionally
-				if(getLevel().random.nextInt(100) == 0){
+				if(getLevel().getRandom().nextInt(100) == 0){
 					playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 				}
 				if(timeSinceSound > 200){

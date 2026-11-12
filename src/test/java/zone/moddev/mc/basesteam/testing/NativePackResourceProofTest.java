@@ -15,6 +15,9 @@ public class NativePackResourceProofTest {
         assertEquals("dumb", child.get("term").getAsString());
         assertFalse("The child must not attach a console", child.get("consoleAttached").getAsBoolean());
         assertFalse("JLine must not construct a terminal", child.get("terminalCreated").getAsBoolean());
+        for (String name : java.util.List.of("JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS")) {
+            assertTrue(name, child.getAsJsonObject("jvmOptionEnvironment").get(name).isJsonNull());
+        }
         assertEquals(0, proof.getAsJsonArray("warningsAndErrors").size());
         for (PackType type : PackType.values()) {
             assertTrue(type.toString(), proof.getAsJsonObject(type.name()).get("resourcesVerified").getAsInt() > 0);

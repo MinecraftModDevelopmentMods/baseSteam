@@ -1,13 +1,10 @@
 package zone.moddev.mc.basesteam.graphics;
 
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.bus.BusGroup;
 import zone.moddev.mc.basesteam.init.Entities;
 
 /** Client-only renderer registration. */
-@OnlyIn(Dist.CLIENT)
 public final class ClientRegistration {
     private ClientRegistration() {}
 

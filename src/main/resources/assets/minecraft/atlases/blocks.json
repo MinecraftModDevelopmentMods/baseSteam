@@ -1,8 +1,100 @@
 {
   "sources": [
     {
-      "type": "single",
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/coal_boiler_front"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/electric_boiler_back"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/electric_boiler_front"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/geothermal_boiler_side"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/geothermal_boiler_top"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/oil_tank_end"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/platform_top"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/rock_crusher_front"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/rock_crusher_top"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_drill_bottom"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_drill_top"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_elevator_side"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_furnace_front"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_furnace_top"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_pipe"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_pump_front"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_pump_side"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_switch_off"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:blocks/steam_switch_on"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "basesteam:entity/drill_bit"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:materials/bolted_copper"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:materials/bolted_iron"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:materials/iron"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:materials/steel_dark_hole"
     }
   ]
 }

@@ -27,8 +27,11 @@ public class NativeRegistrationLifecycleTest {
                 .anyMatch(call -> call.owner.startsWith("net/minecraftforge/registries/")));
         assertFalse(calls("init/Blocks", "registerBlockItems").stream().anyMatch(call -> initializes(call, "Blocks")));
         assertFalse(calls("init/Items", "init").stream().anyMatch(call -> initializes(call, "Blocks")));
-        assertFalse(calls("init/Recipes", "init").stream()
-                .anyMatch(call -> initializes(call, "Blocks") || initializes(call, "Items")));
+        assertFalse(calls("SteamAdvantage", "commonSetup").stream()
+                .anyMatch(call -> initializes(call, "Blocks") || initializes(call, "Items")
+                        || call.owner.equals(INIT + "Recipes")));
+        assertNull("The discarded pre-component recipe bridge must not be packaged",
+                NativeRegistrationLifecycleTest.class.getResource("/" + INIT + "Recipes.class"));
     }
 
     @Test public void commonSetupQueuesGuiDefinitions() throws Exception {

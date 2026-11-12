@@ -68,7 +68,7 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 				burnTime--;
 				boilWater();
 				// play steam sounds occasionally
-				if(getLevel().random.nextInt(100) == 0){
+				if(getLevel().getRandom().nextInt(100) == 0){
 					playSoundAtTileEntity( SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 				}
 				if(timeSinceSound > 200){

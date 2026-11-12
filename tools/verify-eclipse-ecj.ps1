@@ -1,11 +1,16 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$RunId,
-    [string]$JavaExe = "$env:USERPROFILE/.jdks/temurin-21.0.7+6/bin/java.exe",
+    [string]$JavaExe = "$env:USERPROFILE/.jdks/jdk-25.0.3+9/bin/java.exe",
     [string]$CompilerJar = "$env:USERPROFILE/.p2/pool/plugins/org.eclipse.jdt.core.compiler.batch_3.46.0.v20260528-0407.jar"
 )
 
 $ErrorActionPreference = 'Stop'
+$jvmEnvironment = [ordered]@{}
+foreach ($name in @('JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS', '_JAVA_OPTIONS')) {
+    $jvmEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+    if ($null -ne $jvmEnvironment[$name]) { throw "ECJ qualification must not inherit $name" }
+}
 $project = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $java = (Resolve-Path -LiteralPath $JavaExe).Path
 $compiler = (Resolve-Path -LiteralPath $CompilerJar).Path
@@ -14,7 +19,7 @@ if ($compilerHash -cne 'D0D43F8E2D7003E5EFED612E2CBB5F01870043397D8F1BBE536FD912
     throw 'The installed Eclipse ECJ 3.46.0 compiler does not match the qualified tool.'
 }
 $version = (& $java -version 2>&1 | Out-String).Trim()
-if ($LASTEXITCODE -ne 0 -or $version -notmatch 'Temurin-21\.0\.7\+6') { throw "Unexpected JVM: $version" }
+if ($LASTEXITCODE -ne 0 -or $version -notmatch 'Temurin-25\.0\.3\+9') { throw "Unexpected JVM: $version" }
 $pins = Get-Content -Raw -LiteralPath (Join-Path $project 'gradle.properties') | ConvertFrom-StringData
 [xml]$classpath = Get-Content -Raw -LiteralPath (Join-Path $project '.classpath')
 $entries = @($classpath.classpath.classpathentry)
@@ -25,6 +30,9 @@ $receipt = [ordered]@{
     status = 'FAILED'
     commit = (& git -C $project rev-parse HEAD)
     java = $version
+    jvmOptionEnvironment = $jvmEnvironment
+    compilerJvmArguments = @('-XX:ActiveProcessorCount=4', '-Xmx1G')
+    unitJvmArguments = @('-XX:ActiveProcessorCount=4', '-Xmx1536m')
     compiler = @{ path = $compiler; sha256 = $compilerHash }
     classpathSha256 = (Get-FileHash -LiteralPath (Join-Path $project '.classpath') -Algorithm SHA256).Hash
     powerSource = $pins.poweradvantage_source_ref
@@ -65,7 +73,7 @@ try {
         $output = Join-Path $run $scope
         New-Item -ItemType Directory -Path $output | Out-Null
         if ($scope -ne 'main') { $libraries = @((Join-Path $run 'main')) + $libraries }
-        $arguments = @('-21', '-proc:none', '-encoding', 'UTF-8', '-classpath', ('"' + ($libraries -join ';') + '"'),
+        $arguments = @('-25', '-proc:none', '-encoding', 'UTF-8', '-classpath', ('"' + ($libraries -join ';') + '"'),
                 '-d', ('"' + $output + '"')) + @($sources | ForEach-Object { '"' + $_ + '"' })
         $argumentFile = Join-Path $run "$scope.args"
         $arguments | Set-Content -LiteralPath $argumentFile -Encoding utf8
@@ -85,18 +93,60 @@ try {
     }
     $runtime = @((Join-Path $run 'test'), (Join-Path $run 'main'), (Join-Path $project 'build/resources/main'))
     $runtime += @($receipt.scopes.test.libraries | Where-Object { $_ -ne (Join-Path $run 'main') })
-    $tests = @($receipt.scopes.test.sources | Where-Object { $_.path -like '*Test.java' } | ForEach-Object {
-        $source = Get-Content -Raw -LiteralPath $_.path
-        if ($source -notmatch '(?m)^\s*package\s+([\w.]+)\s*;') { throw "Missing package in $($_.path)" }
-        $Matches[1] + '.' + [IO.Path]::GetFileNameWithoutExtension($_.path)
+    $results = Join-Path $project 'build/test-results/test'
+    $xml = @(Get-ChildItem -LiteralPath $results -Filter TEST-*.xml | Sort-Object Name)
+    if ($xml.Count -lt 2) { throw 'A complete Gradle XML inventory is required before independent ECJ qualification' }
+    $receipt.gradleResults = @($xml | ForEach-Object {
+        @{ path = $_.FullName; sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash }
     })
+    $inventory = Join-Path $run 'complete-inventory.json'
+    $inventoryMain = 'zone.moddev.mc.basesteam.testing.EclipseTestInventory'
+    & $java -XX:ActiveProcessorCount=4 -cp ($runtime -join ';') $inventoryMain (Join-Path $run 'test') $results $inventory `
+            *> (Join-Path $run 'complete-inventory.log')
+    if ($LASTEXITCODE -ne 0) { throw "Compiled JUnit inventory differs from complete Gradle results; see $run/complete-inventory.log" }
+    $receipt.inventory = Get-Content -Raw -LiteralPath $inventory | ConvertFrom-Json
+    $tests = @($receipt.inventory.suites.PSObject.Properties.Name | Sort-Object)
+    $receipt.inventoryNegativeControls = @()
+    foreach ($negative in @('omitted-suite', 'omitted-method', 'stale-method')) {
+        $negativeResults = Join-Path $run $negative
+        New-Item -ItemType Directory -Path $negativeResults | Out-Null
+        $xml | Copy-Item -Destination $negativeResults
+        $first = Join-Path $negativeResults $xml[0].Name
+        if ($negative -eq 'omitted-suite') {
+            Remove-Item -LiteralPath $first
+        } else {
+            [xml]$document = Get-Content -Raw -LiteralPath $first
+            $method = @($document.testsuite.testcase)[0]
+            if ($negative -eq 'omitted-method') {
+                $null = $document.testsuite.RemoveChild($method)
+                $document.testsuite.SetAttribute('tests', ([int]$document.testsuite.tests - 1).ToString())
+            } else {
+                $method.SetAttribute('name', 'staleInventoryNegativeControl')
+            }
+            $document.Save($first)
+        }
+        & $java -XX:ActiveProcessorCount=4 -cp ($runtime -join ';') $inventoryMain (Join-Path $run 'test') $negativeResults `
+                (Join-Path $run "$negative.json") *> (Join-Path $run "$negative.log")
+        if ($LASTEXITCODE -eq 0 -or (Get-Content -Raw -LiteralPath (Join-Path $run "$negative.log")) -notmatch
+                'Incomplete or stale Gradle inventory|Duplicate or inconsistent Gradle suite') {
+            throw "ECJ inventory accepted or failed for the wrong reason: $negative"
+        }
+        $receipt.inventoryNegativeControls += $negative
+    }
     $unitReceipt = Join-Path $run 'junit.json'
-    & $java -XX:ActiveProcessorCount=4 -Xmx1536m "-javaagent:$bootstrap" --add-opens java.base/java.lang.invoke=ALL-UNNAMED `
+    $powerJar = @($receipt.scopes.test.libraries | Where-Object { [IO.Path]::GetFileName($_) -like 'basePower-*.jar' })
+    if ($powerJar.Count -ne 1) { throw 'ECJ unit runtime must retain exactly one audited native Power jar' }
+    & $java -XX:ActiveProcessorCount=4 -Xmx1536m "-javaagent:$bootstrap" "-Dbasesteam.nativePowerJar=$($powerJar[0])" --add-opens java.base/java.lang.invoke=ALL-UNNAMED `
             -cp ($runtime -join ';') zone.moddev.mc.basesteam.testing.EclipseUnitLauncher $unitReceipt @tests `
             *> (Join-Path $run 'junit.log')
     $receipt.unitExitCode = $LASTEXITCODE
     if ($LASTEXITCODE -ne 0) { throw "ECJ-compiled JUnit failed; see $run/junit.log" }
     $receipt.unit = Get-Content -Raw -LiteralPath $unitReceipt | ConvertFrom-Json
+    if ($receipt.unit.tests -ne $receipt.inventory.tests -or $receipt.unit.ignored -ne 0 -or
+            $receipt.unit.assumptions -ne 0 -or $receipt.unit.failures -ne 0 -or
+            (@($receipt.unit.classes | Sort-Object) -join ',') -cne ($tests -join ',')) {
+        throw 'ECJ JUnit execution did not match the complete compiled test inventory'
+    }
     $receipt.status = 'ECJ_ALL_SCOPES_AND_UNIT_PASS'
     Write-Output "$($receipt.status): $run"
 } finally {

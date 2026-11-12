@@ -70,7 +70,7 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 				burnTime--;
 				boilWater();
 				// play steam sounds occasionally
-				if(getLevel().random.nextInt(100) == 0){
+				if(getLevel().getRandom().nextInt(100) == 0){
 					playSoundAtTileEntity(SoundEvents.FIRE_EXTINGUISH, SoundSource.AMBIENT, 0.5f, 1f, this);
 				}
 				if(timeSinceSound > 200){
@@ -118,7 +118,8 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	private void decrementFuel() {
 		if(inventory[0].getCount() == 1){
-			inventory[0] = inventory[0].getCraftingRemainder();
+			var remainder = inventory[0].getCraftingRemainder();
+			inventory[0] = remainder == null ? ItemStack.EMPTY : remainder.create();
 		} else {
 			this.removeItem(0, 1);
 		}

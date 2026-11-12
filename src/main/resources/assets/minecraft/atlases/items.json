@@ -1,5 +1,16 @@
 {
   "sources": [
-    { "type": "directory", "source": "items", "prefix": "items/" }
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:items/blackpowder_cartridge"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:items/steam_drill_bit"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "basesteam:items/steam_governor"
+    }
   ]
 }

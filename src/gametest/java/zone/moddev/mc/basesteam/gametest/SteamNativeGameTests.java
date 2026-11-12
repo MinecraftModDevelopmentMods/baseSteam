@@ -120,6 +120,16 @@ public final class SteamNativeGameTests {
 
     @GameTest(structure = "basesteam:basesteam_empty")
     public static void nativeResourcesLoadWithExpectedIds(GameTestHelper helper) {
+        var jvmArguments = java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments();
+        for (String name : java.util.List.of("JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS")) {
+            helper.assertTrue(System.getenv(name) == null, "Native JVM inherited " + name);
+        }
+        helper.assertTrue(jvmArguments.contains("-XX:ActiveProcessorCount=4")
+                        && jvmArguments.contains("-Xmx1536m") && Runtime.getRuntime().availableProcessors() == 4
+                        && Runtime.getRuntime().maxMemory() <= 1536L * 1024 * 1024,
+                "Native JVM did not retain explicit CPU/heap caps: " + jvmArguments);
+        com.mojang.logging.LogUtils.getLogger().info(
+                "BASESTEAM_NATIVE_JVM_PASS inheritedOptions=absent processorCap=4 heapCapMiB=1536 args={}", jvmArguments);
         var level = helper.getLevel();
         var registries = level.registryAccess();
         var nativeEnchantments = registries.lookupOrThrow(Registries.ENCHANTMENT);
@@ -173,13 +183,61 @@ public final class SteamNativeGameTests {
         var brass = net.minecraft.tags.ItemTags.create(Identifier.fromNamespaceAndPath("forge", "ingots/brass"));
         if (registries.lookupOrThrow(Registries.ITEM).get(brass).filter(tag -> tag.size() > 0).isPresent()) {
             var recipe = (net.minecraft.world.item.crafting.ShapedRecipe)pipe.orElseThrow().value();
-            var result = recipe.assemble(net.minecraft.world.item.crafting.CraftingInput.EMPTY, registries);
+            var result = recipe.assemble(net.minecraft.world.item.crafting.CraftingInput.EMPTY);
             helper.assertTrue(result.is(Blocks.steam_pipe.asItem()) && result.getCount() == 6,
                     "Wrong Steam pipe recipe output");
         } else {
             helper.assertTrue(pipe.isEmpty(), "Recipe must not load with an empty brass tag");
         }
+        NativeVillagerTradeProof.verify(helper);
+        assertSalvageRecipes(helper);
         helper.succeed();
+    }
+
+    private static void assertSalvageRecipes(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var registries = level.registryAccess();
+        var ops = registries.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
+        var mode = zone.moddev.mc.basepower.PowerAdvantage.recipeMode;
+        boolean enabled = mode == zone.moddev.mc.basepower.RecipeMode.APOCALYPTIC;
+        String[] inputs = {"steam_boiler_coal", "steam_boiler_electric", "steam_boiler_geothermal",
+                "steam_crusher", "steam_drill", "steam_elevator", "steam_furnace", "steam_governor", "steam_tank"};
+        for (String input : inputs) {
+            var loaded = level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, id("crushing_" + input)));
+            if (!enabled) {
+                helper.assertTrue(loaded.isEmpty(), "Salvage recipe loaded outside APOCALYPTIC mode: " + input);
+                continue;
+            }
+            var actual = loaded.orElseThrow().value();
+            helper.assertTrue(actual instanceof zone.moddev.mc.basemetals.recipe.CrushingRecipe,
+                    "Missing native crushing serializer: " + input);
+            var encoded = net.minecraft.world.item.crafting.Recipe.CODEC.encodeStart(ops, actual).getOrThrow();
+            var parsed = net.minecraft.world.item.crafting.Recipe.CODEC.parse(ops, encoded).getOrThrow();
+            helper.assertTrue(parsed instanceof zone.moddev.mc.basemetals.recipe.CrushingRecipe,
+                    "Native salvage recipe codec did not round-trip: " + input);
+            var inputItem = registries.lookupOrThrow(Registries.ITEM)
+                    .getOrThrow(ResourceKey.create(Registries.ITEM, id(input))).value();
+            var inventory = new net.minecraft.world.item.crafting.SingleRecipeInput(new ItemStack(inputItem));
+            Identifier expectedId = input.equals("steam_governor")
+                    ? Identifier.fromNamespaceAndPath("basepower", "sprocket") : id("steam_governor");
+            var expectedItem = registries.lookupOrThrow(Registries.ITEM)
+                    .getOrThrow(ResourceKey.create(Registries.ITEM, expectedId)).value();
+            int count = input.equals("steam_tank") ? 1 : input.equals("steam_elevator") ? 3 : 2;
+            for (var recipe : java.util.List.of((zone.moddev.mc.basemetals.recipe.CrushingRecipe)actual,
+                    (zone.moddev.mc.basemetals.recipe.CrushingRecipe)parsed)) {
+                helper.assertTrue(recipe.matches(inventory, level), "Native salvage input did not match: " + input);
+                helper.assertTrue(!recipe.matches(new net.minecraft.world.item.crafting.SingleRecipeInput(
+                        new ItemStack(net.minecraft.world.item.Items.DIAMOND)), level), "Unrelated salvage input matched: " + input);
+                ItemStack result = recipe.assemble(inventory);
+                helper.assertTrue(result.is(expectedItem) && result.getCount() == count,
+                        "Salvage output identity or exact quantity changed: " + input);
+            }
+            helper.assertTrue(inventory.item().is(inputItem) && inventory.item().getCount() == 1,
+                    "Salvage matching/assembly mutated the supplied input: " + input);
+        }
+        com.mojang.logging.LogUtils.getLogger().info(
+                "BASESTEAM_NATIVE_SALVAGE_PASS mode={} present={} absent={} nativeCodecs={} inputNegatives={}",
+                mode, enabled ? 9 : 0, enabled ? 0 : 9, enabled ? 9 : 0, enabled ? 9 : 0);
     }
 
     private static Identifier id(String path) {

@@ -28,6 +28,11 @@ public final class NativeTestBootstrap {
         return RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     }
 
+    public static void bindRegisteredItemComponents() {
+        BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(net.minecraft.data.registries.VanillaRegistries.createLookup())
+                .forEach(net.minecraft.core.component.DataComponentInitializers.PendingComponents::apply);
+    }
+
     public static synchronized void registerVanillaFluidTypes() throws ReflectiveOperationException {
         start();
         if (ForgeMod.LAVA_TYPE.isPresent()) return;
