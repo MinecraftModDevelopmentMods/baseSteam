@@ -13,7 +13,10 @@ If CurseForge has accepted the file but it isn't public yet, wait for approval.
 Start a new run with the recorded CurseForge file ID so it verifies that upload
 without submitting the jar again. The release workflow sets Java 8 through
 Minecraft 1.16.5, Java 16 for Minecraft 1.17.1, and Java 17 for Minecraft 1.18.2
-through 1.20.1, and Java 21 for Minecraft 1.20.6 and 1.21.1.
+through 1.20.1, and Java 21 for Minecraft 1.20.6, 1.21.1 and 1.21.11.
+
+The GitHub release targets the exact version-branch source recorded in
+`releases.json`, not the publication workflow's default branch.
 
 Before publishing, check that basePower and Base Metals have public files
 before publishing. Use the release's required dependency relations on CurseForge.
