@@ -61,5 +61,5 @@ for (const mutate of controls) {
   mutate(data);
   assert.throws(() => validate(data.trades, data.tags), assert.AssertionError);
 }
-console.log(`BASESTEAM_NATIVE2612_TRADE_DATA_PASS definitions=5 placements=10 negativeControls=${controls.length}`);
+console.log(`BASESTEAM_NATIVE262_TRADE_DATA_PASS definitions=5 placements=10 negativeControls=${controls.length}`);
 console.log('Exact data contract only; native codec and generated-offer runtime checks remain separate.');

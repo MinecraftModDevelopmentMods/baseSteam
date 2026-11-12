@@ -69,18 +69,20 @@ public class GUIHelperTest {
         }
         var method = node.methods.stream().filter(value -> value.name.equals("drawNeedle")
                 && value.desc.equals("(FFFF)V")).findFirst().orElseThrow();
-        boolean currentScreen = false, delegate = false;
+        boolean gui = false, currentScreen = false, delegate = false;
         for (var instruction : method.instructions) {
             if (instruction instanceof org.objectweb.asm.tree.FieldInsnNode field) {
-                if (field.owner.equals("net/minecraft/client/Minecraft") && field.name.equals("screen")) currentScreen = true;
+                if (field.owner.equals("net/minecraft/client/Minecraft") && field.name.equals("gui")) gui = true;
             }
             if (instruction instanceof org.objectweb.asm.tree.MethodInsnNode call) {
                 assertFalse(call.owner, call.owner.startsWith("com/mojang/blaze3d/"));
+                if (call.owner.equals("net/minecraft/client/gui/Gui") && call.name.equals("screen")
+                        && call.desc.equals("()Lnet/minecraft/client/gui/screens/Screen;")) currentScreen = true;
                 if (call.owner.equals(node.name) && call.name.equals("drawNeedle")
                         && call.desc.equals("(Lcyano/poweradvantage/api/simple/SimpleMachineGUI$GUIContainer;FFFF)V")) delegate = true;
             }
         }
-        assertTrue(currentScreen && delegate);
+        assertTrue(gui && currentScreen && delegate);
     }
 
     private static final class DrawingContainer extends GUIContainer {

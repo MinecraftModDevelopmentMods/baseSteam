@@ -46,9 +46,9 @@ public class NativeRequiredDependencyContractTest {
         assertTrue("Base Metals is REQUIRED, not an optional installation scope", dependency.isMandatory());
         assertEquals(IModInfo.Ordering.AFTER, dependency.getOrdering());
         assertEquals(IModInfo.DependencySide.BOTH, dependency.getSide());
-        assertEquals("[3.1.2.2601021,4.0.0)", dependency.getVersionRange().toString());
-        assertTrue(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.2.2601021")));
-        assertFalse(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.1.2601021")));
+        assertEquals("[3.1.2.2602001,4.0.0)", dependency.getVersionRange().toString());
+        assertTrue(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.2.2602001")));
+        assertFalse(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.1.2602001")));
         assertFalse(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("4.0.0")));
     }
 
@@ -83,11 +83,11 @@ public class NativeRequiredDependencyContractTest {
     private static String fixture(String dependency) {
         return """
                 modLoader="javafml"
-                loaderVersion="[64,65)"
+                loaderVersion="[65,66)"
                 license="GPL-3.0-only"
                 [[mods]]
                 modId="basesteam"
-                version="2.2.17.2601021"
+                version="2.2.18.2602001"
                 displayName="baseSteam"
                 """ + dependency;
     }
@@ -97,7 +97,7 @@ public class NativeRequiredDependencyContractTest {
                 [[dependencies.basesteam]]
                 modId="basemetals"
                 mandatory=%s
-                versionRange="[3.1.2.2601021,4.0.0)"
+                versionRange="[3.1.2.2602001,4.0.0)"
                 ordering="AFTER"
                 side="BOTH"
                 """.formatted(required);

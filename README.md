@@ -1,94 +1,54 @@
 # baseSteam
 
-**Minecraft 26.1.2 (Forge), baseSteam 2.2.17.2601021. Accepted for release.**
+**Minecraft 26.2 Forge, version 2.2.18.2602001. Local build candidate.**
 
-The frozen profile12 family has completed automated qualification and manual
-testing. See the
-[family qualification record](../../PowerAdvantage/docs/26.1.2/QUALIFICATION.md)
-for the exact tested jars, completed checks and scope limits. Manual acceptance
-is complete. Publication is being prepared; this version is not public yet.
+baseSteam continues DrCyano's Steam Advantage and uses basePower's shared
+API, machines and creative tab. Existing `basesteam` registry and saved-data
+identities are retained.
 
-baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
-and a blackpowder musket to basePower. Items and blocks share the basePower
-creative tab. The mod ID and resource namespace remain `basesteam`.
+This port targets Forge **65.1.0**, official Minecraft **26.2** names,
+MCP **20260616.103818**, Java **25.0.3+9**, ForgeGradle **7.0.34** and the
+checksum-pinned Gradle **9.6.1** wrapper. Native pack formats are data
+**107.1** and client **88.0**.
 
 ## Build
 
-Target: Forge 64.1.5, official Minecraft 26.1.2 names and MCP
-20260409.101008, with reobf=false. ForgeGradle 7.0.34 and the checksum-pinned
-Gradle 9.6.1 wrapper use Temurin 25.0.3+9. The compiler, Minecraft,
-Mavenizer and Slime launcher also use that Java 25 toolchain.
-
-This port requires the coordinated local basePower 2.4.16.2601021 and
-Base Metals 3.1.2.2601021 hook, plus released OreSpawn 4.1.1.2601021.
-They remain separate Forge jars on both client and server, not bundled copies.
+The coordinated local dependency versions are basePower **2.4.17.2602001**
+and Base Metals **3.1.2.2602001**. The Base Metals hook source is
+`523335a59ecff399e40a7c66eb121a3aabdc45ba`, player SHA-256
+`15CBD0C8DD95BBA846969929B8767887BA4B8152DFB10C9C58FB314AD39FB9E1`.
 Base Metals is REQUIRED on both client and server, not an optional integration.
-The default build paths use the coordinated 26.1.2 checkouts. The current local
-inputs are Power source d0bd0bdb/player 23ABCC1F, Base Metals source 331fa469/player
-678623 and OreSpawn 810284EC (CurseForge 9572926). Exact source, jar and fixture08 bootstrap pins are in
-gradle.properties. The coordinated Advantage and Base Metals builds remain
-local inputs, not published releases. No 1.21.11 dependency is substituted.
+The approved local Power262 handoff is source
+`f84b2362449e39eff5e76696dd64ce4cb144da4f`, player SHA-256
+`7E456DE1A45140E86415A701D186FEDE08C4AB63D53C6B7848935DB70CBC68B1`.
 
-The accepted qualification uses the exact local Power and Base Metals pins.
-They will be replaced with verified public source and file pins after those
-dependencies are released. Publication follows Power, then Steam, then Electric;
-local acceptance does not stand in for merged-source CI or public downloads.
-The new clean release suite and fresh ECJ each pass 276 tests; independent
-warm and empty-cache builds in paths with spaces reproduce all three archives.
-These are child build gates, not combined-family or manual acceptance.
+OreSpawn **4.1.1.2602001** is the approved local retained-settings repair,
+source `dcaaa933299dd8b1ebc73e31c9e5acd36dd7957c`, SHA-256
+`BC0658DF2E149CC23E65E5771F3FF62E2BB13FFDA4E316AB632EB92EF7FA5A1F`.
+It is not published; the public file-ID pin is deliberately empty. The older
+4.1.0 public download is not substituted for these bytes.
 
-The released 1.21.11 baseline and its receipts remain separate historical
-evidence. Native 26.1.2
-metadata declares server data format 101.1 and client format 84.0; the hidden
-client resource aggregate remains Forge's responsibility. The current kit's
-native reader, machine, migration, side-loading and GUI results are recorded in
-the family qualification record. Its original automated and manual-only scope
-labels remain historical; manual acceptance was confirmed afterward.
+The Mavenizer fixture and its source-rule, patch, licence and provenance files
+are checksum-sealed from the existing OS262 checkout. The established
+`-Pforge64MavenizerJar` property remains a path alias; it selects the Forge65
+fixture here. Dependencies stay separate mods and must match the source and
+artifact pins in `gradle.properties`.
 
-The sealed BB0D Mavenizer fixture comes from OreSpawn's OS2612 checkout. Another
-layout can use `-Pforge64MavenizerJar=<path>`. The `*DeobfJar` and `*PlayerJar`
-properties select separate development and packaged inputs; both must
-satisfy the committed checksums.
-
-After the coordinated native dependency pins are available locally:
-
-```powershell
-$env:JAVA_HOME = "$env:USERPROFILE/.jdks/jdk-25.0.3+9"
-$env:GRADLE_USER_HOME = 'D:/GradleCaches/basesteam-2612-port'
-$toolchains = @("-Porg.gradle.java.installations.paths=$env:JAVA_HOME",
-  '-Porg.gradle.java.installations.auto-detect=false',
-  '-Porg.gradle.java.installations.auto-download=false')
-./gradlew.bat @toolchains check build deobfJar verifyReleaseArtifacts writeReleaseChecksums
-./gradlew.bat @toolchains verifyEclipseProductionClasspath
-./gradlew.bat @toolchains -PsteamGameTestRunId=candidate verifyPlayerDependencies runGameTestServer
-./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_2612_SERVER_INSTALL -RunId candidate-with-metals -UseNioTransport -Reopen
-```
-
-For a checkout outside the sibling-folder layout, unit tests also need the
-verified Power test bootstrap and its three source files. Build Power first,
-then supply these paths as well as the dependency-jar overrides:
+Use Temurin 25 and clear `JAVA_TOOL_OPTIONS`, `JDK_JAVA_OPTIONS` and
+`_JAVA_OPTIONS` before qualification. The prepared sibling layout is the
+default; explicit `*DeobfJar` and `*PlayerJar` flags change
+paths, not the required bytes. With these exact coordinated inputs:
 
 ```text
--PforgeCapabilityBootstrapJar=<Power checkout>/build/unit-bootstrap/forge-native-unit-bootstrap.jar
--PforgeCapabilityBootstrapSource=<Power checkout>/test-rig/unit-bootstrap/ForgeCapabilityBootstrap.java
--PforgeUnitRegistriesSource=<Power checkout>/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/ForgeUnitRegistries.java
--Pforge64UnitLoaderSource=<Power checkout>/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/Forge64UnitLoader.java
+./gradlew clean check build javadoc verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums --no-build-cache --no-daemon
+./gradlew verifyEclipseProductionClasspath --no-daemon
+node tools/verify-native-port.js
+node tools/generate-recipe-unlocks.js --check
 ```
 
-The atlas test uses the same verified Power jar selected for compilation;
-it does not look for a second copy in a fixed local folder. Missing or
-changed inputs fail the checks. The previous candidate09 passed 276 unit
-tests and a fresh independent ECJ run of the same complete inventory. The
-scoped runtime and reproducibility results are in the port status below;
-they do not imply family or manual acceptance. Native resource tests disable interactive terminal setup in their
-child process, while keeping warnings and errors fatal.
-Keep Java option environment variables unset
-when running the packaged family rig; it records its own runtime arguments.
-
-Independent source checks: `node tools/verify-native-port.js` and
-`node tools/generate-recipe-unlocks.js --check`.
-Hosted CI and CodeQL verify merged dependency sources and checksum-matching
-public downloads before compiling.
+See [26.2 port status](docs/PORT262-STATUS.md). The accepted 26.1.2 family
+qualification remains historical proof of those original bytes, not this port.
+There is no 26.2 manual acceptance, hosted qualification or publication yet.
 
 ## Old Worlds
 
@@ -105,7 +65,7 @@ check machines, restarts, redstone, all drill directions, elevators,
 GUI captions, whole fluid gauges, track transparency and musket effects
 in-game. Release acceptance does not turn the remaining manual checks into
 automated passes or qualify every modpack.
-See the [26.1.2 port status](docs/PORT2612-STATUS.md). The
+The [26.1.2 port status](docs/PORT2612-STATUS.md) is historical. The
 [1.21.11 notes](docs/PORT12111-STATUS.md) and the
 [1.21.1 notes](docs/PORT1211-STATUS.md) describe the accepted source baseline,
 not qualification of this port.

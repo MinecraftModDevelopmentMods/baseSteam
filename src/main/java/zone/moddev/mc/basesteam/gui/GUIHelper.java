@@ -44,7 +44,7 @@ public abstract class GUIHelper {
 	@Deprecated
 	public static void drawNeedle(float pivotX, float pivotY, float zLevel,
 			float value) {
-		drawNeedle(drawingContainer(net.minecraft.client.Minecraft.getInstance().screen), pivotX, pivotY, zLevel, value);
+		drawNeedle(drawingContainer(net.minecraft.client.Minecraft.getInstance().gui.screen()), pivotX, pivotY, zLevel, value);
 	}
 
 	static GUIContainer drawingContainer(net.minecraft.client.gui.screens.Screen screen) {

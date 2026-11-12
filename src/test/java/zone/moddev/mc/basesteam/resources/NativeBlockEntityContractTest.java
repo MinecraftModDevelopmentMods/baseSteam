@@ -59,7 +59,7 @@ public class NativeBlockEntityContractTest {
         try {
             Entities.DRILLBIT = new BlockEntityType<>(DrillBitTileEntity::new, java.util.Set.of(block));
             assertNotNull(block.getTicker(null, block.defaultBlockState(), Entities.DRILLBIT));
-            assertNull(block.getTicker(null, block.defaultBlockState(), BlockEntityType.FURNACE));
+            assertNull(block.getTicker(null, block.defaultBlockState(), net.minecraft.world.level.block.entity.BlockEntityTypes.FURNACE));
             DrillBitTileEntity tile = new DrillBitTileEntity(new BlockPos(17, 80, 31), block.defaultBlockState());
             block.getTicker(null, block.defaultBlockState(), Entities.DRILLBIT)
                     .tick(null, tile.getBlockPos(), tile.getBlockState(), tile);
