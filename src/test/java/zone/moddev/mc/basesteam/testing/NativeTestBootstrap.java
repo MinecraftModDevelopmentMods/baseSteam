@@ -29,7 +29,9 @@ public final class NativeTestBootstrap {
     }
 
     public static void bindRegisteredItemComponents() {
-        BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(net.minecraft.data.registries.VanillaRegistries.createLookup())
+        var world = net.minecraft.data.registries.VanillaRegistries.createWorldLookup();
+        var registries = net.minecraft.data.registries.VanillaRegistries.createReloadableLookup(world);
+        BuiltInRegistries.DATA_COMPONENT_INITIALIZERS.build(registries)
                 .forEach(net.minecraft.core.component.DataComponentInitializers.PendingComponents::apply);
     }
 
@@ -52,6 +54,7 @@ public final class NativeTestBootstrap {
 
     public static synchronized void registerCraftingSerializers() throws ReflectiveOperationException {
         start();
+        registerHolderSetTypes();
         if (ForgeRegistries.INGREDIENT_SERIALIZERS.get() == null)
             createForgeRegistry(ForgeRegistries.Keys.INGREDIENT_SERIALIZERS);
         var field = ForgeMod.class.getDeclaredField("INGREDIENT_SERIALIZERS");
@@ -62,6 +65,22 @@ public final class NativeTestBootstrap {
         event.setAccessible(true);
         invokeRegistryPhase(register, "handleEvent", event.newInstance(
                 ForgeRegistries.Keys.INGREDIENT_SERIALIZERS, ForgeRegistries.INGREDIENT_SERIALIZERS.get(), null));
+    }
+
+    public static synchronized void registerHolderSetTypes() throws ReflectiveOperationException {
+        start();
+        if (ForgeRegistries.HOLDER_SET_TYPES.get() == null)
+            createForgeRegistry(ForgeRegistries.Keys.HOLDER_SET_TYPES);
+        var field = ForgeMod.class.getDeclaredField("HOLDER_SET_TYPES");
+        field.setAccessible(true);
+        var register = (DeferredRegister<?>)field.get(null);
+        if (register.getEntries().stream().allMatch(net.minecraftforge.registries.RegistryObject::isPresent)) return;
+        var event = RegisterEvent.class.getDeclaredConstructor(ResourceKey.class, ForgeRegistry.class, Registry.class);
+        event.setAccessible(true);
+        invokeRegistryPhase(register, "handleEvent", event.newInstance(
+                ForgeRegistries.Keys.HOLDER_SET_TYPES, ForgeRegistries.HOLDER_SET_TYPES.get(), null));
+        if (register.getEntries().stream().anyMatch(entry -> !entry.isPresent()))
+            throw new IllegalStateException("Native Forge HolderSet types did not bind");
     }
 
     private static void createForgeRegistry(ResourceKey<?> key) throws ReflectiveOperationException {

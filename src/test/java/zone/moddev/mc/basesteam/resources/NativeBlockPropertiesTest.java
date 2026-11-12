@@ -89,7 +89,7 @@ public class NativeBlockPropertiesTest {
         for (BlockState state : states()) {
             assertFalse("A solid helper must not be washed away",
                     state.canBeReplaced(net.minecraft.world.level.material.Fluids.WATER));
-            assertEquals(height < 0 ? PushReaction.BLOCK : PushReaction.NORMAL, state.getPistonPushReaction());
+            assertEquals(height < 0 ? PushReaction.IMMOVEABLE : PushReaction.PUSH_PULL, state.getPistonPushReaction());
         }
         if (height >= 0) assertTrue("Hidden helpers have no native loot-table key", block.getLootTable().isEmpty());
     }
@@ -97,7 +97,8 @@ public class NativeBlockPropertiesTest {
     @Test public void fullCollisionHelpersNeitherSuffocateNorBlockTheView() {
         for (BlockState state : states()) {
             assertFalse(state.toString(), state.isSuffocating(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
-            assertFalse(state.toString(), state.isViewBlocking(EmptyBlockGetter.INSTANCE, BlockPos.ZERO));
+            assertFalse(state.toString(), state.isViewBlocking(EmptyBlockGetter.INSTANCE, BlockPos.ZERO,
+                    new net.minecraft.world.phys.AABB(0, 0, 0, 1, 1, 1)));
         }
     }
 

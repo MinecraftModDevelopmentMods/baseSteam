@@ -211,8 +211,8 @@ public final class SteamNativeGameTests {
             var actual = loaded.orElseThrow().value();
             helper.assertTrue(actual instanceof zone.moddev.mc.basemetals.recipe.CrushingRecipe,
                     "Missing native crushing serializer: " + input);
-            var encoded = net.minecraft.world.item.crafting.Recipe.CODEC.encodeStart(ops, actual).getOrThrow();
-            var parsed = net.minecraft.world.item.crafting.Recipe.CODEC.parse(ops, encoded).getOrThrow();
+            var encoded = net.minecraft.world.item.crafting.Recipe.DIRECT_CODEC.encodeStart(ops, actual).getOrThrow();
+            var parsed = net.minecraft.world.item.crafting.Recipe.DIRECT_CODEC.parse(ops, encoded).getOrThrow();
             helper.assertTrue(parsed instanceof zone.moddev.mc.basemetals.recipe.CrushingRecipe,
                     "Native salvage recipe codec did not round-trip: " + input);
             var inputItem = registries.lookupOrThrow(Registries.ITEM)

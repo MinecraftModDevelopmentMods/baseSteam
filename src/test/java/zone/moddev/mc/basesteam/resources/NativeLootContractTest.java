@@ -28,8 +28,8 @@ public class NativeLootContractTest {
             JsonObject entry = pool.getAsJsonArray("entries").get(0).getAsJsonObject();
             assertEquals("minecraft:item", entry.get("type").getAsString());
             assertEquals("basesteam:" + id, entry.get("name").getAsString());
-            assertEquals("minecraft:survives_explosion", pool.getAsJsonArray("conditions")
-                    .get(0).getAsJsonObject().get("condition").getAsString());
+            assertEquals("minecraft:survives_explosion", pool.getAsJsonObject("condition").get("type").getAsString());
+            assertFalse(pool.has("conditions"));
         }
     }
 
@@ -39,10 +39,30 @@ public class NativeLootContractTest {
         }
     }
 
-    @Test public void packUsesNative262DataFormatAndForgeClientMetadata() throws Exception {
+    @Test public void nativeExplosionPredicateCodecRejectsLegacyAndUnknownDiscriminators() throws Exception {
+        zone.moddev.mc.basesteam.testing.NativeTestBootstrap.start();
+        var codec = net.minecraft.world.level.storage.loot.predicates.LootItemCondition.DIRECT_CODEC;
+        var ops = com.mojang.serialization.JsonOps.INSTANCE;
+        var condition = read(TABLES.resolve("steam_pipe.json")).getAsJsonArray("pools")
+                .get(0).getAsJsonObject().getAsJsonObject("condition");
+        var decoded = codec.parse(ops, condition);
+        assertTrue(decoded.error().isEmpty());
+        assertEquals(condition, codec.encodeStart(ops, decoded.getOrThrow()).getOrThrow());
+        var old = condition.deepCopy();
+        old.add("condition", old.remove("type"));
+        var unknown = condition.deepCopy();
+        unknown.addProperty("type", "missing_mod:unknown_predicate");
+        for (var invalid : java.util.List.of(old, unknown)) {
+            var rejected = codec.parse(ops, invalid);
+            assertTrue(rejected.error().isPresent());
+            assertTrue(rejected.result().isEmpty());
+        }
+    }
+
+    @Test public void packUsesNative263DataFormatAndForgeClientMetadata() throws Exception {
         JsonObject pack = read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack");
-        assertEquals("[107,1]", pack.getAsJsonArray("min_format").toString());
-        assertEquals("[107,1]", pack.getAsJsonArray("max_format").toString());
+        assertEquals("[121,0]", pack.getAsJsonArray("min_format").toString());
+        assertEquals("[121,0]", pack.getAsJsonArray("max_format").toString());
         assertFalse(pack.has("pack_format"));
         assertFalse(pack.has("supported_formats"));
         assertFalse(pack.has("forge:server_data_pack_format"));

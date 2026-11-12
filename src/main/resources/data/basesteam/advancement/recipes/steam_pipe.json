@@ -14,7 +14,9 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:steam_pipe"
+        "recipes": [
+          "basesteam:steam_pipe"
+        ]
       }
     }
   },
@@ -28,5 +30,9 @@
     "recipes": [
       "basesteam:steam_pipe"
     ]
+  },
+  "forge:condition": {
+    "type": "basepower:tag_not_empty",
+    "tag": "forge:ingots/brass"
   }
 }

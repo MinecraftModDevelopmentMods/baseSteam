@@ -27,7 +27,7 @@ public class PlatformBlock extends Block {
         super(SteamBlockProperties.metalHelper("platform", 2000.0F)
                 .isRedstoneConductor((state, world, pos) -> false)
                 .isSuffocating((state, world, pos) -> false)
-                .isViewBlocking((state, world, pos) -> false));
+                .isViewBlocking((state, world, pos, nearPlane) -> false));
         registerDefaultState(getStateDefinition().any().setValue(HEIGHT, 1));
     }
 

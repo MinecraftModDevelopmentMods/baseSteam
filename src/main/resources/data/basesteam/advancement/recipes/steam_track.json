@@ -28,7 +28,9 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:steam_track"
+        "recipes": [
+          "basesteam:steam_track"
+        ]
       }
     }
   },

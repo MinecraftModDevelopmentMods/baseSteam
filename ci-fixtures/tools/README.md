@@ -1,5 +1,21 @@
 # Forge Mavenizer compatibility fixtures
 
+## Forge 66 (Minecraft 26.3)
+
+The active build selects the sealed fixture and all five provenance inputs
+from the read-only sibling `OS263/OreSpawn/ci-fixtures/tools` directory.
+The historical `-Pforge64MavenizerJar` property is a path alias, not a choice
+of Minecraft target. Every selected input must match the hashes in
+`gradle/forge64-mavenizer.gradle`; there is no stock-tool fallback.
+
+JAR SHA-256:
+`4150926F33A696B2088AB2675C1C3B45745CE4F9F2DEB31CCD88C9ADC834062F`.
+Rules SHA-256:
+`829400D74ECB1BF0CC6107D9980B8328365E3F56D9A5342002D8DF340571BDB7`.
+The Forge 66.0.0 target applies exactly zero source repairs. The older tracked
+rule, patch and licence files below remain historical fixtures; their hashes
+do not qualify them as the active Forge 66 tool.
+
 ## Forge 45 (Minecraft 1.19.4)
 
 The source patch and target-rule manifest match the Base Metals 1.19.4

@@ -1,3 +1,16 @@
+baseSteam 2.2.19.2603001 - local 26.3 port in progress
+
+- Target Minecraft 26.3, Forge 66.0.0, official MCP 20260918.230105 and Java 25.0.3+9.
+- Use native data format 121.0, hidden client metadata for 97.1, and asset index 34 in Eclipse launches.
+- Retain machine balance, registry and saved-data identities, recipe modes, dependency audits and test guards.
+- Adapt cooking fuel to native contextual components and split world/reloadable registry lookups without changing burn times or machine multipliers.
+- Preserve trade quantities and explosion-safe drops through native singular modifier/condition fields, type discriminators and explicit uniform providers.
+- Prepare the oil boiler's contextual Power fuel call without caching results across machines, worlds or reloads.
+- Pin frozen Base Metals 3.1.2.2603001, OreSpawn 4.1.1.2603001, basePower 2.4.18.2603001 and exact native test-support inputs.
+- Generate all 24 recipe unlocks with the native recipes criterion and intact recipe-condition parity; add actual criterion CODEC and negative-control regressions.
+- Pass all 285 Steam units, build/artifact/Eclipse gates and independent ECJ against Power handoff03, including the unchanged shared-fuel regression. Native server qualification remains blocked on shared unbound-tag condition loading.
+- Do not transfer 26.2 qualification to this candidate. Full tests, packaged runtime, manual acceptance and release remain pending.
+
 baseSteam 2.2.18.2602001 - local candidate
 
 - Target Minecraft 26.2 and Forge 65 with Java 25.

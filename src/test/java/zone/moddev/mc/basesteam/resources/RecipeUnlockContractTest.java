@@ -51,6 +51,10 @@ public class RecipeUnlockContractTest {
             JsonObject recipe = read(file);
             if (!crafting(recipe)) continue;
             JsonObject unlock = read(DATA.resolve("advancement/recipes").resolve(file.getFileName()));
+            assertEquals("A gated recipe and its reference-bearing unlock must share availability: " + file,
+                    recipe.has("forge:condition"), unlock.has("forge:condition"));
+            if (recipe.has("forge:condition")) assertEquals("Keep the exact mode, tag and musket condition tree: " + file,
+                    recipe.get("forge:condition"), unlock.get("forge:condition"));
             assertEquals("minecraft:recipes/root", unlock.get("parent").getAsString());
             assertFalse("Recipe unlocks should not create visible advancement tabs", unlock.has("display"));
             JsonObject criteria = unlock.getAsJsonObject("criteria");
@@ -91,7 +95,10 @@ public class RecipeUnlockContractTest {
             assertEquals(id, recipes.get(0).getAsString());
             JsonObject criterion = unlock.getAsJsonObject("criteria").getAsJsonObject("has_recipe");
             assertEquals("minecraft:recipe_unlocked", criterion.get("trigger").getAsString());
-            assertEquals(id, criterion.getAsJsonObject("conditions").get("recipe").getAsString());
+            JsonObject condition = criterion.getAsJsonObject("conditions");
+            assertFalse("The singular field is not part of the native 26.3 criterion", condition.has("recipe"));
+            assertEquals(1, condition.getAsJsonArray("recipes").size());
+            assertEquals(id, condition.getAsJsonArray("recipes").get(0).getAsString());
             assertFalse("Forge recipe conditions are not valid advancement conditions", unlock.has("conditions"));
         }
     }

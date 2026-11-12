@@ -31,7 +31,7 @@ public class NativeIngredientCodecContractTest {
     @BeforeClass public static void bootstrap() throws Exception {
         NativeTestBootstrap.registerCraftingSerializers();
         try (var resources = new MultiPackResourceManager(PackType.SERVER_DATA,
-                List.of(ServerPacksSource.createVanillaPackSource()))) {
+                List.of(ServerPacksSource.createVanillaPackSource().fullResources()))) {
             TagLoader<Holder<Item>> reader = new TagLoader<>((id, required) -> BuiltInRegistries.ITEM
                     .get(ResourceKey.create(Registries.ITEM, id)).map(holder -> (Holder<Item>) holder), "tags/item");
             Map<TagKey<Item>, List<Holder<Item>>> loaded = new HashMap<>();

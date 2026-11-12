@@ -112,7 +112,7 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	private int getFuelBurnTime() {
 		if(inventory[0] == null) return 0;
-		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(inventory[0], getLevel());
+		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(inventory[0], this);
 	}
 
 
@@ -440,7 +440,7 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	@Override
 	public boolean canPlaceItem(final int slot, final ItemStack item) {
-		return super.canPlaceItem(slot, item) && zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(item, getLevel()) > 0;
+		return super.canPlaceItem(slot, item) && zone.moddev.mc.basesteam.util.FurnaceFuelHelper.isFuel(item, this);
 	}
 
 	@Override

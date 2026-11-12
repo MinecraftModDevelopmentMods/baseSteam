@@ -139,7 +139,7 @@ public final class NativePackResourceProof {
                 JsonObject side = new JsonObject();
                 side.addProperty("id", id);
                 side.addProperty("loaderCompatibility", pack.getCompatibility().name());
-                try (var opened = pack.open()) {
+                try (var opened = pack.openMetadata()) {
                     PackMetadataSection metadata = opened.getMetadataSection(PackMetadataSection.forPackType(type));
                     if (metadata == null) throw new AssertionError("Missing native " + type + " metadata");
                     var formats = metadata.supportedFormats();
@@ -158,7 +158,8 @@ public final class NativePackResourceProof {
                     side.addProperty("accepts102", formats.isValueInRange(net.minecraft.server.packs.metadata.pack.PackFormat.of(102)));
                     side.add("nativeMetadata", encoded);
                     if (type == PackType.CLIENT_RESOURCES) {
-                        if (opened.getChildren() == null || opened.getChildren().size() != 1) {
+                        if (!(opened instanceof net.minecraftforge.resource.DelegatingPackResources delegate)
+                                || delegate.getChildren() == null || delegate.getChildren().size() != 1) {
                             throw new AssertionError("Expected the actual Forge client delegate");
                         }
                         side.addProperty("currentCompatibility", pack.getCompatibility().name());
@@ -210,7 +211,7 @@ public final class NativePackResourceProof {
     }
 
     private static void installResourceFixture(ModFile mod) throws ReflectiveOperationException {
-        // Isolated reader fixture, not a dependency/startup test. Forge 65 removed ModList.of.
+        // Isolated reader fixture, not a dependency/startup test. Forge 66 removed ModList.of.
         Class<?> state = Class.forName("net.minecraftforge.fml.loading.ModSorter$State");
         var constructor = state.getDeclaredConstructor(List.class, List.class);
         constructor.setAccessible(true);
@@ -223,7 +224,7 @@ public final class NativePackResourceProof {
         ModList.init();
         if (ModList.getModFiles().size() != 1 || ModList.getModFiles().getFirst() != mod.getModFileInfo()
                 || !net.minecraftforge.fml.loading.LoadingModList.getErrors().isEmpty()) {
-            throw new AssertionError("The native Forge 65 resource fixture changed");
+            throw new AssertionError("The native Forge 66 resource fixture changed");
         }
     }
 }

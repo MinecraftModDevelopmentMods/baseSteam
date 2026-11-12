@@ -157,7 +157,7 @@ public class SteamOperationalPumpSourceTest {
             state = initial;
             world = (LevelAccessor) Proxy.newProxyInstance(LevelAccessor.class.getClassLoader(), new Class<?>[]{LevelAccessor.class},
                     (proxy, method, arguments) -> {
-                        if (method.getName().equals("setBlock")) {
+                        if (method.getName().equals("setBlock") || method.getName().equals("setBlockAndUpdate")) {
                             assertEquals(SOURCE, arguments[0]);
                             state = (BlockState) arguments[1];
                             state.initCache();

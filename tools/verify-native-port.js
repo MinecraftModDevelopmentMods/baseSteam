@@ -25,7 +25,7 @@ for (const name of files(resources).filter(name => /\.(json|mcmeta)$/.test(name)
   json.set(name, JSON.parse(text));
 }
 assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {
-  min_format: [107, 1], max_format: [107, 1], description: 'baseSteam'
+  min_format: [121, 0], max_format: [121, 0], description: 'baseSteam'
 });
 const metadata = read(`${resources}/META-INF/mods.toml`);
 assert.match(metadata, /^showAsResourcePack=false$/m);
@@ -113,7 +113,8 @@ for (const id of [...pickaxe.values.map(value => value.split(':')[1]),
 for (const name of source) {
   assert(!/ResourceLocation|net\.minecraftforge\.eventbus\.api\.(?:IEventBus|SubscribeEvent)/.test(read(name)), name);
 }
-console.log(`BASESTEAM_NATIVE262_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
+console.log(`BASESTEAM_NATIVE263_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
 console.log('Source checks only. Compilation, executed tests, packaged runtime and manual acceptance are separate.');
 require('./verify-enchantment-data');
 require('./verify-villager-trades');
+require('./verify-loot-data');

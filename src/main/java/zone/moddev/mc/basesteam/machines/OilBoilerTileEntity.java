@@ -26,8 +26,6 @@ import cyano.poweradvantage.api.fluid.FluidStack;
 import cyano.poweradvantage.api.fluid.FluidTank;
 import cyano.poweradvantage.api.fluid.FluidTankInfo;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import static zone.moddev.mc.basesteam.util.SoundHelper.playSoundAtTileEntity;
 
@@ -39,7 +37,6 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 
 	private final FluidTank waterTank;
 	private final FluidTank fuelTank;
-	private static final Map<Fluid,Float> flammibilityCache = new HashMap<>();
 	private int burnTime = 0;
 	private int totalBurnTime = 0;
 
@@ -114,38 +111,17 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 		return (int)(getBurnTimePerBucketFor(fluid) * amount / FluidTank.BUCKET_VOLUME);
 	}
 
-	private static Float getBurnTimePerBucketFor(Fluid fluid){
+	private Float getBurnTimePerBucketFor(Fluid fluid){
 		if(fluid == null) return 0f;
-		if(flammibilityCache.containsKey(fluid)){
-			return flammibilityCache.get(fluid)*1000;
-		} else {
-			// first, check configured overrides
-			Float fuelPerBucket = getConfiguredBurnTimePerBucketFor(fluid);
-			if(fuelPerBucket != null){
-				flammibilityCache.put(fluid,0.001F*fuelPerBucket);
-				return fuelPerBucket;
-			}
-			// second, check universal bucket fuel registry
-			int vol = FluidTank.BUCKET_VOLUME;
-			ItemStack bucket = fluid.getBucket() == net.minecraft.world.item.Items.AIR
-					? ItemStack.EMPTY : new ItemStack(fluid.getBucket());
-			if(bucket.isEmpty()){
-				flammibilityCache.put(fluid,0f);
-				return 0f;
-			}
-			Float burnTicksPerAmount = (float) FuelRegistry.getActualBurntimeForItem(bucket) / (float) vol;
-			if(burnTicksPerAmount > 0){
-				flammibilityCache.put(fluid,burnTicksPerAmount);
-				return 1000*burnTicksPerAmount;
-			}
-
-			// it just isn't a fuel
-			flammibilityCache.put(fluid,0f);
-		}
-		// no containers (buckets) for this fluid
-		return 0f;
-
-
+		Float fuelPerBucket = getConfiguredBurnTimePerBucketFor(fluid);
+		if(fuelPerBucket != null) return fuelPerBucket;
+		int vol = FluidTank.BUCKET_VOLUME;
+		ItemStack bucket = fluid.getBucket() == net.minecraft.world.item.Items.AIR
+				? ItemStack.EMPTY : new ItemStack(fluid.getBucket());
+		if(bucket.isEmpty()) return 0f;
+		// Contextual providers must see this instance and must not be cached across worlds or reloads.
+		Float burnTicksPerAmount = (float) FuelRegistry.getActualBurntimeForItem(bucket, this) / (float) vol;
+		return burnTicksPerAmount > 0 ? 1000*burnTicksPerAmount : 0f;
 	}
 
 	private static Float getConfiguredBurnTimePerBucketFor(Fluid fluid) {

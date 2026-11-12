@@ -36,7 +36,9 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:musket_left_tech"
+        "recipes": [
+          "basesteam:musket_left_tech"
+        ]
       }
     }
   },
@@ -51,6 +53,22 @@
   "rewards": {
     "recipes": [
       "basesteam:musket_left_tech"
+    ]
+  },
+  "forge:condition": {
+    "type": "forge:and",
+    "values": [
+      {
+        "type": "basesteam:recipe_mode",
+        "mode": "TECH_PROGRESSION"
+      },
+      {
+        "type": "basesteam:musket_enabled"
+      },
+      {
+        "type": "basepower:tag_not_empty",
+        "tag": "forge:ingots/steel"
+      }
     ]
   }
 }

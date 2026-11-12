@@ -34,11 +34,14 @@ for (const file of fs.readdirSync(recipes).filter(name => name.endsWith('.json')
       conditions: {items: [ingredient.item ? {items: [ingredient.item]} : {items: `#${ingredient.tag}`}]}
     };
   });
-  criteria.has_recipe = {trigger: 'minecraft:recipe_unlocked', conditions: {recipe: id}};
+  criteria.has_recipe = {trigger: 'minecraft:recipe_unlocked', conditions: {recipes: [id]}};
   const advancement = {
     parent: 'minecraft:recipes/root', criteria,
     requirements: [Object.keys(criteria)], rewards: {recipes: [id]}
   };
+  if (Object.hasOwn(recipe, 'forge:condition')) {
+    advancement['forge:condition'] = structuredClone(recipe['forge:condition']);
+  }
   const text = JSON.stringify(advancement, null, 2) + '\n';
   const target = path.join(output, file);
   expected.add(file);

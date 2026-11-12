@@ -101,6 +101,9 @@ public class DrillBitRendererTest {
         @Override public VertexConsumer setUv(float u, float v) { vertex.u = u; vertex.v = v; return this; }
         @Override public VertexConsumer setUv1(int u, int v) { vertex.overlay = u | v << 16; return this; }
         @Override public VertexConsumer setUv2(int u, int v) { vertex.light = u | v << 16; return this; }
+        @Override public VertexConsumer setUv3(float u, float v) {
+            throw new AssertionError("Drill geometry must not submit secondary texture coordinates");
+        }
         @Override public VertexConsumer setLineWidth(float width) {
             throw new AssertionError("Drill geometry must submit quads, not line vertices");
         }

@@ -25,12 +25,12 @@ import zone.moddev.mc.basesteam.migration.SteamLegacyMigrations;
 import zone.moddev.mc.basesteam.migration.SteamConfigMigration;
 import zone.moddev.mc.basesteam.recipe.RecipeConditions;
 
-/** Forge 26.2 entry point for baseSteam. */
+/** Forge 26.3 entry point for baseSteam. */
 @Mod(SteamAdvantage.MODID)
 public final class SteamAdvantage {
     public static final String MODID = "basesteam";
     public static final String NAME = "baseSteam";
-    public static final String VERSION = "2.2.18.2602001";
+    public static final String VERSION = "2.2.19.2603001";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static float MUSKET_DAMAGE = 20.0F;

@@ -14,7 +14,7 @@ public final class SteamBlockProperties {
     }
 
     public static Block.Properties pistonLike(String path) {
-        return Block.Properties.of().setId(key(path)).mapColor(MapColor.STONE).pushReaction(PushReaction.BLOCK)
+        return Block.Properties.of().setId(key(path)).mapColor(MapColor.STONE).pushReaction(PushReaction.IMMOVEABLE)
                 .forceSolidOn().strength(0.75F);
     }
 
