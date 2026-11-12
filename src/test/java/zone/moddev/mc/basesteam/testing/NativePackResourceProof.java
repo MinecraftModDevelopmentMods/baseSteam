@@ -47,7 +47,7 @@ public final class NativePackResourceProof {
         if (receipt != null) return receipt.deepCopy();
         Path evidenceRoot = Path.of("build/native-pack-resources").toAbsolutePath();
         Files.createDirectories(evidenceRoot);
-        Path evidence = Files.createTempDirectory(evidenceRoot, "forge61-");
+        Path evidence = Files.createTempDirectory(evidenceRoot, "forge64-");
         String classpath = Arrays.stream(System.getProperty("basesteam.nativePackClasspath",
                 System.getProperty("java.class.path")).split(java.util.regex.Pattern.quote(java.io.File.pathSeparator)))
                 .map(entry -> new java.io.File(entry).getAbsolutePath())
@@ -62,6 +62,7 @@ public final class NativePackResourceProof {
                 evidence.toString()).directory(evidence.toFile())
                 .redirectInput(ProcessBuilder.Redirect.PIPE).redirectErrorStream(true).redirectOutput(log.toFile());
         builder.environment().put("TERM", "dumb");
+        for (String name : List.of("JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS")) builder.environment().remove(name);
         Process process = builder.start();
         if (!process.waitFor(90, TimeUnit.SECONDS)) {
             process.destroyForcibly().waitFor();
@@ -74,7 +75,7 @@ public final class NativePackResourceProof {
         return receipt.deepCopy();
     }
 
-    static void requireCleanOutput(String output, Path log) {
+    public static void requireCleanOutput(String output, Path log) {
         if (java.util.regex.Pattern.compile("(?m)(?:\\[[^\\r\\n]*\\b(?:WARN|ERROR|FATAL)\\b[^\\r\\n]*\\]|\\bmain (?:WARN|ERROR|FATAL)\\b)")
                 .matcher(output).find()) {
             throw new AssertionError("Native Forge resource diagnostic in " + log + "\n" + output);
@@ -82,8 +83,8 @@ public final class NativePackResourceProof {
     }
 
     public static void main(String[] args) throws Exception {
+        requireCleanJvmEnvironment();
         SharedConstants.tryDetectVersion();
-        Bootstrap.bootStrap();
         Path resources = Path.of(args[0]);
         Path evidence = Path.of(args[1]);
         Path jar = evidence.resolve("basesteam-resource-contract.jar");
@@ -100,7 +101,8 @@ public final class NativePackResourceProof {
         }
         ModFile mod = new ModFile(SecureJar.from(jar), new ForgeDevLocator(), ModFileParser::modsTomlParser);
         if (mod.getModFileInfo().showAsResourcePack()) throw new AssertionError("Steam must use Forge's hidden client pack");
-        ModList.of(List.of(mod), mod.getModInfos().stream().map(ModInfo.class::cast).toList());
+        installResourceFixture(mod);
+        Bootstrap.bootStrap();
         List<String> diagnostics = new ArrayList<>();
         AbstractAppender appender = new AbstractAppender("SteamPackContract", null,
                 PatternLayout.createDefaultLayout(), false, Property.EMPTY_ARRAY) {
@@ -113,6 +115,11 @@ public final class NativePackResourceProof {
         logger.addAppender(appender);
         JsonObject result = new JsonObject();
         JsonObject child = new JsonObject();
+        JsonObject environment = new JsonObject();
+        for (String name : List.of("JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS")) {
+            environment.addProperty(name, System.getenv(name));
+        }
+        child.add("jvmOptionEnvironment", environment);
         child.addProperty("terminalJline", System.getProperty("terminal.jline"));
         child.addProperty("term", System.getenv("TERM"));
         child.addProperty("consoleAttached", System.console() != null);
@@ -147,8 +154,8 @@ public final class NativePackResourceProof {
                     side.addProperty("resourcesClass", opened.getClass().getName());
                     side.addProperty("acceptsClient", formats.isValueInRange(SharedConstants.getCurrentVersion().packVersion(PackType.CLIENT_RESOURCES)));
                     side.addProperty("acceptsServer", formats.isValueInRange(SharedConstants.getCurrentVersion().packVersion(PackType.SERVER_DATA)));
-                    side.addProperty("accepts74", formats.isValueInRange(net.minecraft.server.packs.metadata.pack.PackFormat.of(74)));
-                    side.addProperty("accepts95", formats.isValueInRange(net.minecraft.server.packs.metadata.pack.PackFormat.of(95)));
+                    side.addProperty("accepts83", formats.isValueInRange(net.minecraft.server.packs.metadata.pack.PackFormat.of(83)));
+                    side.addProperty("accepts102", formats.isValueInRange(net.minecraft.server.packs.metadata.pack.PackFormat.of(102)));
                     side.add("nativeMetadata", encoded);
                     if (type == PackType.CLIENT_RESOURCES) {
                         if (opened.getChildren() == null || opened.getChildren().size() != 1) {
@@ -194,5 +201,29 @@ public final class NativePackResourceProof {
         Files.writeString(evidence.resolve("receipt.json"), result.toString(), StandardCharsets.UTF_8);
         if (!diagnostics.isEmpty()) throw new AssertionError("Native Forge resource diagnostics: " + diagnostics);
         System.out.println("BASESTEAM_NATIVE_PACK_RESOURCES_PASS " + result);
+    }
+
+    public static void requireCleanJvmEnvironment() {
+        for (String name : List.of("JAVA_TOOL_OPTIONS", "JDK_JAVA_OPTIONS", "_JAVA_OPTIONS")) {
+            if (System.getenv(name) != null) throw new AssertionError("Native proof inherited " + name);
+        }
+    }
+
+    private static void installResourceFixture(ModFile mod) throws ReflectiveOperationException {
+        // Isolated reader fixture, not a dependency/startup test. Forge 64 removed ModList.of.
+        Class<?> state = Class.forName("net.minecraftforge.fml.loading.ModSorter$State");
+        var constructor = state.getDeclaredConstructor(List.class, List.class);
+        constructor.setAccessible(true);
+        Object discovery = constructor.newInstance(List.of(mod),
+                mod.getModInfos().stream().map(ModInfo.class::cast).toList());
+        Class<?> loading = Class.forName("net.minecraftforge.fml.loading.LoadingModListImpl");
+        var init = loading.getDeclaredMethod("init", state, net.minecraftforge.fml.loading.EarlyLoadingException.class);
+        init.setAccessible(true);
+        init.invoke(null, discovery, null);
+        ModList.init();
+        if (ModList.getModFiles().size() != 1 || ModList.getModFiles().getFirst() != mod.getModFileInfo()
+                || !net.minecraftforge.fml.loading.LoadingModList.getErrors().isEmpty()) {
+            throw new AssertionError("The native Forge 64 resource fixture changed");
+        }
     }
 }

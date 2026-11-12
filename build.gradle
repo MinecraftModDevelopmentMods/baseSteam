@@ -13,7 +13,7 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.34'
 }
 
-apply from: 'gradle/forge61-mavenizer.gradle'
+apply from: 'gradle/forge64-mavenizer.gradle'
 
 group = project.mod_group
 version = project.mod_version
@@ -43,9 +43,21 @@ ext.functional_version = versionParts[0..2].join('.')
 ext.display_version = project.mod_version
 ext.release_tag = project.mod_version
 
+if (GradleVersion.current() != GradleVersion.version('9.6.1')
+        || JavaVersion.current() != JavaVersion.VERSION_25) {
+    throw new GradleException('Use Gradle 9.6.1 running on the pinned Java 25 toolchain')
+}
+
+fgtools.configure('slimelauncher') {
+    javaLauncher.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+        vendor = JvmVendorSpec.ADOPTIUM
+    })
+}
+
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
         vendor = JvmVendorSpec.ADOPTIUM
     }
     withSourcesJar()
@@ -54,11 +66,11 @@ java {
 
 tasks.withType(JavaCompile).configureEach {
     javaCompiler = javaToolchains.compilerFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
         vendor = JvmVendorSpec.ADOPTIUM
     }
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
     options.encoding = 'UTF-8'
     options.compilerArgs.addAll(['-Xmaxerrs', '1000'])
 }
@@ -119,7 +131,8 @@ minecraft {
             .getOrElse('run')
     runs {
         configureEach {
-            jvmArgs '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED'
+            jvmArgs '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED',
+                    '-XX:ActiveProcessorCount=4', '-Xmx1536m'
             workingDir.convention layout.projectDirectory.dir(configuredRunDirectory)
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             systemProperty 'forge.logging.console.level', 'info'
@@ -152,7 +165,7 @@ sourceSets.main.resources {
 def forgeRunModClassesDirectory = layout.buildDirectory.dir('forge-run-mod-classes/main')
 def prepareForgeRunModClasses = tasks.register('prepareForgeRunModClasses', Sync) {
     group = 'ide'
-    description = 'Merges classes and processed resources for Forge 61 launches.'
+    description = 'Merges classes and processed resources for Forge 64 launches.'
     dependsOn tasks.named('classes')
     from sourceSets.main.output
     into forgeRunModClassesDirectory
@@ -165,8 +178,15 @@ def prepareForgeGameTestModClasses = tasks.register('prepareForgeGameTestModClas
 }
 tasks.withType(JavaExec).configureEach {
     jvmArgs '-XX:ActiveProcessorCount=4'
+    maxHeapSize = '1536m'
+    doFirst {
+        ['JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS', '_JAVA_OPTIONS'].each { name ->
+            if (environment.containsKey(name)) throw new GradleException("${path} must not inherit ${name}")
+        }
+        logger.lifecycle("${path}: inherited JVM option variables absent; explicit -XX:ActiveProcessorCount=4 -Xmx1536m")
+    }
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
         vendor = JvmVendorSpec.ADOPTIUM
     }
     if (name in ['runClient', 'runServer', 'runData', 'runGameTestServer']) {
@@ -204,6 +224,18 @@ tasks.withType(JavaExec).configureEach {
             String output = receipt.isFile() ? receipt.getText('UTF-8') : ''
             if (!output.contains('All 4 required tests passed') || (output =~ /\[[^\]\r\n]*\/(?:ERROR|FATAL)\]/).find()) {
                 throw new GradleException("The four Steam GameTests did not pass; see ${receipt}")
+            }
+            if (!output.contains('BASESTEAM_NATIVE_TRADES_PASS definitions=5 placements=10 samples=1280 codecNegatives=5 fallbackWitnesses=1')) {
+                throw new GradleException("Missing native villager trade codec and offer witness: ${receipt}")
+            }
+            if (!output.contains('BASESTEAM_NATIVE_JVM_PASS inheritedOptions=absent processorCap=4 heapCapMiB=1536')) {
+                throw new GradleException("Missing actual native JVM environment and cap witness: ${receipt}")
+            }
+            def salvage = output =~ /BASESTEAM_NATIVE_SALVAGE_PASS mode=(NORMAL|TECH_PROGRESSION|APOCALYPTIC) present=(\d+) absent=(\d+) nativeCodecs=(\d+) inputNegatives=(\d+)/
+            if (!salvage.find()) throw new GradleException("Missing native salvage recipe witness: ${receipt}")
+            List<String> expectedSalvage = salvage.group(1) == 'APOCALYPTIC' ? ['9', '0', '9', '9'] : ['0', '9', '0', '0']
+            if ((2..5).collect { salvage.group(it) } != expectedSalvage || salvage.find()) {
+                throw new GradleException("Incorrect native salvage recipe witness: ${receipt}")
             }
             File report = new File(steamGameTestRunDirectory.get().asFile, 'steam-gametest-results.xml')
             if (!report.isFile()) throw new GradleException('Missing native GameTest XML report')
@@ -246,12 +278,12 @@ repositories {
 // Only code and launch tasks require the exact jars; source/resource checks can run independently.
 def explicitJar = { String property -> providers.gradleProperty(property).map { file(it) }.getOrNull() }
 def powerRoot = '../../PowerAdvantage'
-def baseMetalsRoot = '../../../../BaseMetals/.verification-basemetals12111/Advantage shared hook'
+def baseMetalsRoot = '../../../../BaseMetals/BaseMetals 2612/BaseMetals'
 def powerNativeJar = file("${powerRoot}/build/libs/basePower-${project.poweradvantage_version}.jar")
 def powerAdvantageDeobfJar = explicitJar('powerAdvantageDeobfJar') ?: powerNativeJar
 def baseMetalsDeobfJar = explicitJar('baseMetalsDeobfJar') ?: file(
         "${baseMetalsRoot}/build/libs/BaseMetals-${project.basemetals_version}.jar")
-def oreSpawnRoot = '../../../../MinecraftMineralogy/OS12111/OreSpawn'
+def oreSpawnRoot = '../../../../MinecraftMineralogy/OS2612/OreSpawn'
 def oreSpawnJar = { String variant ->
     explicitJar("oreSpawn${variant}Jar") ?: file(
             "${oreSpawnRoot}/build/libs/OreSpawn-${project.orespawn_version}.jar")
@@ -304,8 +336,31 @@ def unitBootstrapSources = [
         poweradvantage_test_bootstrap_source_sha256: explicitJar('forgeCapabilityBootstrapSource') ?:
                 file("${powerRoot}/test-rig/unit-bootstrap/ForgeCapabilityBootstrap.java"),
         poweradvantage_test_registry_source_sha256: explicitJar('forgeUnitRegistriesSource') ?:
-                file("${powerRoot}/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/ForgeUnitRegistries.java")
+                file("${powerRoot}/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/ForgeUnitRegistries.java"),
+        poweradvantage_test_loader_source_sha256: explicitJar('forge64UnitLoaderSource') ?:
+                file("${powerRoot}/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/Forge64UnitLoader.java")
 ]
+def nativeUnitSupportDirectory = layout.buildDirectory.dir('native-unit-support-source')
+def nativeUnitSupportSources = unitBootstrapSources.findAll {
+    key, source -> key != 'poweradvantage_test_bootstrap_source_sha256'
+}
+def prepareNativeUnitSupport = tasks.register('prepareNativeUnitSupport', Sync) {
+    from(nativeUnitSupportSources.values()) { into 'zone/moddev/mc/advantageworks/unit' }
+    into nativeUnitSupportDirectory
+    nativeUnitSupportSources.keySet().each { inputs.property(it, providers.gradleProperty(it)) }
+    doFirst {
+        nativeUnitSupportSources.each { key, source ->
+            String expected = committedPin(key, /[A-F0-9]{64}/)
+            if (!source.isFile() || MessageDigest.getInstance('SHA-256').digest(source.bytes)
+                    .encodeHex().toString().toUpperCase(Locale.ROOT) != expected) {
+                throw new GradleException("Native unit-support source pin mismatch: ${source}")
+            }
+        }
+    }
+}
+sourceSets.test.java.srcDir(nativeUnitSupportDirectory)
+tasks.named('compileTestJava') { dependsOn prepareNativeUnitSupport }
+
 tasks.named('test', Test) {
     useJUnit()
     jvmArgs '-XX:ActiveProcessorCount=4'
@@ -379,7 +434,7 @@ tasks.named('jar', Jar) {
     }
 }
 
-// Forge 61 runs official names. The player jar needs no SRG remapping.
+// Forge 64 runs official names. The player jar needs no SRG remapping.
 def releaseJar = tasks.register('releaseJar', Jar) {
     dependsOn tasks.named('classes'), 'verifyReleaseDependencies'
     archiveClassifier = null
@@ -456,18 +511,18 @@ def expectedReleaseFiles = providers.provider {
 def preparedReleaseDir = providers.gradleProperty('preparedReleaseDir')
 
 def verifyPackFormats = { pack ->
-    if (pack.min_format != [94, 1] || pack.max_format != [94, 1]
+    if (pack.min_format != [101, 1] || pack.max_format != [101, 1]
             || pack.containsKey('pack_format') || pack.containsKey('supported_formats')) {
-        throw new GradleException('The mod root requires data format 94.1; Forge supplies hidden client pack metadata')
+        throw new GradleException('The mod root requires data format 101.1; Forge supplies hidden client pack metadata')
     }
 }
 
 def verifyRequiredBaseMetalsMetadata = { String metadata ->
     String normalized = metadata.replace('\r\n', '\n')
-    String declaration = 'modId="basemetals"\nmandatory=true\nversionRange="[3.1.2.121111,4.0.0)"\nordering="AFTER"\nside="BOTH"'
+    String declaration = 'modId="basemetals"\nmandatory=true\nversionRange="[3.1.2.2601021,4.0.0)"\nordering="AFTER"\nside="BOTH"'
     if (!normalized.contains(declaration)
             || normalized.readLines().count { it.trim() == 'modId="basemetals"' } != 1) {
-        throw new GradleException('Base Metals must be declared exactly once as REQUIRED on BOTH sides, ordered AFTER, in [3.1.2.121111,4.0.0)')
+        throw new GradleException('Base Metals must be declared exactly once as REQUIRED on BOTH sides, ordered AFTER, in [3.1.2.2601021,4.0.0)')
     }
 }
 
@@ -483,22 +538,22 @@ tasks.register('verifyReleaseConfiguration') {
                 '9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14') {
             throw new GradleException('Use the checksum-pinned Gradle 9.6.1 wrapper')
         }
-        if (project.mod_version != '2.2.16.121111') {
+        if (project.mod_version != '2.2.17.2601021') {
             throw new GradleException("Unexpected baseSteam release version: ${project.mod_version}")
         }
-        if (project.minecraft_version != '1.21.11' || project.minecraft_version_range != '[1.21.11]'
-                || project.forge_version != '61.1.0' || project.forge_version_range != '[61.1.0,62)'
-                || project.loader_version_range != '[61,62)'
+        if (project.minecraft_version != '26.1.2' || project.minecraft_version_range != '[26.1.2]'
+                || project.forge_version != '64.1.5' || project.forge_version_range != '[64.1.5,65)'
+                || project.loader_version_range != '[64,65)'
                 || project.mapping_channel != 'official'
-                || project.mapping_version != '1.21.11'
-                || project.mcp_version != '20251223.124241') {
+                || project.mapping_version != '26.1.2'
+                || project.mcp_version != '20260409.101008' || project.reobf != 'false') {
             throw new GradleException('Unexpected Minecraft, Forge, or mappings target')
         }
         if (project.loader_name != 'forge' || project.loader_code != '1'
-                || project.java_version != '21'
-                || project.java_toolchain_version != '21.0.7+6'
-                || project.java_setup_version != '21.0.7+6.0.LTS'
-                || project.gradle_java_version != '21') {
+                || project.java_version != '25'
+                || project.java_toolchain_version != '25.0.3+9'
+                || project.java_setup_version != '25.0.3+9.0.LTS'
+                || project.gradle_java_version != '25') {
             throw new GradleException('Unexpected release dispatcher target metadata')
         }
         if (project.mod_id != 'basesteam'
@@ -511,11 +566,11 @@ tasks.register('verifyReleaseConfiguration') {
         }
         if (project.cf_requirements != 'basepower,base-metals'
                 || project.cf_optionals != ''
-                || project.cf_versions != '1.21.11') {
+                || project.cf_versions != '26.1.2') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
-        if (project.basemetals_version != '3.1.2.121111'
-                || project.orespawn_version != '4.1.0.121111') {
+        if (project.basemetals_version != '3.1.2.2601021'
+                || project.orespawn_version != '4.1.0.2601021') {
             throw new GradleException('Unexpected development API versions')
         }
         if (project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/basePower') {
@@ -524,7 +579,7 @@ tasks.register('verifyReleaseConfiguration') {
         String mainSource = file(
                 'src/main/java/zone/moddev/mc/basesteam/SteamAdvantage.java').getText('UTF-8')
         if (!mainSource.contains('MODID = "basesteam"')
-                || !mainSource.contains('VERSION = "2.2.16.121111"')) {
+                || !mainSource.contains('VERSION = "2.2.17.2601021"')) {
             throw new GradleException('baseSteam source identity changed')
         }
         String metadata = file('src/main/resources/META-INF/mods.toml').getText('UTF-8').replace('\r\n', '\n')
@@ -556,10 +611,12 @@ def auditJar = { File jarFile, String property, String hashPin, String modId, St
             }
         }
         def manifest = new Manifest(zip.getInputStream(zip.getEntry('META-INF/MANIFEST.MF'))).mainAttributes
+        String expectedBuild = modId in ['basemetals', 'orespawn']
+                ? '26.1.2-64.0.9' : "${project.minecraft_version}-${project.forge_version}"
         if (manifest.getValue('Implementation-Version') != expectedVersion
-                || manifest.getValue('Built-On') != "${project.minecraft_version}-${project.forge_version}"
-                || manifest.getValue('Built-On-Java') != '21') {
-            throw new GradleException("${modId} must be ${expectedVersion} for Forge ${project.forge_version} and Java 21")
+                || manifest.getValue('Built-On') != expectedBuild
+                || manifest.getValue('Built-On-Java') != '25') {
+            throw new GradleException("${modId} must be ${expectedVersion}, built on ${expectedBuild} with Java 25")
         }
         String metadata = zip.getInputStream(zip.getEntry('META-INF/mods.toml')).getText('UTF-8')
         if (!metadata.readLines().any { it.startsWith("modId=\"${modId}\"") }) {
@@ -616,7 +673,7 @@ tasks.register('verifyPlayerDependencies') {
     dependsOn tasks.named('verifyCompanionPlayerDependencies')
     doLast {
         committedPin('poweradvantage_source_ref', /[a-f0-9]{40}/)
-        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.121111/)
+        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.2601021/)
         auditJar(explicitJar('powerAdvantagePlayerJar') ?: powerNativeJar, 'powerAdvantagePlayerJar', 'poweradvantage_player_sha256',
                 'basepower', project.poweradvantage_version, powerApi)
     }
@@ -627,7 +684,7 @@ tasks.register('verifyNativeDevelopmentDependencies') {
     description = 'Resolves Forge and audits the exact development JARs.'
     dependsOn tasks.named('verifyCompanionDevelopmentDependencies')
     doLast {
-        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.121111/)
+        committedPin('poweradvantage_version', /\d+\.\d+\.\d+\.2601021/)
         committedPin('poweradvantage_source_ref', /[a-f0-9]{40}/)
         auditJar(powerAdvantageDeobfJar, 'powerAdvantageDeobfJar', 'poweradvantage_deobf_sha256',
                 'basepower', project.poweradvantage_version, powerApi)
@@ -817,8 +874,8 @@ tasks.register('verifyReleaseArtifacts') {
                     }
                 }
                 int major = ((header[6] & 0xff) << 8) | (header[7] & 0xff)
-                if (major != 65) {
-                    throw new GradleException("${entry.name} uses Java class major ${major}, expected 65")
+                if (major != 69) {
+                    throw new GradleException("${entry.name} uses Java class major ${major}, expected 69")
                 }
             }
         }
@@ -1016,7 +1073,7 @@ eclipse {
     synchronizationTasks 'verifyJavaSourceLayout', 'isolateEclipseProductionRuns'
 }
 
-tasks.named('eclipseClasspath') { dependsOn tasks.named('processResources') }
+tasks.named('eclipseClasspath') { dependsOn tasks.named('processResources'), prepareNativeUnitSupport }
 
 tasks.register('configureEclipseBuildship') {
     group = 'ide'
@@ -1030,6 +1087,8 @@ tasks.register('configureEclipseBuildship') {
                 'connection.gradle.user.home'   : gradle.gradleUserHomeDir.canonicalPath,
                 'connection.project.dir'        : '',
                 'gradle.user.home'               : gradle.gradleUserHomeDir.canonicalPath,
+                'connection.java.home'           : javaToolchains.launcherFor(java.toolchain)
+                        .get().metadata.installationPath.asFile.canonicalPath,
                 'java.home'                      : javaToolchains.launcherFor(java.toolchain)
                         .get().metadata.installationPath.asFile.canonicalPath,
                 'override.workspace.settings'   : 'true'
@@ -1159,7 +1218,7 @@ tasks.register('isolateEclipseProductionRuns') {
             classpath.children().addAll(runtimeIndex, runtimeEntries)
             contents = groovy.xml.XmlUtil.serialize(launchXml)
 
-            ['--cache', '--metadata', '--to-srg', '--to-obf'].each { option ->
+            ['--cache', '--metadata'].each { option ->
                 String prefix = option + ' '
                 int valueStart = contents.indexOf(prefix)
                 if (valueStart < 0) {
@@ -1176,6 +1235,38 @@ tasks.register('isolateEclipseProductionRuns') {
                             + '&quot;' + value + '&quot;' + contents.substring(valueEnd))
                 }
             }
+            def resolvedLaunch = parser.parseText(contents)
+            def programAttribute = resolvedLaunch.stringAttribute.find {
+                it.@key == 'org.eclipse.jdt.launching.PROGRAM_ARGUMENTS'
+            }
+            String program = programAttribute.@value
+            if (program.contains('--to-srg') || program.contains('--to-obf')) {
+                throw new GradleException("${name} must not remap the official Forge 64 runtime")
+            }
+            if (name == 'runClient.launch') {
+                File nativeJar = productionRuntime.find {
+                    it.name == "forge-${project.minecraft_version}-${project.forge_version}.jar"
+                }
+                if (nativeJar == null) throw new GradleException('Missing native client metadata input')
+                File metadata = new File(nativeJar.parentFile,
+                        "forge-${project.minecraft_version}-${project.forge_version}-metadata.zip")
+                def assetIndex
+                new ZipFile(metadata).withCloseable { zip ->
+                    assetIndex = new groovy.json.JsonSlurper().parse(zip.getInputStream(
+                            zip.getEntry('minecraft/version.json'))).assetIndex
+                }
+                if (assetIndex.id.toString() != '30'
+                        || assetIndex.sha1 != '49107cf4e5f961b086ac4f06f3c2c56142b023dc') {
+                    throw new GradleException('Unexpected Minecraft 26.1.2 native asset index')
+                }
+                File assets = file(providers.gradleProperty('minecraftAssetsDir').getOrElse(
+                        new File(System.getenv('APPDATA') ?: System.getProperty('user.home'),
+                                '.minecraft/assets').path))
+                // Resolve launch metadata without downloading assets during Eclipse generation.
+                programAttribute.@value = program.replace('{asset_index}', assetIndex.id.toString())
+                        .replace('{assets_root}', '"' + assets.canonicalPath + '"')
+            }
+            contents = groovy.xml.XmlUtil.serialize(resolvedLaunch)
             launch.setText(contents.replace('\r\n', '\n'), 'UTF-8')
         }
     }
@@ -1216,6 +1307,10 @@ tasks.register('verifyEclipseProductionClasspath') {
                 != gradle.gradleUserHomeDir.canonicalFile) {
             throw new GradleException('Eclipse Buildship does not use this wrapper and Gradle home')
         }
+        File javaHome = javaToolchains.launcherFor(java.toolchain).get().metadata.installationPath.asFile
+        if (file(preferences.getProperty('connection.java.home', '')).canonicalFile != javaHome.canonicalFile) {
+            throw new GradleException('Eclipse Buildship must use the pinned Java 25 installation')
+        }
         String projectMetadata = file('.project').getText('UTF-8')
         if (!projectMetadata.contains('org.eclipse.buildship.core.gradleprojectnature')
                 || !projectMetadata.contains('org.eclipse.buildship.core.gradleprojectbuilder')) {
@@ -1229,16 +1324,16 @@ tasks.register('verifyEclipseProductionClasspath') {
         }
         def eclipseClasspath = new groovy.xml.XmlSlurper().parse(file('.classpath'))
         if (!eclipseClasspath.classpathentry.any {
-            it.@kind.text() == 'con' && it.@path.text().tokenize('/').last() == 'JavaSE-21'
+            it.@kind.text() == 'con' && it.@path.text().tokenize('/').last() == 'JavaSE-25'
         }) {
-            throw new GradleException('Eclipse must use the Java 21 production execution environment')
+            throw new GradleException('Eclipse must use the Java 25 production execution environment')
         }
         Properties jdt = new Properties()
         file('.settings/org.eclipse.jdt.core.prefs').withInputStream { jdt.load(it) }
         ['org.eclipse.jdt.core.compiler.codegen.targetPlatform', 'org.eclipse.jdt.core.compiler.source',
          'org.eclipse.jdt.core.compiler.compliance'].each { key ->
-            if (jdt.getProperty(key) != '21') {
-                throw new GradleException("Eclipse ${key} must remain Java 21")
+            if (jdt.getProperty(key) != '25') {
+                throw new GradleException("Eclipse ${key} must remain Java 25")
             }
         }
         def processedResources = eclipseClasspath.classpathentry.findAll {
@@ -1276,6 +1371,18 @@ tasks.register('verifyEclipseProductionClasspath') {
             String vmArguments = launch.stringAttribute.find {
                 it.@key.text() == 'org.eclipse.jdt.launching.VM_ARGUMENTS'
             }.@value.text()
+            if (arguments.contains('--to-srg') || arguments.contains('--to-obf')
+                    || arguments.contains('{asset_index}') || arguments.contains('{assets_root}')) {
+                throw new GradleException("${name} contains remap flags or unresolved native asset placeholders")
+            }
+            ['--cache', '--metadata'].each { option ->
+                if (!arguments.contains(option + ' ')) {
+                    throw new GradleException("${name} is missing Slime Launcher argument ${option}")
+                }
+            }
+            if (name == 'runClient.launch' && !arguments.contains('--assetIndex 30 ')) {
+                throw new GradleException('Eclipse client must use the actual Minecraft 26.1.2 asset index')
+            }
             def legacyFile = vmArguments =~ /(?:^|\s)"-DlegacyClassPath\.file=([^"]+)"(?=\s|$)/
             if (vmArguments.contains('-DlegacyClassPath.file=')
                     && (!legacyFile.find() || !file(legacyFile.group(1)).isFile())) {
@@ -1285,7 +1392,7 @@ tasks.register('verifyEclipseProductionClasspath') {
                     || (name == 'runClient.launch' && !arguments.startsWith('--launcher-side client '))
                     || !vmArguments.contains('--add-opens java.base/java.lang.invoke=ALL-UNNAMED')
                     || contents.contains('net.minecraftforge.userdev.LaunchTesting')) {
-                throw new GradleException("${name} must retain the native Forge 61 bootstrap and Java 21 module access")
+                throw new GradleException("${name} must retain the native Forge 64 bootstrap and Java 25 module access")
             }
             if (launch.booleanAttribute.find {
                 it.@key.text() == 'org.eclipse.jdt.launching.ATTR_EXCLUDE_TEST_CODE'
@@ -1329,9 +1436,11 @@ tasks.register('verifyEclipseProductionClasspath') {
             }
             List<String> bootstrapArtifacts = [
                     "forge-${project.minecraft_version}-${project.forge_version}",
-                    "client-extra-${project.minecraft_version}",
-                    "mappings_${project.mapping_channel}-${project.minecraft_version}"
+                    "client-extra-${project.minecraft_version}"
             ]
+            if (archives.any { it.name.startsWith('mappings_') }) {
+                throw new GradleException("${name} includes a mapping archive in an official-name runtime")
+            }
             List<Integer> bootstrapPositions = bootstrapArtifacts.collect { artifact ->
                 contents.indexOf(artifact)
             }
@@ -1343,7 +1452,7 @@ tasks.register('verifyEclipseProductionClasspath') {
             String target = name == 'runClient.launch' ? 'forge_userdev_client' : 'forge_userdev_server'
             if (!arguments.contains("--launchTarget ${target}")
                     || !arguments.contains("forge-${project.minecraft_version}-${project.forge_version}-metadata.zip")) {
-                throw new GradleException("${name} does not target the exact Forge 61 development runtime")
+                throw new GradleException("${name} does not target the exact Forge 64 development runtime")
             }
         }
     }

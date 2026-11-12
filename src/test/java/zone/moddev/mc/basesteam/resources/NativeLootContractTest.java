@@ -39,10 +39,10 @@ public class NativeLootContractTest {
         }
     }
 
-    @Test public void packUsesNative12111ResourceAndDataFormats() throws Exception {
+    @Test public void packUsesNative2612DataFormatAndForgeClientMetadata() throws Exception {
         JsonObject pack = read(ROOT.resolve("pack.mcmeta")).getAsJsonObject("pack");
-        assertEquals("[94,1]", pack.getAsJsonArray("min_format").toString());
-        assertEquals("[94,1]", pack.getAsJsonArray("max_format").toString());
+        assertEquals("[101,1]", pack.getAsJsonArray("min_format").toString());
+        assertEquals("[101,1]", pack.getAsJsonArray("max_format").toString());
         assertFalse(pack.has("pack_format"));
         assertFalse(pack.has("supported_formats"));
         assertFalse(pack.has("forge:server_data_pack_format"));

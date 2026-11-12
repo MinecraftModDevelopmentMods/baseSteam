@@ -13,7 +13,7 @@ import zone.moddev.mc.basemetals.recipe.CrushingRecipe;
 public final class BaseMetalsCompat {
     private BaseMetalsCompat() {}
 
-    public static boolean isLoaded() { return ModList.get().isLoaded("basemetals"); }
+    public static boolean isLoaded() { return ModList.isLoaded("basemetals"); }
 
     /** 1.13 additions are supplied as JSON crushing recipes, not mutable runtime registrations. */
     public static void addCrusherRecipe(String input, ItemStack output) {}

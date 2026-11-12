@@ -47,6 +47,7 @@ public class NativeEnchantmentContractTest {
             if (!ForgeRegistries.ITEMS.containsKey(key)) ForgeRegistries.ITEMS.register(key, item);
             assertSame(item, ForgeRegistries.ITEMS.getValue(key));
         });
+        NativeTestBootstrap.bindRegisteredItemComponents();
         previousTags = new HashMap<>();
         BuiltInRegistries.ITEM.freeze();
         BuiltInRegistries.ITEM.getTags().forEach(tag ->

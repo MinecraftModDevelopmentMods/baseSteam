@@ -57,7 +57,7 @@ public class NativeBlockPropertiesTest {
         // Native opacity is 1, not 0, for a non-solid block with a full-cube outline.
         int expected = height < 0 || height == 4 ? 1 : 0;
         for (BlockState state : states()) {
-            assertEquals(state.toString(), expected, state.getLightBlock());
+            assertEquals(state.toString(), expected, state.getLightDampening());
         }
     }
 

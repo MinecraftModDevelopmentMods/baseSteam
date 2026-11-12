@@ -41,13 +41,13 @@ public class NativePackFormatContractTest {
         assertEquals(server, PackMetadataSection.forPackType(PackType.SERVER_DATA).codec()
                 .parse(JsonOps.INSTANCE, pack).getOrThrow());
         var version = SharedConstants.getCurrentVersion();
-        assertEquals(PackFormat.of(75, 0), version.packVersion(PackType.CLIENT_RESOURCES));
-        assertEquals(PackFormat.of(94, 1), version.packVersion(PackType.SERVER_DATA));
+        assertEquals(PackFormat.of(84, 0), version.packVersion(PackType.CLIENT_RESOURCES));
+        assertEquals(PackFormat.of(101, 1), version.packVersion(PackType.SERVER_DATA));
         assertTrue(client.supportedFormats().isValueInRange(version.packVersion(PackType.CLIENT_RESOURCES)));
         assertTrue(server.supportedFormats().isValueInRange(version.packVersion(PackType.SERVER_DATA)));
-        assertFalse(client.supportedFormats().isValueInRange(PackFormat.of(74)));
-        assertFalse(server.supportedFormats().isValueInRange(PackFormat.of(95)));
-        assertFalse(client.supportedFormats().isValueInRange(PackFormat.of(94, 1)));
-        assertFalse(server.supportedFormats().isValueInRange(PackFormat.of(75, 0)));
+        assertFalse(client.supportedFormats().isValueInRange(PackFormat.of(83)));
+        assertFalse(server.supportedFormats().isValueInRange(PackFormat.of(102)));
+        assertFalse(client.supportedFormats().isValueInRange(PackFormat.of(101, 1)));
+        assertFalse(server.supportedFormats().isValueInRange(PackFormat.of(84, 0)));
     }
 }

@@ -46,9 +46,9 @@ public class NativeRequiredDependencyContractTest {
         assertTrue("Base Metals is REQUIRED, not an optional installation scope", dependency.isMandatory());
         assertEquals(IModInfo.Ordering.AFTER, dependency.getOrdering());
         assertEquals(IModInfo.DependencySide.BOTH, dependency.getSide());
-        assertEquals("[3.1.2.121111,4.0.0)", dependency.getVersionRange().toString());
-        assertTrue(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.2.121111")));
-        assertFalse(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.1.121111")));
+        assertEquals("[3.1.2.2601021,4.0.0)", dependency.getVersionRange().toString());
+        assertTrue(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.2.2601021")));
+        assertFalse(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("3.1.1.2601021")));
         assertFalse(dependency.getVersionRange().containsVersion(new DefaultArtifactVersion("4.0.0")));
     }
 
@@ -61,7 +61,7 @@ public class NativeRequiredDependencyContractTest {
     private static ModInfo parse(String metadata) throws Exception {
         Path root = Path.of("build/native-required-dependency-metadata");
         Files.createDirectories(root);
-        Path jar = Files.createTempDirectory(root, "forge61-").resolve("metadata.jar");
+        Path jar = Files.createTempDirectory(root, "forge64-").resolve("metadata.jar");
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         manifest.getMainAttributes().putValue("Automatic-Module-Name", "basesteam");
@@ -83,11 +83,11 @@ public class NativeRequiredDependencyContractTest {
     private static String fixture(String dependency) {
         return """
                 modLoader="javafml"
-                loaderVersion="[61,62)"
+                loaderVersion="[64,65)"
                 license="GPL-3.0-only"
                 [[mods]]
                 modId="basesteam"
-                version="2.2.16.121111"
+                version="2.2.17.2601021"
                 displayName="baseSteam"
                 """ + dependency;
     }
@@ -97,7 +97,7 @@ public class NativeRequiredDependencyContractTest {
                 [[dependencies.basesteam]]
                 modId="basemetals"
                 mandatory=%s
-                versionRange="[3.1.2.121111,4.0.0)"
+                versionRange="[3.1.2.2601021,4.0.0)"
                 ordering="AFTER"
                 side="BOTH"
                 """.formatted(required);

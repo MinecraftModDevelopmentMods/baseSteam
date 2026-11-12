@@ -117,4 +117,21 @@ public class OptionalCrushingRecipeContractTest {
             assertEquals(amount, output.has("count") ? output.get("count").getAsInt() : 1);
         }
     }
+
+    @Test public void commonSetupDoesNotConstructDiscardedPreComponentRecipeStacks() throws Exception {
+        var type = new org.objectweb.asm.tree.ClassNode();
+        new org.objectweb.asm.ClassReader("zone.moddev.mc.basesteam.SteamAdvantage").accept(type, 0);
+        var setup = type.methods.stream().filter(method -> method.name.equals("commonSetup")).findFirst().orElseThrow();
+        for (var instruction : setup.instructions) {
+            if (instruction instanceof org.objectweb.asm.tree.MethodInsnNode call) {
+                assertNotEquals("The obsolete recipe bridge constructs unbound mod ItemStacks during common setup",
+                        "zone/moddev/mc/basesteam/init/Recipes", call.owner);
+            }
+            if (instruction instanceof org.objectweb.asm.tree.TypeInsnNode allocation) {
+                assertNotEquals("Common setup must not allocate mod stacks before native component binding",
+                        "net/minecraft/world/item/ItemStack", allocation.desc);
+            }
+        }
+        assertFalse(Files.exists(Path.of("src/main/java/zone/moddev/mc/basesteam/init/Recipes.java")));
+    }
 }

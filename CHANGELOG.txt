@@ -1,3 +1,13 @@
+baseSteam 2.2.17.2601021 (Minecraft 26.1.2 / Forge, LOCAL PORT IN PROGRESS)
+
+- Target Forge 64.1.5, official names, MCP 20260409.101008 and Java 25.0.3+9 throughout.
+- Keep the existing registry IDs, saved fields, recipes, assets, migration aliases and machine balance.
+- Use native 26.1.2 recipe assembly and resource metadata while retaining strict positive and negative checks.
+- Handle fuels without a crafting remainder in both boilers and blast furnaces; keep exact fuel consumption and container returns.
+- Remove obsolete no-op crushing registration during common setup; keep all nine data-driven salvage recipes and their original mode conditions.
+- Require the coordinated native Power and Base Metals hook pins before compiling or qualifying a candidate.
+- No 26.1.2 publication or gameplay acceptance is claimed.
+
 baseSteam 2.2.16.121111 (Minecraft 1.21.11 / Forge)
 
 - Target Forge 61.1.0, Java 21 and released basePower 2.4.15.121111.

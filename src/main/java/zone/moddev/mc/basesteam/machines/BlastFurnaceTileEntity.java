@@ -14,8 +14,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Arrays;
 
@@ -60,7 +58,6 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	public float[] getProgress(){
 		float[] a = new float[progress.length];
 		System.arraycopy(progress, 0, a, 0, progress.length);
@@ -209,7 +206,8 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	
 	private void decrementFuel() {
 		if(inventory[0].getCount() == 1){
-			inventory[0] = inventory[0].getCraftingRemainder();
+			var remainder = inventory[0].getCraftingRemainder();
+			inventory[0] = remainder == null ? ItemStack.EMPTY : remainder.create();
 		} else {
 			this.removeItem(0, 1);
 		}
@@ -337,7 +335,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
                 || !(getLevel() instanceof net.minecraft.server.level.ServerLevel server)) return ItemStack.EMPTY;
 		SingleRecipeInput inventory = new SingleRecipeInput(input);
 		return server.recipeAccess().getRecipeFor(RecipeType.SMELTING, inventory, server)
-				.map(recipe -> recipe.value().assemble(inventory, getLevel().registryAccess())).orElse(ItemStack.EMPTY);
+				.map(recipe -> recipe.value().assemble(inventory)).orElse(ItemStack.EMPTY);
 	}
 
 

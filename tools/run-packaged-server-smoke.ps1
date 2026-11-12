@@ -2,7 +2,7 @@
 param(
     [Parameter(Mandatory)][string]$ForgeInstall,
     [Parameter(Mandatory)][ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$RunId,
-    [string]$JavaExe = "$env:USERPROFILE/.jdks/temurin-21.0.7+6/bin/java.exe",
+    [string]$JavaExe = "$env:USERPROFILE/.jdks/jdk-25.0.3+9/bin/java.exe",
     [string]$PowerJar,
     [string]$BaseMetalsJar,
     [string]$OreSpawnJar,
@@ -12,19 +12,24 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$jvmEnvironment = [ordered]@{}
+foreach ($name in @('JAVA_TOOL_OPTIONS', 'JDK_JAVA_OPTIONS', '_JAVA_OPTIONS')) {
+    $jvmEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+    if ($null -ne $jvmEnvironment[$name]) { throw "Packaged qualification must not inherit $name" }
+}
 if ($WithoutBaseMetals) {
     throw 'Base Metals is required by baseSteam; a no-Base-Metals runtime is not supported.'
 }
 $project = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $forge = (Resolve-Path -LiteralPath $ForgeInstall).Path
 $pins = Get-Content -Raw -LiteralPath (Join-Path $project 'gradle.properties') | ConvertFrom-StringData
-if ($pins.minecraft_version -ne '1.21.11' -or $pins.forge_version -ne '61.1.0' -or
+if ($pins.minecraft_version -ne '26.1.2' -or $pins.forge_version -ne '64.1.5' -or
         $pins.poweradvantage_source_ref -cnotmatch '^[0-9a-f]{40}$') {
-    throw 'An exact Forge 61.1.0 candidate and committed Power source pin are required.'
+    throw 'An exact Forge 64.1.5 candidate and committed Power source pin are required.'
 }
 $java = (Resolve-Path -LiteralPath $JavaExe).Path
 $javaVersion = (& $java -version 2>&1 | Out-String).Trim()
-if ($LASTEXITCODE -ne 0 -or $javaVersion -notmatch 'Temurin-21\.0\.7\+6') {
+if ($LASTEXITCODE -ne 0 -or $javaVersion -notmatch 'Temurin-25\.0\.3\+9') {
     throw "Unexpected test JVM: $javaVersion"
 }
 
@@ -39,10 +44,10 @@ if (!$PowerJar) {
     $PowerJar = Join-Path $project "../../PowerAdvantage/build/libs/basePower-$($pins.poweradvantage_version).jar"
 }
 if (!$BaseMetalsJar) {
-    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/.verification-basemetals12111/Advantage shared hook/build/libs/BaseMetals-$($pins.basemetals_version).jar"
+    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/BaseMetals 2612/BaseMetals/build/libs/BaseMetals-$($pins.basemetals_version).jar"
 }
 if (!$OreSpawnJar) {
-    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS12111/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
+    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS2612/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
 }
 $mods = [ordered]@{
     $steamName = @{ Path = (Join-Path $project "build/libs/$steamName"); Sha256 = $steamSha }
@@ -60,7 +65,7 @@ $forgeJars = [ordered]@{
 }
 foreach ($file in $forgeJars.Keys) {
     if ($forgeJars[$file] -cnotmatch '^[A-F0-9]{64}$') {
-        throw "Supply the coordinated Forge 61.1.0 runtime hash in gradle.properties: $file"
+        throw "Supply the coordinated Forge 64.1.5 runtime hash in gradle.properties: $file"
     }
     if ((Get-FileHash -LiteralPath (Join-Path $forge $file)).Hash -cne $forgeJars[$file]) {
         throw "Installed Forge runtime hash mismatch: $file"
@@ -85,6 +90,8 @@ $receipt = [ordered]@{
     forge = $forgeVersion
     forgeJars = $forgeJars
     java = $javaVersion
+    jvmOptionEnvironment = $jvmEnvironment
+    jvmArguments = @('-Xms512m', '-Xmx3g', '-XX:ActiveProcessorCount=4', '-Djava.net.preferIPv6Addresses=system')
     mods = $mods
     world = (Join-Path $run 'steam-smoke')
     transport = $(if ($UseNioTransport) { 'NIO' } else { 'native-availability-selection' })

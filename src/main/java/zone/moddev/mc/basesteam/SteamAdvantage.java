@@ -19,19 +19,18 @@ import cyano.poweradvantage.api.migration.LegacyConfigMigration.Mapping;
 import cyano.poweradvantage.api.migration.LegacyConfigMigration.ValueType;
 import zone.moddev.mc.basesteam.config.SteamAdvantageConfig;
 import zone.moddev.mc.basesteam.init.GUI;
-import zone.moddev.mc.basesteam.init.Recipes;
 import zone.moddev.mc.basesteam.init.TreasureChests;
 import zone.moddev.mc.basesteam.init.Villages;
 import zone.moddev.mc.basesteam.migration.SteamLegacyMigrations;
 import zone.moddev.mc.basesteam.migration.SteamConfigMigration;
 import zone.moddev.mc.basesteam.recipe.RecipeConditions;
 
-/** Forge 1.21.11 entry point for baseSteam. */
+/** Forge 26.1.2 entry point for baseSteam. */
 @Mod(SteamAdvantage.MODID)
 public final class SteamAdvantage {
     public static final String MODID = "basesteam";
     public static final String NAME = "baseSteam";
-    public static final String VERSION = "2.2.16.121111";
+    public static final String VERSION = "2.2.17.2601021";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static float MUSKET_DAMAGE = 20.0F;
@@ -79,7 +78,6 @@ public final class SteamAdvantage {
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(GUI::init);
         SteamAdvantageConfig.apply();
-        Recipes.init();
         TreasureChests.init(FMLPaths.CONFIGDIR.get());
         Villages.init();
         LOGGER.info("baseSteam {} common setup complete", VERSION);
