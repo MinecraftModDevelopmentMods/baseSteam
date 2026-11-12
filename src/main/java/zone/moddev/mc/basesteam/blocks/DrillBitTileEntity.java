@@ -27,7 +27,7 @@ public class DrillBitTileEntity extends BlockEntity{
 	}
 	
 	public void tick(){
-		if(hasLevel() && getLevel().isClientSide){
+		if(hasLevel() && getLevel().isClientSide()){
 			rotation = ROTATION_PER_TICK * (getLevel().getGameTime() % 20);
 		}
 	}
@@ -40,6 +40,12 @@ public class DrillBitTileEntity extends BlockEntity{
 	public Direction.Axis getDirection(){
 		return direction.getAxis();
 	}
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        destroyLine(false);
+        super.preRemoveSideEffects(pos, state);
+    }
 	
 	public static void createDrillBitBlock(Level w, BlockPos coord, Direction dir){
 		w.setBlockAndUpdate(coord, zone.moddev.mc.basesteam.init.Blocks.drillbit.defaultBlockState());
@@ -55,7 +61,7 @@ public class DrillBitTileEntity extends BlockEntity{
 	}
 
 	public void destroyLine(boolean removeOrigin){
-		if(!hasLevel() || getLevel().isClientSide) return;
+		if(!hasLevel() || getLevel().isClientSide()) return;
 		List<BlockPos> line = new ArrayList<>();
 		line.add(getBlockPos());
 		collectLine(line, direction);
@@ -78,16 +84,16 @@ public class DrillBitTileEntity extends BlockEntity{
 	}
 	
 	@Override
-	protected void saveAdditional(CompoundTag root, HolderLookup.Provider registries){
-		super.saveAdditional(root, registries);
-		writeDirectionToNBT(root);
+	protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput root){
+		super.saveAdditional(root);
+		root.putByte("dir", (byte)direction.get3DDataValue());
 	}
 	
 
 	@Override
-	protected void loadAdditional(CompoundTag root, HolderLookup.Provider registries){
-		super.loadAdditional(root, registries);
-		readDirectionFromNBT(root);
+	protected void loadAdditional(net.minecraft.world.level.storage.ValueInput root){
+		super.loadAdditional(root);
+		this.direction = decodeDirection(root.getByteOr("dir", root.getByteOr("d", (byte)direction.get3DDataValue())));
 	}
 
 	@Override
@@ -109,20 +115,12 @@ public class DrillBitTileEntity extends BlockEntity{
 		root.putByte("dir", (byte)direction.get3DDataValue());
 	}
 
-	private void readDirectionFromNBT(CompoundTag root) {
-		if(root.contains("dir")){
-			this.direction = decodeDirection(root.getByte("dir"));
-		} else if(root.contains("d")){
-			this.direction = decodeDirection(root.getByte("d"));
-		}
-	}
-
 	private static Direction decodeDirection(int index) {
 		return index >= 0 && index < Direction.values().length ? Direction.from3DDataValue(index) : Direction.DOWN;
 	}
 
 	private void syncDirection() {
-		if(hasLevel() && !getLevel().isClientSide) {
+		if(hasLevel() && !getLevel().isClientSide()) {
 			setChanged();
 			BlockState state = getLevel().getBlockState(getBlockPos());
 			getLevel().sendBlockUpdated(getBlockPos(), state, state, 3);

@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistry;
 import org.junit.BeforeClass;
@@ -54,20 +54,24 @@ public class SteamMachinePersistenceTest {
         tag.putInt("BurnTime", 127);
         tag.putInt("BurnTimeTotal", 1600);
         CoalBoilerTileEntity coal = new CoalBoilerTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_coal"));
-        coal.loadWithComponents(tag, NativeTestBootstrap.registries());
+        coal.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
         CompoundTag saved = coal.saveWithFullMetadata(NativeTestBootstrap.registries());
-        assertEquals("basesteam:steam_boiler_coal", saved.getString("id"));
-        assertEquals(127, saved.getInt("BurnTime"));
-        assertEquals(1600, saved.getInt("BurnTimeTotal"));
+        assertEquals("basesteam:steam_boiler_coal", saved.getStringOr("id", ""));
+        assertEquals(127, saved.getIntOr("BurnTime", 0));
+        assertEquals(1600, saved.getIntOr("BurnTimeTotal", 0));
         CoalBoilerTileEntity restored = new CoalBoilerTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_coal"));
-        restored.loadWithComponents(saved, NativeTestBootstrap.registries());
+        restored.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), saved));
         assertEquals(37.5F, restored.getEnergy(Power.steam_power), 0.0F);
         assertEquals(1500, restored.getTank().getFluidAmount());
         tag.putFloat("Electricity", 60.0F);
         ElectricBoilerTileEntity electric = new ElectricBoilerTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_electric"));
-        electric.loadWithComponents(tag, NativeTestBootstrap.registries());
+        electric.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
         ElectricBoilerTileEntity electricRestored = new ElectricBoilerTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_electric"));
-        electricRestored.loadWithComponents(electric.saveWithoutMetadata(NativeTestBootstrap.registries()), NativeTestBootstrap.registries());
+        electricRestored.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), electric.saveWithoutMetadata(NativeTestBootstrap.registries())));
         assertEquals(37.5F, electricRestored.getEnergy(Power.steam_power), 0.0F);
         assertEquals(60.0F, electricRestored.getEnergy(ElectricBoilerTileEntity.ELECTRIC_POWER), 0.0F);
         assertEquals(1500, electricRestored.getTank().getFluidAmount());
@@ -78,21 +82,25 @@ public class SteamMachinePersistenceTest {
         tag.put("TankOut", water(750));
         tag.putByte("NextPump", (byte) 11);
         SteamPumpTileEntity pump = new SteamPumpTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_pump"));
-        pump.loadWithComponents(tag, NativeTestBootstrap.registries());
+        pump.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
         CompoundTag saved = pump.saveWithoutMetadata(NativeTestBootstrap.registries());
-        assertEquals(750, saved.getCompound("Tank").getInt("Amount"));
-        assertEquals(11, saved.getByte("NextPump"));
+        assertEquals(750, saved.getCompoundOrEmpty("Tank").getIntOr("Amount", 0));
+        assertEquals(11, saved.getByteOr("NextPump", (byte)0));
         SteamPumpTileEntity pumpRestored = new SteamPumpTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_pump"));
-        pumpRestored.loadWithComponents(saved, NativeTestBootstrap.registries());
+        pumpRestored.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), saved));
         assertEquals(750, pumpRestored.getTank().getFluidAmount());
         assertEquals(37.5F, pumpRestored.getEnergy(Power.steam_power), 0.0F);
         tag.putFloat("Tempoerature", 412.5F);
         GeothermalBoilerTileEntity geothermal = new GeothermalBoilerTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_boiler_geothermal"));
-        geothermal.loadWithComponents(tag, NativeTestBootstrap.registries());
-        assertEquals(412.5F, geothermal.saveWithoutMetadata(NativeTestBootstrap.registries()).getFloat("Temperature"), 0.0F);
+        geothermal.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
+        assertEquals(412.5F, geothermal.saveWithoutMetadata(NativeTestBootstrap.registries()).getFloatOr("Temperature", 0.0F), 0.0F);
         tag.putFloat("Temperature", 500.0F);
-        geothermal.loadWithComponents(tag, NativeTestBootstrap.registries());
-        assertEquals(500.0F, geothermal.saveWithoutMetadata(NativeTestBootstrap.registries()).getFloat("Temperature"), 0.0F);
+        geothermal.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
+        assertEquals(500.0F, geothermal.saveWithoutMetadata(NativeTestBootstrap.registries()).getFloatOr("Temperature", 0.0F), 0.0F);
     }
 
     @Test public void stillKeepsSeparateTanksAndExplicitlyEmptyReloads() {
@@ -100,15 +108,18 @@ public class SteamMachinePersistenceTest {
         tag.put("TankIn", water(625));
         tag.put("TankOut", water(375));
         SteamStillTileEntity still = new SteamStillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_still"));
-        still.loadWithComponents(tag, NativeTestBootstrap.registries());
+        still.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
         SteamStillTileEntity restored = new SteamStillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_still"));
-        restored.loadWithComponents(still.saveWithoutMetadata(NativeTestBootstrap.registries()), NativeTestBootstrap.registries());
+        restored.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), still.saveWithoutMetadata(NativeTestBootstrap.registries())));
         assertEquals(625, restored.getInputTank().getFluidAmount());
         assertEquals(375, restored.getOutputTank().getFluidAmount());
         assertEquals(37.5F, restored.getEnergy(Power.steam_power), 0.0F);
         tag.put("TankIn", water(0));
         tag.put("TankOut", water(0));
-        restored.loadWithComponents(tag, NativeTestBootstrap.registries());
+        restored.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
         assertEquals(0, restored.getInputTank().getFluidAmount());
         assertEquals(0, restored.getOutputTank().getFluidAmount());
     }

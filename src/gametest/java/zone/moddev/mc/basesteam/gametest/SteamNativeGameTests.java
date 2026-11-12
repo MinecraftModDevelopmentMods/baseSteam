@@ -3,12 +3,12 @@ package zone.moddev.mc.basesteam.gametest;
 import com.mojang.serialization.Dynamic;
 import io.netty.buffer.Unpooled;
 import net.minecraft.SharedConstants;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.gametest.framework.GameTest;
+import net.minecraftforge.gametest.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,7 +16,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
@@ -27,7 +27,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestDontPrefix;
-import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.GameTestNamespace;
 import zone.moddev.mc.basepower.migration.LegacyWorldDataHook;
 import zone.moddev.mc.basepower.util.ItemData;
 import zone.moddev.mc.basesteam.SteamAdvantage;
@@ -38,16 +38,16 @@ import zone.moddev.mc.basesteam.init.Items;
 import zone.moddev.mc.basesteam.init.Enchantments;
 import zone.moddev.mc.basesteam.items.MusketItem;
 
-@GameTestHolder(value = SteamAdvantage.MODID, namespace = SteamAdvantage.MODID)
+@GameTestNamespace(SteamAdvantage.MODID)
 @GameTestDontPrefix
 public final class SteamNativeGameTests {
     private SteamNativeGameTests() {}
 
-    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
+    @GameTest(structure = "basesteam:basesteam_empty")
     public static void drillBitPacketPreservesTypePositionAndDirection(GameTestHelper helper) {
         BlockPos local = new BlockPos(1, 1, 1);
         helper.setBlock(local, Blocks.drillbit);
-        DrillBitTileEntity source = (DrillBitTileEntity) helper.getBlockEntity(local);
+        DrillBitTileEntity source = helper.getBlockEntity(local, DrillBitTileEntity.class);
         var registries = helper.getLevel().registryAccess();
         for (Direction direction : Direction.values()) {
             source.setDirection(direction);
@@ -58,8 +58,9 @@ public final class SteamNativeGameTests {
                 helper.assertTrue(received.getType() == Entities.DRILLBIT, "Wrong drill-bit packet type");
                 helper.assertTrue(received.getPos().equals(helper.absolutePos(local)), "Wrong drill-bit position");
                 DrillBitTileEntity destination = new DrillBitTileEntity(received.getPos(), source.getBlockState());
-                destination.onDataPacket(null, received, registries);
-                helper.assertTrue(destination.getUpdateTag(registries).getByte("dir") == direction.get3DDataValue(),
+                destination.onDataPacket(null, net.minecraft.world.level.storage.TagValueInput.create(
+                        net.minecraft.util.ProblemReporter.DISCARDING, registries, received.getTag()), registries);
+                helper.assertTrue(destination.getUpdateTag(registries).getByteOr("dir", (byte)0) == direction.get3DDataValue(),
                         "Lost drill-bit direction " + direction);
             } finally {
                 buffer.release();
@@ -68,7 +69,7 @@ public final class SteamNativeGameTests {
         helper.succeed();
     }
 
-    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
+    @GameTest(structure = "basesteam:basesteam_empty")
     public static void legacyMusketWearAndLoadedByteSurviveNativeComponentization(GameTestHelper helper) {
         CompoundTag legacy = new CompoundTag();
         legacy.putString("id", "basesteam:musket");
@@ -81,23 +82,24 @@ public final class SteamNativeGameTests {
         legacy.put("tag", tag);
         var registries = helper.getLevel().registryAccess();
         var fixed = DataFixers.getDataFixer().update(References.ITEM_STACK,
-                new Dynamic<>(NbtOps.INSTANCE, legacy), 3465, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
-        ItemStack stack = ItemStack.parse(registries, fixed.getValue()).orElseThrow();
+                new Dynamic<>(NbtOps.INSTANCE, legacy), 3465, SharedConstants.getCurrentVersion().dataVersion().version());
+        ItemStack stack = ItemStack.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), fixed.getValue()).getOrThrow();
         helper.assertTrue(stack.is(Items.blackpowder_musket), "Converted the wrong item");
         helper.assertTrue(stack.getDamageValue() == 249 && stack.getMaxDamage() == 250, "Lost legacy wear");
         helper.assertTrue(MusketItem.isLoaded(stack), "Lost the legacy loaded byte");
         assertMusketEnchantments(helper, stack);
         MusketItem.unload(stack);
-        ItemStack reloaded = ItemStack.parse(registries, stack.save(registries)).orElseThrow();
+        ItemStack reloaded = ItemStack.CODEC.parse(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
+                ItemStack.CODEC.encodeStart(registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE), stack).getOrThrow()).getOrThrow();
         helper.assertTrue(MusketItem.isNotLoaded(reloaded) && reloaded.getDamageValue() == 249,
                 "Changing loaded state must not reset wear");
-        helper.assertTrue("legacy fixture".equals(reloaded.get(DataComponents.CUSTOM_DATA).copyTag().getString("owner")),
+        helper.assertTrue("legacy fixture".equals(reloaded.get(DataComponents.CUSTOM_DATA).copyTag().getStringOr("owner", "")),
                 "Changing loaded state must not discard unrelated legacy data");
         assertMusketEnchantments(helper, reloaded);
         helper.succeed();
     }
 
-    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
+    @GameTest(structure = "basesteam:basesteam_empty")
     public static void olderMusketAliasAndTopLevelWearSurvivePowerMigration(GameTestHelper helper) {
         CompoundTag legacy = new CompoundTag();
         legacy.putString("id", "steamadvantage:musket");
@@ -116,22 +118,22 @@ public final class SteamNativeGameTests {
         helper.succeed();
     }
 
-    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
+    @GameTest(structure = "basesteam:basesteam_empty")
     public static void nativeResourcesLoadWithExpectedIds(GameTestHelper helper) {
         var level = helper.getLevel();
         var registries = level.registryAccess();
-        var nativeEnchantments = registries.registryOrThrow(Registries.ENCHANTMENT);
+        var nativeEnchantments = registries.lookupOrThrow(Registries.ENCHANTMENT);
         for (var key : java.util.List.of(Enchantments.high_explosive, Enchantments.powderless,
                 Enchantments.rapid_reload, Enchantments.recoil)) {
-            var holder = nativeEnchantments.getHolderOrThrow(key);
+            var holder = nativeEnchantments.getOrThrow(key);
             helper.assertTrue(holder.is(net.minecraft.tags.EnchantmentTags.IN_ENCHANTING_TABLE),
-                    "Missing table discovery for " + key.location());
+                    "Missing table discovery for " + key.identifier());
             helper.assertTrue(holder.is(net.minecraft.tags.EnchantmentTags.TRADEABLE),
-                    "Missing enchanted-book trade discovery for " + key.location());
+                    "Missing enchanted-book trade discovery for " + key.identifier());
             helper.assertTrue(holder.is(net.minecraft.tags.EnchantmentTags.ON_RANDOM_LOOT),
-                    "Missing random loot discovery for " + key.location());
+                    "Missing random loot discovery for " + key.identifier());
             helper.assertTrue(holder.value().isPrimaryItem(new ItemStack(Items.blackpowder_musket)),
-                    "Native musket support tag was not bound for " + key.location());
+                    "Native musket support tag was not bound for " + key.identifier());
         }
         var fragile = TagKey.create(Registries.BLOCK, id("musket_fragile"));
         helper.assertTrue(net.minecraft.world.level.block.Blocks.SHORT_GRASS.defaultBlockState().is(fragile),
@@ -165,12 +167,13 @@ public final class SteamNativeGameTests {
             if (!chestTable.getRandomItems(params, seed).isEmpty()) foundSteamItem = true;
         }
         helper.assertTrue(foundSteamItem, "Steam chest rolls returned no items");
-        helper.assertTrue(loot.getLootTable(Blocks.steam_pipe.getLootTable()) != LootTable.EMPTY,
+        helper.assertTrue(loot.getLootTable(Blocks.steam_pipe.getLootTable().orElseThrow()) != LootTable.EMPTY,
                 "Missing Steam pipe block loot");
-        var pipe = level.getRecipeManager().byKey(id("steam_pipe"));
-        var brass = net.minecraft.tags.ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ingots/brass"));
+        var pipe = level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, id("steam_pipe")));
+        var brass = net.minecraft.tags.ItemTags.create(Identifier.fromNamespaceAndPath("forge", "ingots/brass"));
         if (registries.lookupOrThrow(Registries.ITEM).get(brass).filter(tag -> tag.size() > 0).isPresent()) {
-            var result = pipe.orElseThrow().value().getResultItem(registries);
+            var recipe = (net.minecraft.world.item.crafting.ShapedRecipe)pipe.orElseThrow().value();
+            var result = recipe.assemble(net.minecraft.world.item.crafting.CraftingInput.EMPTY, registries);
             helper.assertTrue(result.is(Blocks.steam_pipe.asItem()) && result.getCount() == 6,
                     "Wrong Steam pipe recipe output");
         } else {
@@ -179,8 +182,8 @@ public final class SteamNativeGameTests {
         helper.succeed();
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, path);
     }
 
     private static ListTag legacyEnchantments(String namespace) {
@@ -200,7 +203,7 @@ public final class SteamNativeGameTests {
                 Enchantments.rapid_reload, Enchantments.recoil)) {
             int expected = key.equals(Enchantments.high_explosive) || key.equals(Enchantments.recoil) ? 5 : 1;
             helper.assertTrue(Enchantments.level(key, stack, registries) == expected,
-                    "Lost legacy enchantment holder or level: " + key.location());
+                    "Lost legacy enchantment holder or level: " + key.identifier());
         }
     }
 }

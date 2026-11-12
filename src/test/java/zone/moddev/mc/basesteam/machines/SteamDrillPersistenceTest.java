@@ -36,15 +36,18 @@ public class SteamDrillPersistenceTest {
 
     @Test public void retainsLegacyProgressUntilWorldIsAttached() {
         SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
-        drill.loadWithComponents(target(94), NativeTestBootstrap.registries());
+        drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), target(94)));
         drill.prepareDataFieldsForSync();
         assertEquals(94, drill.getDataFieldArray()[1]);
     }
 
     @Test public void clearsPreviousProgressOnReadingAnUntargetedTile() {
         SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
-        drill.loadWithComponents(target(94), NativeTestBootstrap.registries());
-        drill.loadWithComponents(new CompoundTag(), NativeTestBootstrap.registries());
+        drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), target(94)));
+        drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), new CompoundTag()));
         drill.prepareDataFieldsForSync();
         assertEquals(0, drill.getDataFieldArray()[1]);
     }
@@ -57,7 +60,8 @@ public class SteamDrillPersistenceTest {
             state.putString("Name", "minecraft:stone");
             tag.put("TargetState", state);
             SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
-            drill.loadWithComponents(tag, NativeTestBootstrap.registries());
+            drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
             assertEquals(facing, field(drill, "savedFacing"));
             assertEquals(new BlockPos(2048, 80, 2049), field(drill, "targetBlockCoord"));
             assertEquals(state, field(drill, "savedTargetState"));
@@ -71,11 +75,14 @@ public class SteamDrillPersistenceTest {
         SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
         CompoundTag tag = target(94);
         tag.putByte("Facing", (byte) Direction.UP.get3DDataValue());
-        drill.loadWithComponents(tag, NativeTestBootstrap.registries());
-        drill.loadWithComponents(target(12), NativeTestBootstrap.registries());
+        drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
+        drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), target(12)));
         assertNull(field(drill, "savedFacing"));
         tag.putByte("Facing", (byte) 127);
-        drill.loadWithComponents(tag, NativeTestBootstrap.registries());
+        drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
         assertNull(field(drill, "savedFacing"));
     }
 
@@ -90,7 +97,8 @@ public class SteamDrillPersistenceTest {
         items.add(stack);
         tag.put("Items", items);
         SteamDrillTileEntity drill = new SteamDrillTileEntity(net.minecraft.core.BlockPos.ZERO, NativeMachineFixture.state("steam_drill"));
-        drill.loadWithComponents(tag, NativeTestBootstrap.registries());
+        drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
         assertEquals(37.5F, drill.getEnergy(Power.steam_power), 0.0F);
         ItemStack output = drill.getItem(4);
         assertEquals(net.minecraft.world.item.Items.COBBLESTONE, output.getItem());
@@ -110,9 +118,9 @@ public class SteamDrillPersistenceTest {
         assertNull(drill.addItem(different));
         assertNull(drill.addItem(matching));
         assertEquals(11, drill.getItem(0).getCount());
-        assertEquals("first", drill.getItem(0).get(DataComponents.CUSTOM_DATA).copyTag().getString("source"));
+        assertEquals("first", drill.getItem(0).get(DataComponents.CUSTOM_DATA).copyTag().getStringOr("source", ""));
         assertEquals(4, drill.getItem(1).getCount());
-        assertEquals("second", drill.getItem(1).get(DataComponents.CUSTOM_DATA).copyTag().getString("source"));
+        assertEquals("second", drill.getItem(1).get(DataComponents.CUSTOM_DATA).copyTag().getStringOr("source", ""));
     }
 
     @Test public void serializationNeverLooksUpTheWorldOrInfersNeighbours() throws Exception {
@@ -130,12 +138,35 @@ public class SteamDrillPersistenceTest {
                 if (!(instruction instanceof MethodInsnNode)) continue;
                 MethodInsnNode call = (MethodInsnNode) instruction;
                 assertFalse("Serialization must not reacquire a saving chunk: " + call.name,
-                        call.name.equals("getFacing") || call.name.equals("inferFacing")
-                        || call.name.equals("powerAdvantageWorld") || call.owner.startsWith("net/minecraft/world/"));
+                        serializationTouchesWorld(call));
             }
         }
         assertEquals(1, methods);
         assertTrue("Cached facing must still be serialized", cachedFacingReads > 0);
+    }
+
+    @Test public void nativeOutputWriteAllowlistStillRejectsWorldAccessAndUnrelatedIoMethods() {
+        String output = "net/minecraft/world/level/storage/ValueOutput";
+        assertFalse(serializationTouchesWorld(new MethodInsnNode(org.objectweb.asm.Opcodes.INVOKEINTERFACE,
+                output, "putShort", "(Ljava/lang/String;S)V", true)));
+        assertTrue(serializationTouchesWorld(new MethodInsnNode(org.objectweb.asm.Opcodes.INVOKEINTERFACE,
+                output, "child", "(Ljava/lang/String;)Lnet/minecraft/world/level/storage/ValueOutput;", true)));
+        assertTrue(serializationTouchesWorld(new MethodInsnNode(org.objectweb.asm.Opcodes.INVOKEVIRTUAL,
+                "net/minecraft/world/level/Level", "getBlockState",
+                "(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;", false)));
+        for (String method : new String[] {"getFacing", "inferFacing", "powerAdvantageWorld"})
+            assertTrue(serializationTouchesWorld(new MethodInsnNode(org.objectweb.asm.Opcodes.INVOKEVIRTUAL,
+                    "zone/moddev/mc/basesteam/machines/SteamDrillTileEntity", method, "()Ljava/lang/Object;", false)));
+    }
+
+    private static boolean serializationTouchesWorld(MethodInsnNode call) {
+        if (call.name.equals("getFacing") || call.name.equals("inferFacing") || call.name.equals("powerAdvantageWorld")) return true;
+        if (!call.owner.startsWith("net/minecraft/world/")) return false;
+        if (!call.owner.equals("net/minecraft/world/level/storage/ValueOutput")
+                || call.getOpcode() != org.objectweb.asm.Opcodes.INVOKEINTERFACE) return true;
+        return !java.util.Set.of("putShort(Ljava/lang/String;S)V", "putByte(Ljava/lang/String;B)V",
+                "putInt(Ljava/lang/String;I)V", "store(Ljava/lang/String;Lcom/mojang/serialization/Codec;Ljava/lang/Object;)V")
+                .contains(call.name + call.desc);
     }
 
     @Test public void facinglessLegacyTargetsInferAllDirectionsWithoutAnAttachedWorld() throws Exception {
@@ -149,7 +180,8 @@ public class SteamDrillPersistenceTest {
             tag.putInt("targetY", target.getY());
             tag.putInt("targetZ", target.getZ());
             SteamDrillTileEntity drill = new SteamDrillTileEntity(origin, NativeMachineFixture.state("steam_drill"));
-            drill.loadWithComponents(tag, NativeTestBootstrap.registries());
+            drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), tag));
             assertNull(field(drill, "savedFacing"));
             assertEquals(direction, infer.invoke(drill));
         }

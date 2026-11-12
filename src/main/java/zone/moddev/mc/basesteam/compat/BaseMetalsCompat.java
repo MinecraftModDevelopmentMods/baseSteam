@@ -37,8 +37,10 @@ public final class BaseMetalsCompat {
     private static final class LoadedCrushingRecipes {
         private static ItemStack find(Level world, ItemStack input) {
             SingleRecipeInput inventory = new SingleRecipeInput(input.copy());
-            for (var candidate : world.getRecipeManager().getAllRecipesFor(CrushingRecipe.TYPE.get())) {
-                CrushingRecipe crushing = candidate.value();
+            if (!(world instanceof net.minecraft.server.level.ServerLevel server)) return null;
+            for (var candidate : server.recipeAccess().getRecipes().stream()
+                    .filter(holder -> CrushingRecipe.TYPE.get().equals(holder.value().getType())).toList()) {
+                CrushingRecipe crushing = (CrushingRecipe)candidate.value();
                 if (crushing.matches(inventory, world)) {
                     return crushing.getResultItem(world.registryAccess()).copy();
                 }

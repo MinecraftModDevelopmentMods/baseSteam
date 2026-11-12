@@ -177,12 +177,12 @@ public class CoalBoilerFillPersistenceTest {
     private static void assertSaved(SaveWitnessBoiler boiler, int amount) {
         assertTrue("An accepted external fill must request saving without relying on a later tile tick",
                 boiler.dirtyCalls > 0);
-        assertEquals(amount, boiler.savedTank.getInt("Amount"));
+        assertEquals(amount, boiler.savedTank.getIntOr("Amount", 0));
     }
 
     private static void assertUnchangedSave(SaveWitnessBoiler boiler, int amount) {
         assertEquals(0, boiler.dirtyCalls);
-        assertEquals(amount, boiler.savedTank.getInt("Amount"));
+        assertEquals(amount, boiler.savedTank.getIntOr("Amount", 0));
     }
 
     private static final class SaveWitnessBoiler extends CoalBoilerTileEntity {
@@ -217,6 +217,6 @@ public class CoalBoilerFillPersistenceTest {
         }
     }
     private static final class SaveWorld extends net.minecraft.server.level.ServerLevel {
-        private SaveWorld() { super(null, null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false, null); }
+        private SaveWorld() { super(null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false, null); }
     }
 }

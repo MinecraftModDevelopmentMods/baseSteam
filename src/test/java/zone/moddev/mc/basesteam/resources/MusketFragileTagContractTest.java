@@ -8,7 +8,7 @@ import java.security.MessageDigest;
 import java.util.HexFormat;
 import java.util.TreeSet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import zone.moddev.mc.basesteam.testing.NativeTestBootstrap;
@@ -31,7 +31,7 @@ public class MusketFragileTagContractTest {
             assertTrue(blocks.contains("minecraft:short_grass"));
             for (String id : blocks) {
                 assertTrue("Unregistered Forge 52 block would invalidate the tag: " + id,
-                        BuiltInRegistries.BLOCK.containsKey(ResourceLocation.parse(id)));
+                        BuiltInRegistries.BLOCK.containsKey(Identifier.parse(id)));
             }
             assertFalse(blocks.contains("minecraft:tnt"));
             assertFalse(blocks.contains("minecraft:stone"));

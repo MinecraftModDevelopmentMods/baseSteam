@@ -12,7 +12,8 @@ import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basepower.registry.still.recipe.DistillationRecipe;
 import zone.moddev.mc.basepower.registry.still.recipe.DistillationRecipeRegistry;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -177,24 +178,24 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void saveAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.saveAdditional(tagRoot, registries);
+	protected void saveAdditional(ValueOutput tagRoot) {
+		super.saveAdditional(tagRoot);
 		CompoundTag tankTag = new CompoundTag();
 		this.getOutputTank().writeToNBT(tankTag);
-		tagRoot.put("TankOut", tankTag);
+		tagRoot.store("TankOut", CompoundTag.CODEC, tankTag);
 		CompoundTag tankTag2 = new CompoundTag();
 		this.getInputTank().writeToNBT(tankTag2);
-		tagRoot.put("TankIn", tankTag2);
+		tagRoot.store("TankIn", CompoundTag.CODEC, tankTag2);
 	}
 	/**
 	 * Handles data saving and loading
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void loadAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.loadAdditional(tagRoot, registries);
-		if (tagRoot.contains("TankOut")) {
-			CompoundTag tankTag = tagRoot.getCompound("TankOut");
+	protected void loadAdditional(ValueInput tagRoot) {
+		super.loadAdditional(tagRoot);
+		if (tagRoot.read("TankOut", CompoundTag.CODEC).isPresent()) {
+			CompoundTag tankTag = tagRoot.read("TankOut", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 			getOutputTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
@@ -202,8 +203,8 @@ public class SteamStillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			}
 		}
 
-		if (tagRoot.contains("TankIn")) {
-			CompoundTag tankTag = tagRoot.getCompound("TankIn");
+		if (tagRoot.read("TankIn", CompoundTag.CODEC).isPresent()) {
+			CompoundTag tankTag = tagRoot.read("TankIn", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 			getInputTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )

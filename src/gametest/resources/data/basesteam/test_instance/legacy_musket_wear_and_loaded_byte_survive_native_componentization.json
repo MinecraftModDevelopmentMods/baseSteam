@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "basesteam:legacy_musket_wear_and_loaded_byte_survive_native_componentization",
+  "environment": "minecraft:default",
+  "structure": "basesteam:basesteam_empty",
+  "max_ticks": 100
+}

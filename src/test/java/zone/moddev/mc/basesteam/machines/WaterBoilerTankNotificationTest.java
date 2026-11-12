@@ -84,7 +84,7 @@ public class WaterBoilerTankNotificationTest {
         assertEquals(5, fill(water(5), true));
         assertEquals(15, probe.tank().getFluidAmount());
         assertEquals(0, probe.save().dirtyCalls);
-        assertEquals(10, probe.save().savedTank.getInt("Amount"));
+        assertEquals(10, probe.save().savedTank.getIntOr("Amount", 0));
     }
 
     @Test public void aClientDirectDrainDoesNotRequestServerSaving() {
@@ -92,7 +92,7 @@ public class WaterBoilerTankNotificationTest {
         assertEquals(5, probe.tank().drain(5, true).amount);
         assertEquals(5, probe.tank().getFluidAmount());
         assertEquals(0, probe.save().dirtyCalls);
-        assertEquals(10, probe.save().savedTank.getInt("Amount"));
+        assertEquals(10, probe.save().savedTank.getIntOr("Amount", 0));
     }
 
     private static FluidStack water(int amount) { return new FluidStack(net.minecraft.world.level.material.Fluids.WATER, amount); }
@@ -100,12 +100,12 @@ public class WaterBoilerTankNotificationTest {
     private void saved(int amount) {
         assertTrue("Real server-side tank mutation must notify its owner immediately", probe.save().dirtyCalls > 0);
         assertEquals(amount, probe.tank().getFluidAmount());
-        assertEquals(amount, probe.save().savedTank.getInt("Amount"));
+        assertEquals(amount, probe.save().savedTank.getIntOr("Amount", 0));
     }
     private void unchanged(int amount) {
         assertEquals(0, probe.save().dirtyCalls);
         assertEquals(amount, probe.tank().getFluidAmount());
-        assertEquals(amount, probe.save().savedTank.getInt("Amount"));
+        assertEquals(amount, probe.save().savedTank.getIntOr("Amount", 0));
     }
     private int fill(FluidStack offer, boolean execute) throws Exception {
         return ((Number) probe.machine().getClass().getMethod("fill", net.minecraft.core.Direction.class, FluidStack.class, boolean.class)
@@ -162,6 +162,6 @@ public class WaterBoilerTankNotificationTest {
         } catch (ReflectiveOperationException failure) { throw new AssertionError(failure); }
     }
     private static final class SaveWorld extends net.minecraft.server.level.ServerLevel {
-        private SaveWorld() { super(null, null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false, null); }
+        private SaveWorld() { super(null, null, null, null, null, null, false, 0L, java.util.Collections.emptyList(), false, null); }
     }
 }

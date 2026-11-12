@@ -5,15 +5,9 @@
     "  w"
   ],
   "key": {
-    "f": {
-      "item": "minecraft:flint_and_steel"
-    },
-    "s": {
-      "tag": "forge:ingots/steel"
-    },
-    "w": {
-      "tag": "minecraft:planks"
-    }
+    "f": "minecraft:flint_and_steel",
+    "s": "#forge:ingots/steel",
+    "w": "#minecraft:planks"
   },
   "result": {
     "id": "basesteam:musket"

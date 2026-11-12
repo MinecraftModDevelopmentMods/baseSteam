@@ -6,21 +6,11 @@
     "pmp"
   ],
   "key": {
-    "X": {
-      "item": "minecraft:piston"
-    },
-    "Y": {
-      "tag": "forge:storage_blocks/steel"
-    },
-    "g": {
-      "tag": "forge:governors"
-    },
-    "p": {
-      "tag": "forge:plates/iron"
-    },
-    "m": {
-      "tag": "forge:frames/steel"
-    }
+    "X": "minecraft:piston",
+    "Y": "#forge:storage_blocks/steel",
+    "g": "#forge:governors",
+    "p": "#forge:plates/iron",
+    "m": "#forge:frames/steel"
   },
   "result": {
     "id": "basesteam:steam_crusher"

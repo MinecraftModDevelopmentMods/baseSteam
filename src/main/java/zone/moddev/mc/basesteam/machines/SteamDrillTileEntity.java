@@ -6,7 +6,8 @@ import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.compat.BaseMetalsCompat;
 import zone.moddev.mc.basesteam.init.Blocks;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
@@ -193,7 +194,8 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 		dataTransfer.putInt("x", nextPos.getX());
 		dataTransfer.putInt("y", nextPos.getY());
 		dataTransfer.putInt("z", nextPos.getZ());
-		te.loadWithComponents(dataTransfer, w.registryAccess());
+		te.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, w.registryAccess(), dataTransfer));
 		te.clearRemoved();
 		te.subtractEnergy(ENERGY_COST_MOVE, Power.steam_power);
 		te.setChanged();
@@ -346,7 +348,7 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	private void restoreTargetBlock(){
-		if(powerAdvantageWorld() == null || powerAdvantageWorld().isClientSide
+		if(powerAdvantageWorld() == null || powerAdvantageWorld().isClientSide()
 				|| !powerAdvantageWorld().hasChunkAt(targetBlockCoord)) return;
 		int savedProgress = progress;
 		if(savedTargetState != null && !savedTargetState.equals(
@@ -468,8 +470,8 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
-		super.saveAdditional(tagRoot, registries);
+	protected void saveAdditional(ValueOutput tagRoot){
+		super.saveAdditional(tagRoot);
 		tagRoot.putShort("progress",(short)progress);
 		// getFacing refreshes this during normal ticks. World lookups here can
 		// synchronously reload a chunk while its unload-save is in progress.
@@ -478,30 +480,36 @@ public class SteamDrillTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			tagRoot.putInt("targetX", targetBlockCoord.getX());
 			tagRoot.putInt("targetY", targetBlockCoord.getY());
 			tagRoot.putInt("targetZ", targetBlockCoord.getZ());
-			if(savedTargetState != null) tagRoot.put("TargetState", savedTargetState.copy());
+			if(savedTargetState != null) tagRoot.store("TargetState", CompoundTag.CODEC, savedTargetState.copy());
 		}
 	}
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (getLevel() != null) SteamDrillBlock.destroyNeighbors(getLevel(), pos, state);
+        super.preRemoveSideEffects(pos, state);
+    }
 	
 	@Override
-	protected void loadAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
-		super.loadAdditional(tagRoot, registries);
+	protected void loadAdditional(ValueInput tagRoot){
+		super.loadAdditional(tagRoot);
 		untargetBlock();
 		savedFacing = null;
 		oldDir = null;
-		if(tagRoot.contains("Facing")){
-			int facingIndex = tagRoot.getByte("Facing");
+		if(tagRoot.read("Facing", com.mojang.serialization.Codec.BYTE).isPresent()){
+			int facingIndex = tagRoot.getByteOr("Facing", (byte)0);
 			if(facingIndex >= 0 && facingIndex < Direction.values().length){
 				savedFacing = Direction.from3DDataValue(facingIndex);
 			}
 		}
-		if(tagRoot.contains("progress")){
-			progress = tagRoot.getShort("progress");
+		if(tagRoot.read("progress", com.mojang.serialization.Codec.SHORT).isPresent()){
+			progress = tagRoot.getShortOr("progress", (short)0);
 		}
-		if(tagRoot.contains("targetX") && tagRoot.contains("targetY") && tagRoot.contains("targetZ")){
-			int x = tagRoot.getInt("targetX");
-			int y = tagRoot.getInt("targetY");
-			int z = tagRoot.getInt("targetZ");
-			savedTargetState = tagRoot.contains("TargetState", 10) ? tagRoot.getCompound("TargetState").copy() : null;
+		if(tagRoot.read("targetX", com.mojang.serialization.Codec.INT).isPresent() && tagRoot.read("targetY", com.mojang.serialization.Codec.INT).isPresent() && tagRoot.read("targetZ", com.mojang.serialization.Codec.INT).isPresent()){
+			int x = tagRoot.getIntOr("targetX", 0);
+			int y = tagRoot.getIntOr("targetY", 0);
+			int z = tagRoot.getIntOr("targetZ", 0);
+			savedTargetState = tagRoot.read("TargetState", CompoundTag.CODEC).isPresent() ? tagRoot.read("TargetState", CompoundTag.CODEC).orElseGet(CompoundTag::new).copy() : null;
 			// Loot and hardness are restored on the server after the world is attached.
 			this.deferredTargetBlock(new BlockPos(x,y,z));
 		}

@@ -2,44 +2,80 @@ package zone.moddev.mc.basesteam.graphics;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.world.phys.Vec3;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 
 @OnlyIn(Dist.CLIENT)
-public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity> {
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/entity/drill_bit.png");
+public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity, DrillBitRenderer.State> {
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, "textures/entity/drill_bit.png");
 
     public DrillBitRenderer(Context dispatcher) {
     }
 
+    public static final class State extends BlockEntityRenderState {
+        Direction.Axis axis = Direction.Axis.Y;
+        float rotation;
+    }
+
+    @Override public State createRenderState() { return new State(); }
+
     @Override
-    public void render(DrillBitTileEntity tile, float partialTick, PoseStack matrices,
-            MultiBufferSource buffers, int light, int overlay) {
-        renderGeometry(tile.getDirection(), tile.rotation + DrillBitTileEntity.ROTATION_PER_TICK * partialTick,
-                matrices, buffers.getBuffer(RenderType.entityTranslucent(TEXTURE)), light, overlay);
+    public void extractRenderState(DrillBitTileEntity tile, State state, float partialTick, Vec3 camera,
+            ModelFeatureRenderer.CrumblingOverlay breaking) {
+        BlockEntityRenderer.super.extractRenderState(tile, state, partialTick, camera, breaking);
+        state.axis = tile.getDirection();
+        state.rotation = tile.rotation + DrillBitTileEntity.ROTATION_PER_TICK * partialTick;
+    }
+
+    @Override
+    public void submit(State state, PoseStack matrices, SubmitNodeCollector collector, CameraRenderState camera) {
+        matrices.pushPose();
+        try {
+            positionGeometry(state.axis, state.rotation, matrices);
+            int light = state.lightCoords;
+            collector.submitCustomGeometry(matrices, RenderTypes.entityTranslucent(TEXTURE),
+                    (pose, vertices) -> renderQuads(pose, vertices, light,
+                            net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY));
+        } finally {
+            matrices.popPose();
+        }
     }
 
     static void renderGeometry(Direction.Axis axis, float rotation, PoseStack matrices,
             VertexConsumer vertices, int light, int overlay) {
         matrices.pushPose();
         try {
-            matrices.translate(0.5D, 0.5D, 0.5D);
-            if (axis != Direction.Axis.Y) {
-                matrices.mulPose(Axis.XP.rotationDegrees(90.0F));
-                if (axis != Direction.Axis.Z) matrices.mulPose(Axis.ZP.rotationDegrees(90.0F));
-            }
-            matrices.mulPose(Axis.YP.rotationDegrees(rotation));
-            PoseStack.Pose transform = matrices.last();
+            positionGeometry(axis, rotation, matrices);
+            renderQuads(matrices.last(), vertices, light, overlay);
+        } finally {
+            matrices.popPose();
+        }
+    }
+
+    private static void positionGeometry(Direction.Axis axis, float rotation, PoseStack matrices) {
+        matrices.translate(0.5D, 0.5D, 0.5D);
+        if (axis != Direction.Axis.Y) {
+            matrices.mulPose(Axis.XP.rotationDegrees(90.0F));
+            if (axis != Direction.Axis.Z) matrices.mulPose(Axis.ZP.rotationDegrees(90.0F));
+        }
+        matrices.mulPose(Axis.YP.rotationDegrees(rotation));
+    }
+
+    private static void renderQuads(PoseStack.Pose transform, VertexConsumer vertices, int light, int overlay) {
             final float radius = 0.25F;
             // Retain the original six quads and UV layout; native buffers supply lighting and overlay.
             vertex(transform, vertices, radius, 0.5F, -radius, 0, 0, 0, 0, -1, light, overlay);
@@ -71,9 +107,6 @@ public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity>
             vertex(transform, vertices, -radius, -0.5F, -radius, 0.5F, 0.5F, 0, -1, 0, light, overlay);
             vertex(transform, vertices, radius, -0.5F, -radius, 1, 0.5F, 0, -1, 0, light, overlay);
             vertex(transform, vertices, radius, -0.5F, radius, 1, 0, 0, -1, 0, light, overlay);
-        } finally {
-            matrices.popPose();
-        }
     }
 
     private static void vertex(PoseStack.Pose transform, VertexConsumer vertices,

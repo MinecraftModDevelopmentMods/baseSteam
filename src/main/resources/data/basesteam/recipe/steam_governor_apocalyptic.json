@@ -6,18 +6,10 @@
     "btb"
   ],
   "key": {
-    "t": {
-      "tag": "forge:sprockets"
-    },
-    "s": {
-      "tag": "forge:rods"
-    },
-    "r": {
-      "tag": "forge:rods"
-    },
-    "b": {
-      "tag": "forge:ingots/brass"
-    }
+    "t": "#forge:sprockets",
+    "s": "#forge:rods",
+    "r": "#forge:rods",
+    "b": "#forge:ingots/brass"
   },
   "result": {
     "id": "basesteam:steam_governor"

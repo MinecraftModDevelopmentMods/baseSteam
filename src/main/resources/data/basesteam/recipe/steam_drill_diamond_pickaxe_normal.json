@@ -5,18 +5,10 @@
     "pmp"
   ],
   "key": {
-    "X": {
-      "item": "minecraft:diamond_pickaxe"
-    },
-    "g": {
-      "tag": "forge:governors"
-    },
-    "p": {
-      "tag": "forge:plates/iron"
-    },
-    "m": {
-      "tag": "forge:frames/steel"
-    }
+    "X": "minecraft:diamond_pickaxe",
+    "g": "#forge:governors",
+    "p": "#forge:plates/iron",
+    "m": "#forge:frames/steel"
   },
   "result": {
     "id": "basesteam:steam_drill"

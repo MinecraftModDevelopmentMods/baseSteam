@@ -7,7 +7,8 @@ import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.fluid.FluidRequest;
 import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -49,7 +50,7 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 			@Override
 			protected void onContentsChanged() {
 				if (CoalBoilerTileEntity.this.getLevel() != null
-						&& !CoalBoilerTileEntity.this.getLevel().isClientSide) {
+						&& !CoalBoilerTileEntity.this.getLevel().isClientSide()) {
 					CoalBoilerTileEntity.this.setChanged();
 				}
 			}
@@ -111,13 +112,13 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	private int getFuelBurnTime() {
 		if(inventory[0] == null) return 0;
-		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(inventory[0]);
+		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(inventory[0], getLevel());
 	}
 
 
 	private void decrementFuel() {
 		if(inventory[0].getCount() == 1){
-			inventory[0] = inventory[0].getCraftingRemainingItem();
+			inventory[0] = inventory[0].getCraftingRemainder();
 		} else {
 			this.removeItem(0, 1);
 		}
@@ -215,11 +216,11 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-    protected void saveAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.saveAdditional(tagRoot, registries);
+    protected void saveAdditional(ValueOutput tagRoot) {
+		super.saveAdditional(tagRoot);
         CompoundTag tankTag = new CompoundTag();
         this.getTank().writeToNBT(tankTag);
-        tagRoot.put("Tank", tankTag);
+        tagRoot.store("Tank", CompoundTag.CODEC, tankTag);
 		if(this.burnTime > 0)tagRoot.putInt("BurnTime", this.burnTime);
 		if(this.totalBurnTime > 0)tagRoot.putInt("BurnTimeTotal", this.totalBurnTime);
 	}
@@ -228,23 +229,23 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-    protected void loadAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-	super.loadAdditional(tagRoot, registries);
-        if (tagRoot.contains("Tank")) {
-            CompoundTag tankTag = tagRoot.getCompound("Tank");
+    protected void loadAdditional(ValueInput tagRoot) {
+	super.loadAdditional(tagRoot);
+        if (tagRoot.read("Tank", CompoundTag.CODEC).isPresent()) {
+            CompoundTag tankTag = tagRoot.read("Tank", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 		getTank().readFromNBT(tankTag);
 		if(tankTag.contains("Empty")){
 			// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
 			getTank().setFluid(null);
 		}
         }
-		if(tagRoot.contains("BurnTime")){
-			this.burnTime = tagRoot.getInt("BurnTime");
+		if(tagRoot.read("BurnTime", com.mojang.serialization.Codec.INT).isPresent()){
+			this.burnTime = tagRoot.getIntOr("BurnTime", 0);
 		} else {
 			this.burnTime = 0;
 		}
-		if(tagRoot.contains("BurnTimeTotal")){
-			this.totalBurnTime = tagRoot.getInt("BurnTimeTotal");
+		if(tagRoot.read("BurnTimeTotal", com.mojang.serialization.Codec.INT).isPresent()){
+			this.totalBurnTime = tagRoot.getIntOr("BurnTimeTotal", 0);
 		} else {
 			this.totalBurnTime = 0;
 		}
@@ -438,7 +439,7 @@ public class CoalBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEn
 
 	@Override
 	public boolean canPlaceItem(final int slot, final ItemStack item) {
-		return super.canPlaceItem(slot, item) && zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(item) > 0;
+		return super.canPlaceItem(slot, item) && zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(item, getLevel()) > 0;
 	}
 
 	@Override

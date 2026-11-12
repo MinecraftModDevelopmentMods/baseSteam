@@ -95,9 +95,15 @@ public class DrillBitRendererTest {
             vertex.color[0] = red; vertex.color[1] = green; vertex.color[2] = blue; vertex.color[3] = alpha;
             return this;
         }
+        @Override public VertexConsumer setColor(int color) {
+            return setColor((color >>> 16) & 255, (color >>> 8) & 255, color & 255, color >>> 24);
+        }
         @Override public VertexConsumer setUv(float u, float v) { vertex.u = u; vertex.v = v; return this; }
         @Override public VertexConsumer setUv1(int u, int v) { vertex.overlay = u | v << 16; return this; }
         @Override public VertexConsumer setUv2(int u, int v) { vertex.light = u | v << 16; return this; }
+        @Override public VertexConsumer setLineWidth(float width) {
+            throw new AssertionError("Drill geometry must submit quads, not line vertices");
+        }
         @Override public VertexConsumer setNormal(float x, float y, float z) {
             vertex.normal[0] = x; vertex.normal[1] = y; vertex.normal[2] = z;
             return this;

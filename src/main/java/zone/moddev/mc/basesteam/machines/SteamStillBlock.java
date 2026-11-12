@@ -21,7 +21,7 @@ public class SteamStillBlock extends cyano.poweradvantage.api.simple.BlockSimple
 
 	
 	public SteamStillBlock() {
-		super(machineProperties(0.75F), Power.steam_power, Fluids.fluidConduit_general);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_still")), Power.steam_power, Fluids.fluidConduit_general);
 	}
 
 	@Override

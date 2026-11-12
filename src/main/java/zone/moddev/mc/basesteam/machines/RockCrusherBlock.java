@@ -16,7 +16,7 @@ public class RockCrusherBlock extends cyano.poweradvantage.api.simple.BlockSimpl
 
 	
 	public RockCrusherBlock() {
-		super(machineProperties(0.75F), Power.steam_power);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_crusher")), Power.steam_power);
 	}
 
 	@Override

@@ -54,7 +54,7 @@ public class SteamOperationalPumpSourceTest {
     }
 
     @Test public void unsupportedModSourceIsNeverReplacedOrCredited() {
-        Block host = new Block(Block.Properties.of()) {
+        Block host = new Block(properties("unsupported_source")) {
             @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
         };
         BlockState source = host.defaultBlockState();
@@ -129,15 +129,21 @@ public class SteamOperationalPumpSourceTest {
 
     private static final class RefusingSource extends Block implements BucketPickup {
         private int pickups;
-        private RefusingSource() { super(Block.Properties.of()); }
+        private RefusingSource() { super(SteamOperationalPumpSourceTest.properties("refusing_source")); }
         @Override public FluidState getFluidState(BlockState state) { return Fluids.WATER.defaultFluidState(); }
         @Override public net.minecraft.world.item.ItemStack pickupBlock(
-                net.minecraft.world.entity.player.Player player, LevelAccessor world, BlockPos pos, BlockState state) {
+                net.minecraft.world.entity.LivingEntity player, LevelAccessor world, BlockPos pos, BlockState state) {
             assertNull("Automated pickup has no acting player", player);
             pickups++;
             return net.minecraft.world.item.ItemStack.EMPTY;
         }
         @Override public java.util.Optional<net.minecraft.sounds.SoundEvent> getPickupSound() { return java.util.Optional.empty(); }
+    }
+
+    private static Block.Properties properties(String name) {
+        return Block.Properties.of().setId(net.minecraft.resources.ResourceKey.create(
+                net.minecraft.core.registries.Registries.BLOCK,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("basesteam_test", name)));
     }
 
     private static final class PickupWorld {

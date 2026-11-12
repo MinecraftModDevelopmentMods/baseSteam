@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 public class SteamTankBlock extends cyano.poweradvantage.api.simple.BlockSimplePowerMachine {
 
 	public SteamTankBlock(){
-		super(machineProperties(0.75F), Power.steam_power);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_tank")), Power.steam_power);
 	}
 
 	@Override

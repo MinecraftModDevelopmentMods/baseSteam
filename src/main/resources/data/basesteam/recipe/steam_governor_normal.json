@@ -6,18 +6,10 @@
     "btb"
   ],
   "key": {
-    "t": {
-      "tag": "forge:nuggets/iron"
-    },
-    "s": {
-      "item": "minecraft:stick"
-    },
-    "r": {
-      "item": "minecraft:stick"
-    },
-    "b": {
-      "tag": "forge:ingots/brass"
-    }
+    "t": "#forge:nuggets/iron",
+    "s": "minecraft:stick",
+    "r": "minecraft:stick",
+    "b": "#forge:ingots/brass"
   },
   "result": {
     "id": "basesteam:steam_governor"

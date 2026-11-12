@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.resources.Identifier;
+import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegisterEvent;
@@ -78,7 +78,8 @@ public final class Blocks {
             steam_elevator_platforms[i] = steam_elevator_platform.defaultBlockState().setValue(PlatformBlock.HEIGHT, i);
         }
         steam_elevator = (GUIBlock) add(new SteamElevatorBlock(), "steam_elevator");
-        steam_switch = add(new BlockPowerSwitch(Power.steam_power), "steam_switch");
+        steam_switch = add(new BlockPowerSwitch(Power.steam_power,
+                zone.moddev.mc.basesteam.blocks.SteamBlockProperties.pistonLike("steam_switch")), "steam_switch");
         pump_pipe_steam = add(new PumpPipeBlock(), "pump_pipe_steam");
         steam_still = (GUIBlock) add(new SteamStillBlock(), "steam_still");
         steam_pump = (GUIBlock) add(new SteamPumpBlock(), "steam_pump");
@@ -96,14 +97,16 @@ public final class Blocks {
         if (!ForgeRegistries.Keys.BLOCKS.equals(event.getRegistryKey())) return;
         init();
         event.register(ForgeRegistries.Keys.BLOCKS, registry ->
-                ALL_BLOCKS.forEach((id, block) -> registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), block)));
+                ALL_BLOCKS.forEach((id, block) -> registry.register(Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, id), block)));
     }
 
     @SubscribeEvent
     public static void registerBlockItems(RegisterEvent event) {
         event.register(ForgeRegistries.Keys.ITEMS, registry -> ALL_BLOCKS.forEach((id, block) -> {
-            BlockItem item = new BlockItem(block, new Item.Properties());
-            registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
+            BlockItem item = new BlockItem(block, new Item.Properties().setId(
+                    net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM,
+                            Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, id))).useBlockDescriptionPrefix());
+            registry.register(Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
             if (!"pump_pipe_steam".equals(id) && !"drillbit".equals(id)) ItemGroups.show(item);
         }));
     }

@@ -20,7 +20,7 @@ public class DrillBitBlock extends Block implements EntityBlock {
     private static final VoxelShape SHAPE = Shapes.box(0.25D, 0.25D, 0.25D, 0.75D, 0.75D, 0.75D);
 
     public DrillBitBlock() {
-        super(SteamBlockProperties.metalHelper(2000.0F));
+        super(SteamBlockProperties.metalHelper("drillbit", 2000.0F));
     }
 
     @Override public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new DrillBitTileEntity(pos, state); }
@@ -35,29 +35,21 @@ public class DrillBitBlock extends Block implements EntityBlock {
     @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPE; }
 
     @Override
-    public void entityInside(BlockState state, Level world, BlockPos pos, Entity victim) {
-        if (!world.isClientSide) victim.hurt(Power.machineDamage(world), 2.0F);
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moving) {
-        if (state.getBlock() != newState.getBlock()) {
-            BlockEntity tile = world.getBlockEntity(pos);
-            if (!world.isClientSide && tile instanceof DrillBitTileEntity) {
-                ((DrillBitTileEntity) tile).destroyLine(false);
-            }
+    public void entityInside(BlockState state, Level world, BlockPos pos, Entity victim,
+            net.minecraft.world.entity.InsideBlockEffectApplier effects, boolean moving) {
+        if (world instanceof net.minecraft.server.level.ServerLevel server) {
+            victim.hurtServer(server, Power.machineDamage(world), 2.0F);
         }
-        super.onRemove(state, world, pos, newState, moving);
     }
 
     @Override
-    public void wasExploded(Level world, BlockPos pos, Explosion explosion) {
+    public void wasExploded(net.minecraft.server.level.ServerLevel world, BlockPos pos, Explosion explosion) {
         destroyNeighbors(world, pos);
         super.wasExploded(world, pos, explosion);
     }
 
     private void destroyNeighbors(Level world, BlockPos pos) {
-        if (world.isClientSide) return;
+        if (world.isClientSide()) return;
         for (Direction side : Direction.values()) {
             BlockEntity tile = world.getBlockEntity(pos.relative(side));
             if (tile instanceof DrillBitTileEntity) ((DrillBitTileEntity) tile).destroyLine();

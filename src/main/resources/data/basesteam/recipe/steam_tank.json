@@ -6,15 +6,9 @@
     "xxx"
   ],
   "key": {
-    "x": {
-      "tag": "forge:plates/copper"
-    },
-    "p": {
-      "tag": "forge:conduits/steam"
-    },
-    "g": {
-      "tag": "forge:governors"
-    }
+    "x": "#forge:plates/copper",
+    "p": "#forge:conduits/steam",
+    "g": "#forge:governors"
   },
   "result": {
     "id": "basesteam:steam_tank"

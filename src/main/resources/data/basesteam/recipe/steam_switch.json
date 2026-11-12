@@ -5,15 +5,9 @@
     "pfp"
   ],
   "key": {
-    "L": {
-      "item": "minecraft:lever"
-    },
-    "p": {
-      "tag": "forge:conduits/steam"
-    },
-    "f": {
-      "tag": "forge:frames/steel"
-    }
+    "L": "minecraft:lever",
+    "p": "#forge:conduits/steam",
+    "f": "#forge:frames/steel"
   },
   "result": {
     "id": "basesteam:steam_switch"

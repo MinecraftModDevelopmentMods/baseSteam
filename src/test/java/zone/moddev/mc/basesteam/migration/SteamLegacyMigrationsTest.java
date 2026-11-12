@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import cyano.poweradvantage.api.migration.LegacyMigrationApi;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.junit.Test;
 
 public class SteamLegacyMigrationsTest {
@@ -30,20 +30,20 @@ public class SteamLegacyMigrationsTest {
         oldTank.putInt("Amount", 1250);
         pump.put("TankOut", oldTank);
         assertTrue(SteamLegacyMigrations.repairPersistenceKeys(pump));
-        assertEquals(1250, pump.getCompound("Tank").getInt("Amount"));
+        assertEquals(1250, pump.getCompoundOrEmpty("Tank").getIntOr("Amount", 0));
 
         CompoundTag boiler = new CompoundTag();
         boiler.putString("id", "steamadvantage:steam_boiler_geothermal");
         boiler.putFloat("Tempoerature", 412.5F);
         assertTrue(SteamLegacyMigrations.repairPersistenceKeys(boiler));
-        assertEquals(412.5F, boiler.getFloat("Temperature"), 0.0F);
+        assertEquals(412.5F, boiler.getFloatOr("Temperature", 0.0F), 0.0F);
 
         CompoundTag canonical = new CompoundTag();
         canonical.putString("id", "basesteam:steam_boiler_geothermal");
         canonical.putFloat("Temperature", 500.0F);
         canonical.putFloat("Tempoerature", 100.0F);
         assertFalse(SteamLegacyMigrations.repairPersistenceKeys(canonical));
-        assertEquals(500.0F, canonical.getFloat("Temperature"), 0.0F);
+        assertEquals(500.0F, canonical.getFloatOr("Temperature", 0.0F), 0.0F);
     }
 
     @Test public void aliasesLegacyTileIds() {
@@ -65,15 +65,15 @@ public class SteamLegacyMigrationsTest {
                 "steam_boiler_geothermal", "steam_tank", "steam_furnace", "steam_crusher", "steam_drill",
                 "drillbit", "platform", "steam_elevator", "steam_switch", "pump_pipe_steam", "steam_still",
                 "steam_pump", "steam_boiler_oil"}) {
-            ResourceLocation current = ResourceLocation.fromNamespaceAndPath("basesteam", path);
-            assertEquals(current, LegacyMigrationApi.blockTarget(ResourceLocation.fromNamespaceAndPath("steamadvantage", path)));
+            Identifier current = Identifier.fromNamespaceAndPath("basesteam", path);
+            assertEquals(current, LegacyMigrationApi.blockTarget(Identifier.fromNamespaceAndPath("steamadvantage", path)));
             assertTrue(path, LegacyMigrationApi.blockStateCodecs().containsKey(current));
         }
-        ResourceLocation oldMusket = ResourceLocation.parse("steamadvantage:musket");
-        assertEquals(ResourceLocation.parse("basesteam:musket"), LegacyMigrationApi.itemTarget(oldMusket));
+        Identifier oldMusket = Identifier.parse("steamadvantage:musket");
+        assertEquals(Identifier.parse("basesteam:musket"), LegacyMigrationApi.itemTarget(oldMusket));
         assertTrue(LegacyMigrationApi.isDurableItem(oldMusket));
-        assertEquals(ResourceLocation.parse("basesteam:rapid_reload"),
-                LegacyMigrationApi.registryTarget(ResourceLocation.parse("steamadvantage:rapid_reload")));
+        assertEquals(Identifier.parse("basesteam:rapid_reload"),
+                LegacyMigrationApi.registryTarget(Identifier.parse("steamadvantage:rapid_reload")));
     }
 
     @Test public void repairsOldKeysForBothNamespacesWithoutDependingOnRemapOrder() {
@@ -84,8 +84,8 @@ public class SteamLegacyMigrationsTest {
             tank.putInt("Amount", 1250);
             pump.put("TankOut", tank);
             assertTrue(source, SteamLegacyMigrations.repairPersistenceKeys(pump));
-            assertEquals(source, pump.getString("id"));
-            assertEquals(tank, pump.getCompound("Tank"));
+            assertEquals(source, pump.getStringOr("id", ""));
+            assertEquals(tank, pump.getCompoundOrEmpty("Tank"));
             assertFalse(SteamLegacyMigrations.repairPersistenceKeys(pump));
         }
     }

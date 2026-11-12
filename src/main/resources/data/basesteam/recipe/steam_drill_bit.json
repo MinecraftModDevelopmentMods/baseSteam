@@ -6,15 +6,9 @@
     "did"
   ],
   "key": {
-    "g": {
-      "tag": "forge:sprockets"
-    },
-    "i": {
-      "tag": "forge:ingots/steel"
-    },
-    "d": {
-      "tag": "forge:gems/diamond"
-    }
+    "g": "#forge:sprockets",
+    "i": "#forge:ingots/steel",
+    "d": "#forge:gems/diamond"
   },
   "result": {
     "id": "basesteam:steam_drill_bit"

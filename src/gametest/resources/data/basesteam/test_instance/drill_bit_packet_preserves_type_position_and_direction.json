@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:function",
+  "function": "basesteam:drill_bit_packet_preserves_type_position_and_direction",
+  "environment": "minecraft:default",
+  "structure": "basesteam:basesteam_empty",
+  "max_ticks": 100
+}

@@ -1,8 +1,6 @@
 {
   "type": "basemetals:crushing",
-  "ingredient": {
-    "item": "basesteam:steam_boiler_electric"
-  },
+  "ingredient": "basesteam:steam_boiler_electric",
   "result": {
     "id": "basesteam:steam_governor",
     "count": 2

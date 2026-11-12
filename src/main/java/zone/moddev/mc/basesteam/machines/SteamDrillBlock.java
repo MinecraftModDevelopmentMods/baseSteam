@@ -5,7 +5,7 @@ import cyano.poweradvantage.api.simple.TileEntitySimplePowerMachine;
 import zone.moddev.mc.basepower.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,10 +28,10 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	/**
 	 * Blockstate property
 	 */
-	public static final DirectionProperty FACING = BlockStateProperties.FACING;
+	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
 
 	public SteamDrillBlock(){
-		super(machineProperties(0.75F));
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_drill")));
 		this.registerDefaultState(getStateDefinition().any().setValue(FACING, Direction.DOWN));
 	}
 
@@ -47,18 +47,16 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 	 * This method is called when the block is removed from the world by an entity.
 	 */
 	@Override
-	public void onRemove(BlockState state, Level w, BlockPos coord, BlockState newState, boolean isMoving){
-		if (state.getBlock() != newState.getBlock()) {
-			destroyNeighbors(w, coord, state);
-			ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, Power.steam_power);
-		}
-		super.onRemove(state, w, coord, newState, isMoving);
+	public void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel w,
+            BlockPos coord, boolean isMoving){
+		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, Power.steam_power);
+		super.affectNeighborsAfterRemoval(state, w, coord, isMoving);
 	}
 	/**
 	 * This method is called when the block is destroyed by an explosion.
 	 */
 	@Override
-	public void wasExploded(Level w, BlockPos coord, Explosion boom){
+	public void wasExploded(net.minecraft.server.level.ServerLevel w, BlockPos coord, Explosion boom){
 		destroyNeighbors(w,coord,w.getBlockState(coord));
 		ConduitRegistry.getInstance().conduitBlockRemovedEvent(w, coord, Power.steam_power);
 		super.wasExploded(w, coord, boom);
@@ -66,8 +64,8 @@ public class SteamDrillBlock extends GUIBlock implements ITypedConduit {
 
 
 
-	private void destroyNeighbors(Level w, BlockPos coord, BlockState state) {
-		if(w.isClientSide) return;
+	static void destroyNeighbors(Level w, BlockPos coord, BlockState state) {
+		if(w.isClientSide()) return;
 		// destroy connected drill bits
 		for(int i = 0; i < 6; i++){
 			BlockPos pos = coord.relative(Direction.from3DDataValue(i));

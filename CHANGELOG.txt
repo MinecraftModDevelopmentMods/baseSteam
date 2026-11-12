@@ -1,3 +1,15 @@
+baseSteam 2.2.16.121111 (Minecraft 1.21.11 / Forge)
+
+- Target Forge 61.1.0, Java 21 and released basePower 2.4.15.121111.
+- Adapt native registration, persistence, recipes, item definitions and drill rendering.
+- Retain registry identities, legacy state keys, recipe payloads and configuration defaults.
+- Use native Forge hidden-client pack metadata with data-format 94.1 at the mod root.
+- Require Base Metals on both client and server in Forge metadata as well as distribution metadata; retain the defensive recipe guards unchanged.
+- Keep block/material sprites, including the drill bit, out of the native item atlas; retain legacy item-icon lookup compatibility.
+- Make the atlas regression test use the configured, checksum-verified Power jar, including builds outside the usual sibling folders.
+- Keep native resource tests noninteractive in CI without suppressing warnings or errors.
+- Complete the combined machine, upgrade, graphical and two-world endurance checks against the current jars.
+
 baseSteam 2.2.15.121011 (Minecraft 1.21.1 / Forge)
 
 - Target Forge 52.1.0 and Java 21 with basePower 2.4.14.121011.

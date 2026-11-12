@@ -7,7 +7,8 @@ import cyano.poweradvantage.api.PowerRequest;
 import cyano.poweradvantage.api.fluid.FluidRequest;
 import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Player;
@@ -53,7 +54,7 @@ public class GeothermalBoilerTileEntity extends cyano.poweradvantage.api.simple.
 			@Override
 			protected void onContentsChanged() {
 				if (GeothermalBoilerTileEntity.this.getLevel() != null
-						&& !GeothermalBoilerTileEntity.this.getLevel().isClientSide) {
+						&& !GeothermalBoilerTileEntity.this.getLevel().isClientSide()) {
 					GeothermalBoilerTileEntity.this.setChanged();
 				}
 			}
@@ -221,11 +222,11 @@ public class GeothermalBoilerTileEntity extends cyano.poweradvantage.api.simple.
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-    protected void saveAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.saveAdditional(tagRoot, registries);
+    protected void saveAdditional(ValueOutput tagRoot) {
+		super.saveAdditional(tagRoot);
         CompoundTag tankTag = new CompoundTag();
         this.getTank().writeToNBT(tankTag);
-        tagRoot.put("Tank", tankTag);
+        tagRoot.store("Tank", CompoundTag.CODEC, tankTag);
 		if(this.temperature > 0)tagRoot.putFloat("Temperature", this.temperature);
 	}
 	/**
@@ -233,20 +234,20 @@ public class GeothermalBoilerTileEntity extends cyano.poweradvantage.api.simple.
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void loadAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.loadAdditional(tagRoot, registries);
-		if (tagRoot.contains("Tank")) {
-			CompoundTag tankTag = tagRoot.getCompound("Tank");
+	protected void loadAdditional(ValueInput tagRoot) {
+		super.loadAdditional(tagRoot);
+		if (tagRoot.read("Tank", CompoundTag.CODEC).isPresent()) {
+			CompoundTag tankTag = tagRoot.read("Tank", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 			getTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
 				getTank().setFluid(null);
 			}
 		}
-		if(tagRoot.contains("Temperature")){
-			this.temperature = tagRoot.getFloat("Temperature");
-		} else if(tagRoot.contains("Tempoerature")){
-			this.temperature = tagRoot.getFloat("Tempoerature");
+		if(tagRoot.read("Temperature", com.mojang.serialization.Codec.FLOAT).isPresent()){
+			this.temperature = tagRoot.getFloatOr("Temperature", 0.0F);
+		} else if(tagRoot.read("Tempoerature", com.mojang.serialization.Codec.FLOAT).isPresent()){
+			this.temperature = tagRoot.getFloatOr("Tempoerature", 0.0F);
 		} else {
 			this.temperature = 0;
 		}

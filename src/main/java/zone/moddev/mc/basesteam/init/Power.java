@@ -4,7 +4,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import cyano.poweradvantage.api.ConduitType;
 import zone.moddev.mc.basesteam.SteamAdvantage;
@@ -28,10 +28,10 @@ public abstract class Power {
 	}
 
 	private static ResourceKey<DamageType> damageType(String id) {
-		return ResourceKey.create(Registries.DAMAGE_TYPE, ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id));
+		return ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, id));
 	}
 
 	private static DamageSource damageSource(Level level, ResourceKey<DamageType> type) {
-		return new DamageSource(level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(type));
+		return new DamageSource(level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(type));
 	}
 }

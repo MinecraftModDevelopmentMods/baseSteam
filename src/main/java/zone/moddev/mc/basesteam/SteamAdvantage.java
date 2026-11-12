@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -27,12 +26,12 @@ import zone.moddev.mc.basesteam.migration.SteamLegacyMigrations;
 import zone.moddev.mc.basesteam.migration.SteamConfigMigration;
 import zone.moddev.mc.basesteam.recipe.RecipeConditions;
 
-/** Forge 1.21.1 entry point for baseSteam. */
+/** Forge 1.21.11 entry point for baseSteam. */
 @Mod(SteamAdvantage.MODID)
 public final class SteamAdvantage {
     public static final String MODID = "basesteam";
     public static final String NAME = "baseSteam";
-    public static final String VERSION = "2.2.15.121011";
+    public static final String VERSION = "2.2.16.121111";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static float MUSKET_DAMAGE = 20.0F;
@@ -45,13 +44,15 @@ public final class SteamAdvantage {
 
         migrateLegacyConfiguration();
         context.registerConfig(ModConfig.Type.COMMON, SteamAdvantageConfig.SPEC);
-        var modBus = context.getModEventBus();
-        modBus.addListener(SteamAdvantageConfig::onConfigLoading);
-        modBus.addListener(this::commonSetup);
+        var modBus = context.getModBusGroup();
+        net.minecraftforge.fml.event.config.ModConfigEvent.Loading.getBus(modBus)
+                .addListener(SteamAdvantageConfig::onConfigLoading);
+        FMLCommonSetupEvent.getBus(modBus).addListener(this::commonSetup);
         RecipeConditions.register(modBus);
 
-        DistExecutor.runWhenOn(Dist.CLIENT,
-                () -> () -> zone.moddev.mc.basesteam.graphics.ClientRegistration.register(modBus));
+        if (net.minecraftforge.fml.loading.FMLEnvironment.dist == Dist.CLIENT) {
+            zone.moddev.mc.basesteam.graphics.ClientRegistration.register(modBus);
+        }
     }
 
     private static void migrateLegacyConfiguration() {

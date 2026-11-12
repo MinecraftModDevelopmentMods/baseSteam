@@ -12,11 +12,10 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagLoader;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import java.util.HashMap;
 import java.util.List;
@@ -36,22 +35,22 @@ public class NativeFuelContractTest {
         try (MultiPackResourceManager resources = new MultiPackResourceManager(
                 PackType.SERVER_DATA, List.of(ServerPacksSource.createVanillaPackSource()))) {
             TagLoader<Holder<Item>> reader = new TagLoader<>(
-                    id -> BuiltInRegistries.ITEM.getHolder(ResourceKey.create(Registries.ITEM, id)), "tags/item");
+                    (id, required) -> BuiltInRegistries.ITEM.get(ResourceKey.create(Registries.ITEM, id))
+                            .map(holder -> (Holder<Item>)holder), "tags/item");
             Map<TagKey<Item>, List<Holder<Item>>> loaded = new HashMap<>();
-            reader.loadAndBuild(resources).forEach((id, tag) -> loaded.put(ItemTags.create(id), List.copyOf(tag)));
+            reader.build(reader.load(resources)).forEach((id, tag) -> loaded.put(ItemTags.create(id), List.copyOf(tag)));
             assertTrue(loaded.containsKey(ItemTags.NON_FLAMMABLE_WOOD));
             previousTags = new HashMap<>();
-            BuiltInRegistries.ITEM.getTags().forEach(pair ->
-                    previousTags.put(pair.getFirst(), pair.getSecond().stream().toList()));
-            BuiltInRegistries.ITEM.bindTags(loaded);
+            BuiltInRegistries.ITEM.freeze();
+            BuiltInRegistries.ITEM.getTags().forEach(tag ->
+                    previousTags.put(tag.key(), tag.stream().toList()));
+            NativeTestBootstrap.bindItemTags(loaded);
         }
-        ForgeHooks.updateBurns();
     }
 
     @AfterClass public static void restoreNativeTags() {
         if (previousTags != null) {
-            BuiltInRegistries.ITEM.bindTags(previousTags);
-            ForgeHooks.updateBurns();
+            NativeTestBootstrap.bindItemTags(previousTags);
         }
     }
 
@@ -64,13 +63,16 @@ public class NativeFuelContractTest {
     }
 
     @Test public void retainsTheForgeItemBurnTimeOverride() {
-        Item item = new Item(new Item.Properties()) {
+        ((net.minecraft.core.MappedRegistry<Item>)BuiltInRegistries.ITEM).unfreeze();
+        Item item = new Item(new Item.Properties().setId(ResourceKey.create(Registries.ITEM,
+                Identifier.fromNamespaceAndPath("basesteam_test", "fuel_override")))) {
             @Override public int getBurnTime(ItemStack stack, RecipeType<?> recipeType) {
                 assertNull(recipeType);
                 return 237;
             }
         };
-        ForgeRegistries.ITEMS.register(ResourceLocation.fromNamespaceAndPath("basesteam_test", "fuel_override"), item);
+        ForgeRegistries.ITEMS.register(Identifier.fromNamespaceAndPath("basesteam_test", "fuel_override"), item);
+        BuiltInRegistries.ITEM.freeze();
         assertEquals(237, FurnaceFuelHelper.getBurnTime(new ItemStack(item)));
     }
 }

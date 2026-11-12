@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.world.item.Items;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -65,14 +65,14 @@ public class RecipeUnlockContractTest {
                 assertEquals("Only an item or tag predicate is expected", 1, predicate.size());
                 actual.add(predicateKey(predicate));
             }
-            List<JsonObject> choices = new ArrayList<>();
+            List<JsonElement> choices = new ArrayList<>();
             if (recipe.has("key")) {
                 for (Map.Entry<String, JsonElement> entry : recipe.getAsJsonObject("key").entrySet())
                     collect(entry.getValue(), choices);
             } else collect(recipe.has("ingredients") ? recipe.get("ingredients") : recipe.get("ingredient"), choices);
             Set<String> expected = choices.stream().map(RecipeUnlockContractTest::ingredientKey)
                     .filter(key -> !IGNORED.contains(key)).collect(Collectors.toCollection(LinkedHashSet::new));
-            if (expected.isEmpty()) for (JsonObject choice : choices) expected.add(ingredientKey(choice));
+            if (expected.isEmpty()) for (JsonElement choice : choices) expected.add(ingredientKey(choice));
             assertEquals("Trigger must correspond to a relevant recipe ingredient: " + file, expected, actual);
             JsonArray requirements = unlock.getAsJsonArray("requirements");
             assertEquals("All criteria must form one OR group", 1, requirements.size());
@@ -110,16 +110,16 @@ public class RecipeUnlockContractTest {
     }
 
     @Test public void nativeSingletonPredicatesKeepRecipeIngredientSemantics() {
-        JsonObject ingredient = new JsonParser().parse("{\"item\":\"minecraft:string\"}").getAsJsonObject();
+        JsonElement ingredient = new com.google.gson.JsonPrimitive("minecraft:string");
         JsonObject predicate = new JsonParser().parse("{\"items\":[\"minecraft:string\"]}").getAsJsonObject();
         assertEquals("item:minecraft:string", predicateKey(predicate));
         assertEquals(ingredientKey(ingredient), predicateKey(predicate));
-        JsonObject tag = new JsonParser().parse("{\"tag\":\"minecraft:planks\"}").getAsJsonObject();
+        JsonElement tag = new com.google.gson.JsonPrimitive("#minecraft:planks");
         JsonObject nativeTag = new JsonParser().parse("{\"items\":\"#minecraft:planks\"}").getAsJsonObject();
         assertEquals("tag:minecraft:planks", predicateKey(nativeTag));
         assertEquals(ingredientKey(tag), predicateKey(nativeTag));
         assertThrows("Legacy item predicates must not compare equal to native predicates",
-                AssertionError.class, () -> predicateKey(ingredient));
+                AssertionError.class, () -> predicateKey(new JsonParser().parse("{\"item\":\"minecraft:string\"}").getAsJsonObject()));
     }
 
     @Test public void malformedOrBroadItemPredicatesAreRejected() {
@@ -188,18 +188,16 @@ public class RecipeUnlockContractTest {
         return "item:" + item.getAsString();
     }
 
-    private static String ingredientKey(JsonObject ingredient) {
-        assertEquals("Only one recipe item or tag ingredient is expected", 1, ingredient.size());
-        String type = ingredient.has("tag") ? "tag" : "item";
-        assertTrue("Recipe ingredients retain singular item or tag syntax", ingredient.has(type));
-        JsonElement value = ingredient.get(type);
-        assertTrue("Recipe ingredient must contain a string ID", value.isJsonPrimitive() && value.getAsJsonPrimitive().isString());
-        return type + ":" + value.getAsString();
+    private static String ingredientKey(JsonElement ingredient) {
+        assertTrue("Native recipe ingredient must contain a string ID",
+                ingredient.isJsonPrimitive() && ingredient.getAsJsonPrimitive().isString());
+        String value = ingredient.getAsString();
+        return value.startsWith("#") ? "tag:" + value.substring(1) : "item:" + value;
     }
 
-    private static void collect(JsonElement element, List<JsonObject> result) {
+    private static void collect(JsonElement element, List<JsonElement> result) {
         if (element.isJsonArray()) for (JsonElement child : element.getAsJsonArray()) collect(child, result);
-        else result.add(element.getAsJsonObject());
+        else result.add(element);
     }
 
     private static JsonObject read(Path file) throws IOException {

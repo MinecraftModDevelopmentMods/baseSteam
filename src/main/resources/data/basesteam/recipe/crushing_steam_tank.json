@@ -1,8 +1,6 @@
 {
   "type": "basemetals:crushing",
-  "ingredient": {
-    "item": "basesteam:steam_tank"
-  },
+  "ingredient": "basesteam:steam_tank",
   "result": {
     "id": "basesteam:steam_governor"
   },

@@ -13,7 +13,7 @@ import net.minecraft.world.level.Level;
 public class GeothermalBoilerBlock extends cyano.poweradvantage.api.simple.BlockSimplePowerMachine{
 
 	public GeothermalBoilerBlock() {
-		super(machineProperties(0.75F), Power.steam_power, Fluids.fluidConduit_general);
+		super(machineProperties(0.75F).setId(zone.moddev.mc.basesteam.blocks.SteamBlockProperties.key("steam_boiler_geothermal")), Power.steam_power, Fluids.fluidConduit_general);
 	}
 
 	@Override

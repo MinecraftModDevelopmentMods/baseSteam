@@ -23,7 +23,7 @@ public class SoundHelper {
 	}
 
 	public static void playSoundAtPosition(double x, double y, double z, SoundEvent sound, SoundSource soundType, float volume, float pitch, Level serverWorld){
-		if(serverWorld.isClientSide) return;
+		if(serverWorld.isClientSide()) return;
 		final double range = 16;
 		final AABB area = new AABB(
 				x - range, y - range, z - range,
@@ -39,7 +39,7 @@ public class SoundHelper {
 	}
 
 	public static void playBigSoundAtPosition(double x, double y, double z, SoundEvent sound, SoundSource soundType, float volume, float pitch, Level serverWorld){
-		if(serverWorld.isClientSide) return;
+		if(serverWorld.isClientSide()) return;
 		final double range = 50;
 		final AABB area = new AABB(
 				x - range, y - range, z - range,

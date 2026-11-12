@@ -5,7 +5,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import zone.moddev.mc.basepower.PowerAdvantage;
@@ -25,7 +25,7 @@ public final class RecipeConditions {
 
     private RecipeConditions() {}
 
-    public static void register(IEventBus bus) {
+    public static void register(BusGroup bus) {
         SERIALIZERS.register(bus);
     }
 

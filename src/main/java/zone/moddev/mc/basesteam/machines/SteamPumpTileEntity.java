@@ -10,7 +10,8 @@ import zone.moddev.mc.basepower.conduitnetwork.ConduitRegistry;
 import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basepower.util.FluidHandlerHelper;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.entity.player.Player;
@@ -285,23 +286,29 @@ public class SteamPumpTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void saveAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.saveAdditional(tagRoot, registries);
+	protected void saveAdditional(ValueOutput tagRoot) {
+		super.saveAdditional(tagRoot);
 		CompoundTag tankTag = new CompoundTag();
 		this.getTank().writeToNBT(tankTag);
-		tagRoot.put("Tank", tankTag);
+		tagRoot.store("Tank", CompoundTag.CODEC, tankTag);
 		tagRoot.putByte("NextPump", (byte)this.timeUntilNextPump);
 	}
+
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (getLevel() != null) SteamPumpBlock.destroyPipe(getLevel(), pos);
+        super.preRemoveSideEffects(pos, state);
+    }
 	/**
 	 * Handles data saving and loading
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void loadAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.loadAdditional(tagRoot, registries);
-		String tankKey = tagRoot.contains("Tank") ? "Tank" : "TankOut";
-		if (tagRoot.contains(tankKey)) {
-			CompoundTag tankTag = tagRoot.getCompound(tankKey);
+	protected void loadAdditional(ValueInput tagRoot) {
+		super.loadAdditional(tagRoot);
+		String tankKey = tagRoot.read("Tank", CompoundTag.CODEC).isPresent() ? "Tank" : "TankOut";
+		if (tagRoot.read(tankKey, CompoundTag.CODEC).isPresent()) {
+			CompoundTag tankTag = tagRoot.read(tankKey, CompoundTag.CODEC).orElseGet(CompoundTag::new);
 			getTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
@@ -309,8 +316,8 @@ public class SteamPumpTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 			}
 		}
 
-		if (tagRoot.contains("NextPump")) {
-			this.timeUntilNextPump = tagRoot.getByte("NextPump");
+		if (tagRoot.read("NextPump", com.mojang.serialization.Codec.BYTE).isPresent()) {
+			this.timeUntilNextPump = tagRoot.getByteOr("NextPump", (byte)0);
 		}
 	}
 

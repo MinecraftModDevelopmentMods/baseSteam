@@ -6,7 +6,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import zone.moddev.mc.basepower.blocks.BlockPowerSwitch;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.blocks.PlatformBlock;
@@ -80,15 +80,15 @@ public final class SteamLegacyMigrations {
     }
 
     static boolean repairPersistenceKeys(CompoundTag compound) {
-        String id = compound.getString("id");
+        String id = compound.getStringOr("id", "");
         boolean changed = false;
-        if (isTile(id, "steam_pump") && !compound.contains("Tank", 10) && compound.contains("TankOut", 10)) {
-            compound.put("Tank", compound.getCompound("TankOut").copy());
+        if (isTile(id, "steam_pump") && compound.getCompound("Tank").isEmpty() && compound.getCompound("TankOut").isPresent()) {
+            compound.put("Tank", compound.getCompoundOrEmpty("TankOut").copy());
             changed = true;
         }
         if (isTile(id, "steam_boiler_geothermal")
-                && !compound.contains("Temperature", 99) && compound.contains("Tempoerature", 99)) {
-            compound.putFloat("Temperature", compound.getFloat("Tempoerature"));
+                && compound.getFloat("Temperature").isEmpty() && compound.getFloat("Tempoerature").isPresent()) {
+            compound.putFloat("Temperature", compound.getFloatOr("Tempoerature", 0.0F));
             changed = true;
         }
         return changed;
@@ -104,7 +104,7 @@ public final class SteamLegacyMigrations {
                 || dotted.equalsIgnoreCase(value) || ("minecraft:" + dotted).equalsIgnoreCase(value);
     }
 
-    private static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, path);
+    private static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(SteamAdvantage.MODID, path);
     }
 }

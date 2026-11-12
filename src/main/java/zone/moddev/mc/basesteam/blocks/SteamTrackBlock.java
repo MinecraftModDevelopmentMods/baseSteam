@@ -11,7 +11,7 @@ import zone.moddev.mc.basesteam.init.Power;
 
 public class SteamTrackBlock extends BlockSimplePowerConduit {
     public SteamTrackBlock() {
-        super(SteamBlockProperties.pistonLike().noOcclusion()
+        super(SteamBlockProperties.pistonLike("steam_track").noOcclusion()
                         .isRedstoneConductor((state, world, pos) -> false)
                         .isSuffocating((state, world, pos) -> false)
                         .isViewBlocking((state, world, pos) -> false),

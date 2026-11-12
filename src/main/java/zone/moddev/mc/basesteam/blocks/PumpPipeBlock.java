@@ -15,26 +15,27 @@ public class PumpPipeBlock extends Block {
     private static final VoxelShape SHAPE = Shapes.box(0.0D, 0.25D, 0.0D, 0.75D, 1.0D, 1.0D);
 
     public PumpPipeBlock() {
-        super(SteamBlockProperties.metalHelper(10.0F));
+        super(SteamBlockProperties.metalHelper("pump_pipe_steam", 10.0F));
     }
 
     @Override public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPE; }
     @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return SHAPE; }
 
     @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moving) {
-        if (state.getBlock() != newState.getBlock()) destroyShaft(world, pos);
-        super.onRemove(state, world, pos, newState, moving);
+    public void affectNeighborsAfterRemoval(BlockState state, net.minecraft.server.level.ServerLevel world,
+            BlockPos pos, boolean moving) {
+        destroyShaft(world, pos);
+        super.affectNeighborsAfterRemoval(state, world, pos, moving);
     }
 
     @Override
-    public void wasExploded(Level world, BlockPos pos, Explosion explosion) {
+    public void wasExploded(net.minecraft.server.level.ServerLevel world, BlockPos pos, Explosion explosion) {
         destroyShaft(world, pos);
         super.wasExploded(world, pos, explosion);
     }
 
     private void destroyShaft(Level world, BlockPos pos) {
-        if (world.isClientSide) return;
+        if (world.isClientSide()) return;
         BlockPos cursor = pos.below();
         while (cursor.getY() > 0 && world.getBlockState(cursor).getBlock() == this) {
             world.destroyBlock(cursor, false);

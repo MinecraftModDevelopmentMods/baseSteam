@@ -2,7 +2,8 @@ package zone.moddev.mc.basesteam.machines;
 
 import cyano.poweradvantage.api.ConduitType;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -203,12 +204,12 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	
 	private int getFuelBurnTime(ItemStack item) {
 		if(item == null) return 0;
-		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(item);
+		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(item, getLevel());
 	}
 	
 	private void decrementFuel() {
 		if(inventory[0].getCount() == 1){
-			inventory[0] = inventory[0].getCraftingRemainingItem();
+			inventory[0] = inventory[0].getCraftingRemainder();
 		} else {
 			this.removeItem(0, 1);
 		}
@@ -268,17 +269,17 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	
 
 	@Override
-	protected void saveAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
-		super.saveAdditional(tagRoot, registries);
+	protected void saveAdditional(ValueOutput tagRoot){
+		super.saveAdditional(tagRoot);
 		prepareDataFieldsForSync();
 		tagRoot.putIntArray("Data", getDataFieldArray());
 	}
 	
 	@Override
-	protected void loadAdditional(CompoundTag tagRoot, HolderLookup.Provider registries){
-		super.loadAdditional(tagRoot, registries);
-		if(tagRoot.contains("Data")){
-			int[] data = tagRoot.getIntArray("Data");
+	protected void loadAdditional(ValueInput tagRoot){
+		super.loadAdditional(tagRoot);
+		if(tagRoot.read("Data", com.mojang.serialization.Codec.INT_STREAM).isPresent()){
+			int[] data = tagRoot.getIntArray("Data").orElseGet(() -> new int[0]);
 			System.arraycopy(data, 0, this.getDataFieldArray(), 0, Math.min(data.length,this.getDataFieldArray().length));
 			onDataFieldUpdate();
 		}
@@ -332,9 +333,10 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	}
 
 	private ItemStack getSmeltingResult(ItemStack input) {
-		if (input == null || input.isEmpty() || getLevel() == null) return ItemStack.EMPTY;
+		if (input == null || input.isEmpty()
+                || !(getLevel() instanceof net.minecraft.server.level.ServerLevel server)) return ItemStack.EMPTY;
 		SingleRecipeInput inventory = new SingleRecipeInput(input);
-		return getLevel().getRecipeManager().getRecipeFor(RecipeType.SMELTING, inventory, getLevel())
+		return server.recipeAccess().getRecipeFor(RecipeType.SMELTING, inventory, server)
 				.map(recipe -> recipe.value().assemble(inventory, getLevel().registryAccess())).orElse(ItemStack.EMPTY);
 	}
 

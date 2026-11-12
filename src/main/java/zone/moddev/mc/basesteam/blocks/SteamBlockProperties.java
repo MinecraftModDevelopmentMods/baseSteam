@@ -5,16 +5,21 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 
 /** Native block properties matching the old piston-like construction material. */
-final class SteamBlockProperties {
+public final class SteamBlockProperties {
     private SteamBlockProperties() {}
 
-    static Block.Properties pistonLike() {
-        return Block.Properties.of().mapColor(MapColor.STONE).pushReaction(PushReaction.BLOCK)
+    public static net.minecraft.resources.ResourceKey<Block> key(String path) {
+        return net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK,
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("basesteam", path));
+    }
+
+    public static Block.Properties pistonLike(String path) {
+        return Block.Properties.of().setId(key(path)).mapColor(MapColor.STONE).pushReaction(PushReaction.BLOCK)
                 .forceSolidOn().strength(0.75F);
     }
 
-    static Block.Properties metalHelper(float resistance) {
-        return Block.Properties.of().mapColor(MapColor.METAL).forceSolidOn().strength(5.0F, resistance)
+    static Block.Properties metalHelper(String path, float resistance) {
+        return Block.Properties.of().setId(key(path)).mapColor(MapColor.METAL).forceSolidOn().strength(5.0F, resistance)
                 .noOcclusion().noLootTable();
     }
 }

@@ -12,14 +12,15 @@ import zone.moddev.mc.basepower.init.Fluids;
 import zone.moddev.mc.basepower.registry.FuelRegistry;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.init.Power;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import cyano.poweradvantage.api.fluid.FluidStack;
 import cyano.poweradvantage.api.fluid.FluidTank;
@@ -148,7 +149,7 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	}
 
 	private static Float getConfiguredBurnTimePerBucketFor(Fluid fluid) {
-		ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(fluid);
+		Identifier id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(fluid);
 		if (id != null) {
 			if (SteamAdvantage.fluidBurnValues.containsKey(id.toString())) return SteamAdvantage.fluidBurnValues.get(id.toString());
 			if (SteamAdvantage.fluidBurnValues.containsKey(id.getPath())) return SteamAdvantage.fluidBurnValues.get(id.getPath());
@@ -264,14 +265,14 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void saveAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.saveAdditional(tagRoot, registries);
+	protected void saveAdditional(ValueOutput tagRoot) {
+		super.saveAdditional(tagRoot);
 		CompoundTag tankTag = new CompoundTag();
 		this.getWaterTank().writeToNBT(tankTag);
-		tagRoot.put("WaterTank", tankTag);
+		tagRoot.store("WaterTank", CompoundTag.CODEC, tankTag);
 		CompoundTag tankTag2 = new CompoundTag();
 		this.getFuelTank().writeToNBT(tankTag2);
-		tagRoot.put("FuelTank", tankTag2);
+		tagRoot.store("FuelTank", CompoundTag.CODEC, tankTag2);
 		if(this.burnTime > 0)tagRoot.putInt("BurnTime", this.burnTime);
 		if(this.totalBurnTime > 0)tagRoot.putInt("BurnTimeTotal", this.totalBurnTime);
 	}
@@ -280,31 +281,31 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	 * @param tagRoot An NBT tag
 	 */
 	@Override
-	protected void loadAdditional(final CompoundTag tagRoot, HolderLookup.Provider registries) {
-		super.loadAdditional(tagRoot, registries);
-		if (tagRoot.contains("WaterTank")) {
-			CompoundTag tankTag = tagRoot.getCompound("WaterTank");
+	protected void loadAdditional(ValueInput tagRoot) {
+		super.loadAdditional(tagRoot);
+		if (tagRoot.read("WaterTank", CompoundTag.CODEC).isPresent()) {
+			CompoundTag tankTag = tagRoot.read("WaterTank", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 			getWaterTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
 				getWaterTank().setFluid(null);
 			}
 		}
-		if (tagRoot.contains("FuelTank")) {
-			CompoundTag tankTag = tagRoot.getCompound("FuelTank");
+		if (tagRoot.read("FuelTank", CompoundTag.CODEC).isPresent()) {
+			CompoundTag tankTag = tagRoot.read("FuelTank", CompoundTag.CODEC).orElseGet(CompoundTag::new);
 			getFuelTank().readFromNBT(tankTag);
 			if(tankTag.contains("Empty")){
 				// empty the tank if NBT says its empty (not default behavior of Tank.read(...) )
 				getFuelTank().setFluid(null);
 			}
 		}
-		if(tagRoot.contains("BurnTime")){
-			this.burnTime = tagRoot.getInt("BurnTime");
+		if(tagRoot.read("BurnTime", com.mojang.serialization.Codec.INT).isPresent()){
+			this.burnTime = tagRoot.getIntOr("BurnTime", 0);
 		} else {
 			this.burnTime = 0;
 		}
-		if(tagRoot.contains("BurnTimeTotal")){
-			this.totalBurnTime = tagRoot.getInt("BurnTimeTotal");
+		if(tagRoot.read("BurnTimeTotal", com.mojang.serialization.Codec.INT).isPresent()){
+			this.totalBurnTime = tagRoot.getIntOr("BurnTimeTotal", 0);
 		} else {
 			this.totalBurnTime = 0;
 		}

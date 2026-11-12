@@ -44,7 +44,8 @@ public class NativeBlockEntityContractTest {
             saved.putInt("x", 7); saved.putInt("y", 9); saved.putInt("z", 11);
             saved.putIntArray("Energy", new int[] { Float.floatToIntBits(37.5F) });
             saved.putByte("Facing", (byte) direction.get3DDataValue());
-            drill.loadWithComponents(saved, NativeTestBootstrap.registries());
+            drill.loadWithComponents(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, NativeTestBootstrap.registries(), saved));
             assertEquals(destination, drill.getBlockPos());
             assertSame(state, drill.getBlockState());
             assertEquals(direction, drill.getBlockState().getValue(SteamDrillBlock.FACING));
@@ -56,7 +57,7 @@ public class NativeBlockEntityContractTest {
         DrillBitBlock block = new DrillBitBlock();
         BlockEntityType<DrillBitTileEntity> previous = Entities.DRILLBIT;
         try {
-            Entities.DRILLBIT = BlockEntityType.Builder.of(DrillBitTileEntity::new, block).build(null);
+            Entities.DRILLBIT = new BlockEntityType<>(DrillBitTileEntity::new, java.util.Set.of(block));
             assertNotNull(block.getTicker(null, block.defaultBlockState(), Entities.DRILLBIT));
             assertNull(block.getTicker(null, block.defaultBlockState(), BlockEntityType.FURNACE));
             DrillBitTileEntity tile = new DrillBitTileEntity(new BlockPos(17, 80, 31), block.defaultBlockState());
@@ -69,8 +70,8 @@ public class NativeBlockEntityContractTest {
     @Test public void nativeConstructorStillRejectsAMismatchedTypeAndBlock() {
         BlockEntityType<DrillBitTileEntity> previous = Entities.DRILLBIT;
         try {
-            Entities.DRILLBIT = BlockEntityType.Builder.of(DrillBitTileEntity::new,
-                    net.minecraft.world.level.block.Blocks.STONE).build(null);
+            Entities.DRILLBIT = new BlockEntityType<>(DrillBitTileEntity::new,
+                    java.util.Set.of(net.minecraft.world.level.block.Blocks.STONE));
             assertThrows(IllegalStateException.class, () -> new DrillBitTileEntity(
                     BlockPos.ZERO, NativeMachineFixture.state("drillbit")));
         } finally { Entities.DRILLBIT = previous; }
