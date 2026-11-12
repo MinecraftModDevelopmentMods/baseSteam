@@ -19,20 +19,19 @@ Target: Forge 64.1.5, official Minecraft 26.1.2 names and MCP
 Gradle 9.6.1 wrapper use Temurin 25.0.3+9. The compiler, Minecraft,
 Mavenizer and Slime launcher also use that Java 25 toolchain.
 
-This port requires the coordinated local basePower 2.4.16.2601021 and
-Base Metals 3.1.2.2601021 hook, plus released OreSpawn 4.1.1.2601021.
+This port requires released basePower 2.4.16.2601021,
+Base Metals 3.1.2.2601021 and OreSpawn 4.1.1.2601021.
 They remain separate Forge jars on both client and server, not bundled copies.
 Base Metals is REQUIRED on both client and server, not an optional integration.
-The default build paths use the coordinated 26.1.2 checkouts. The current local
-inputs are Power source d0bd0bdb/player 23ABCC1F, Base Metals source 331fa469/player
-678623 and OreSpawn 810284EC (CurseForge 9572926). Exact source, jar and fixture08 bootstrap pins are in
-gradle.properties. The coordinated Advantage and Base Metals builds remain
-local inputs, not published releases. No 1.21.11 dependency is substituted.
+The default build paths use the coordinated 26.1.2 checkouts. The public inputs
+are Power source a684e71e/player 23ABCC1F (CurseForge 9576332), Base Metals
+source 5e708468/player 67862388 (9576007), and OreSpawn 810284EC (9572926).
+Their anonymous downloads match the tested jars. Exact source, jar and fixture08
+bootstrap pins are in gradle.properties. No 1.21.11 dependency is substituted.
 
-The accepted qualification uses the exact local Power and Base Metals pins.
-They will be replaced with verified public source and file pins after those
-dependencies are released. Publication follows Power, then Steam, then Electric;
-local acceptance does not stand in for merged-source CI or public downloads.
+The public-pin rebuild retains the accepted Steam jar bytes. Publication
+follows Power, then Steam, then Electric; local acceptance does not stand in
+for merged-source CI or public downloads.
 The new clean release suite and fresh ECJ each pass 276 tests; independent
 warm and empty-cache builds in paths with spaces reproduce all three archives.
 These are child build gates, not combined-family or manual acceptance.
