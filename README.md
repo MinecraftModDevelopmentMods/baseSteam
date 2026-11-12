@@ -1,10 +1,15 @@
 # baseSteam
 
-**Minecraft 26.2 Forge, version 2.2.18.2602001. Combined checks passed; final root build pending.**
+**Minecraft 26.2 Forge, version 2.2.18.2602001. Automated and manual testing complete.**
 
 baseSteam continues DrCyano's Steam Advantage and uses basePower's shared
 API, machines and creative tab. Existing `basesteam` registry and saved-data
 identities are retained.
+
+The earlier [26.1.2 release](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9577519)
+remains available on CurseForge, MMD Maven and GitHub Releases. The 26.2
+release is being prepared separately; the version and dependency pins below
+apply to this branch.
 
 This port targets Forge **65.1.0**, official Minecraft **26.2** names,
 MCP **20260616.103818**, Java **25.0.3+9**, ForgeGradle **7.0.34** and the
