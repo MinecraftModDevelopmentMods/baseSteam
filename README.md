@@ -18,7 +18,7 @@ Base Metals 3.1.2.2601021 hook, plus released OreSpawn 4.1.0.2601021.
 They remain separate Forge jars on both client and server, not bundled copies.
 Base Metals is REQUIRED on both client and server, not an optional integration.
 The default build paths use the coordinated 26.1.2 checkouts. The current local
-inputs are Power source 9f6ffb30/player 05031F, Base Metals source 331fa469/player
+inputs are Power source e565f992/player CC9465, Base Metals source 331fa469/player
 678623 and OreSpawn 6D5C. Exact source, jar and fixture08 bootstrap pins are in
 gradle.properties. These are local integration inputs, not a public release or
 family qualification. No 1.21.11 dependency is substituted.

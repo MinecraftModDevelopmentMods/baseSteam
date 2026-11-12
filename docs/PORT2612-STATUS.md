@@ -27,7 +27,7 @@ unit-test result.
 ## Dependency Gate
 
 Current local integration inputs are Power 2.4.16.2601021 source
-9f6ffb30a14efe4360fee0cbdfa52dc8090a9819/player 05031F1A, the approved Base
+e565f99284de5e6c7860d378abc43b96d9faa5ee/player CC94656A, the approved Base
 Metals 3.1.2.2601021 hook source 331fa46914f854db71a8c33500cc559a8878b7d3/
 player 67862388, and the exact parent fixture08 jar and three audited Java
 sources. The generated unit-support copies are test-only, hash-checked and never
@@ -259,6 +259,37 @@ and build/ecj-native2612-candidate07-full-01/receipt.json.
 No new GameTest, packaged-world or physical campaign is claimed for07 here.
 The five physical campaigns remain held until the parent supplies the sealed07
 profile. The06 receipts remain unchanged historical evidence.
+
+## Candidate08 Dependency Qualification
+
+Power source is e565f99284de5e6c7860d378abc43b96d9faa5ee, player
+CC94656A75B3E6311E5F9F7CB4E4E60014B94A87665743D5A5D3C84CEA849720.
+The bootstrap and three helper-source hashes are unchanged and were reverified.
+BM and OS pins remain unchanged. Only dependency pins and notes change in Steam.
+
+The fresh default-path full release run executes all 46 tasks and 276 tests,
+with zero failures, errors or skips. Dependency, artifact, checksum, resource,
+Javadoc and Eclipse metadata audits pass. Fresh independent ECJ compiles all
+60 main, 54 test and three GameTest sources, then executes the complete 276-test
+inventory with zero failures, ignored tests or assumptions.
+
+An isolated path-with-spaces verification build also passes 46 tasks and 276
+tests and reproduces the player, sources and Javadoc archives byte-for-byte.
+It reuses the verified native engine/dependency cache; no unseeded cold-download
+claim is made. All three hashes remain the exact values in the07 child results,
+including player
+4A4E7D8C3704DCF17F46EBB55A7A908A6E1B547FCAB93E3B6782EE32E49301CB.
+All 333 player entries match07: no class, resource or manifest changed.
+Evidence is under build/native2612-candidate08-qualification and
+build/ecj-native2612-candidate08-full-01/receipt.json. These are fresh pin-bound
+child checks, not relabelled07 tests or an08 family/world qualification.
+
+The parent found a real provider-schema regression in07 legacy generation.
+The five07 finite campaigns finished normally with 470 raw JSON packets and
+nine closed JVMs, but those scoped passes do not qualify07 or waive that failure.
+All07 results and failures remain preserved. No further07 campaign or preseal
+is permitted. The08 physical reruns await both its frozen profile and the short
+legacy-generation gate.
 
 ## Remaining Qualification
 
