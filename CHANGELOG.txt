@@ -1,13 +1,12 @@
-baseSteam 2.2.17.2601021 (Minecraft 26.1.2 / Forge, LOCAL PORT IN PROGRESS)
+baseSteam 2.2.17.2601021 (Minecraft 26.1.2 / Forge)
 
-- Target Forge 64.1.5, official names, MCP 20260409.101008 and Java 25.0.3+9 throughout.
-- Keep the existing registry IDs, saved fields, recipes, assets, migration aliases and machine balance.
-- Use native 26.1.2 recipe assembly and resource metadata while retaining strict positive and negative checks.
-- Handle fuels without a crafting remainder in both boilers and blast furnaces; keep exact fuel consumption and container returns.
-- Remove obsolete no-op crushing registration during common setup; keep all nine data-driven salvage recipes and their original mode conditions.
-- Register explicit, owned block and item sprites so small textures from another mod cannot break atlas loading.
-- Require the coordinated native Power and Base Metals hook pins before compiling or qualifying a candidate.
-- No 26.1.2 publication or gameplay acceptance is claimed.
+- Bring baseSteam to Minecraft 26.1.2 with Forge 64.1.5 and Java 25.
+- Preserve machine state, registry IDs, recipes, progression and old-world aliases.
+- Fix boilers and blast furnaces consuming fuels without a crafting remainder; keep fuel use and container returns unchanged.
+- Keep all nine salvage recipes in their original recipe modes without unsafe setup-time item creation.
+- Keep small textures from other mods out of Steam's native atlases.
+- Use OreSpawn 4.1.1.2601021 with the coordinated basePower and Base Metals builds.
+- Complete the local machine, upgrade, graphical, endurance and manual-acceptance checks.
 
 baseSteam 2.2.16.121111 (Minecraft 1.21.11 / Forge)
 

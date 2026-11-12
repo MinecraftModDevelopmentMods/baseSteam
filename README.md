@@ -1,6 +1,12 @@
 # baseSteam
 
-**Minecraft 26.1.2 (Forge), baseSteam 2.2.17.2601021. Local port in progress.**
+**Minecraft 26.1.2 (Forge), baseSteam 2.2.17.2601021. Accepted for release.**
+
+The frozen profile12 family has completed automated qualification and manual
+testing. See the
+[family qualification record](../../PowerAdvantage/docs/26.1.2/QUALIFICATION.md)
+for the exact tested jars, completed checks and scope limits. Manual acceptance
+is complete. Publication is being prepared; this version is not public yet.
 
 baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
 and a blackpowder musket to basePower. Items and blocks share the basePower
@@ -14,20 +20,30 @@ Gradle 9.6.1 wrapper use Temurin 25.0.3+9. The compiler, Minecraft,
 Mavenizer and Slime launcher also use that Java 25 toolchain.
 
 This port requires the coordinated local basePower 2.4.16.2601021 and
-Base Metals 3.1.2.2601021 hook, plus released OreSpawn 4.1.0.2601021.
+Base Metals 3.1.2.2601021 hook, plus released OreSpawn 4.1.1.2601021.
 They remain separate Forge jars on both client and server, not bundled copies.
 Base Metals is REQUIRED on both client and server, not an optional integration.
 The default build paths use the coordinated 26.1.2 checkouts. The current local
-inputs are Power source b947b4b8/player 5309E7, Base Metals source 331fa469/player
-678623 and OreSpawn 6D5C. Exact source, jar and fixture08 bootstrap pins are in
-gradle.properties. These are local integration inputs, not a public release or
-family qualification. No 1.21.11 dependency is substituted.
+inputs are Power source d0bd0bdb/player 23ABCC1F, Base Metals source 331fa469/player
+678623 and OreSpawn 810284EC (CurseForge 9572926). Exact source, jar and fixture08 bootstrap pins are in
+gradle.properties. The coordinated Advantage and Base Metals builds remain
+local inputs, not published releases. No 1.21.11 dependency is substituted.
 
-This port is not yet qualified or accepted for gameplay. The released 1.21.11
-baseline and its receipts remain separate historical evidence. Native 26.1.2
+The accepted qualification uses the exact local Power and Base Metals pins.
+They will be replaced with verified public source and file pins after those
+dependencies are released. Publication follows Power, then Steam, then Electric;
+local acceptance does not stand in for merged-source CI or public downloads.
+The new clean release suite and fresh ECJ each pass 276 tests; independent
+warm and empty-cache builds in paths with spaces reproduce all three archives.
+These are child build gates, not combined-family or manual acceptance.
+
+The released 1.21.11 baseline and its receipts remain separate historical
+evidence. Native 26.1.2
 metadata declares server data format 101.1 and client format 84.0; the hidden
-client resource aggregate remains Forge's responsibility. Actual native reader,
-machine, migration, side-loading and GUI checks are required for the new jars.
+client resource aggregate remains Forge's responsibility. The current kit's
+native reader, machine, migration, side-loading and GUI results are recorded in
+the family qualification record. Its original automated and manual-only scope
+labels remain historical; manual acceptance was confirmed afterward.
 
 The sealed BB0D Mavenizer fixture comes from OreSpawn's OS2612 checkout. Another
 layout can use `-Pforge64MavenizerJar=<path>`. The `*DeobfJar` and `*PlayerJar`
@@ -61,7 +77,7 @@ then supply these paths as well as the dependency-jar overrides:
 
 The atlas test uses the same verified Power jar selected for compilation;
 it does not look for a second copy in a fixed local folder. Missing or
-changed inputs fail the checks. The current local 26.1.2 source passes 276 unit
+changed inputs fail the checks. The previous candidate09 passed 276 unit
 tests and a fresh independent ECJ run of the same complete inventory. The
 scoped runtime and reproducibility results are in the port status below;
 they do not imply family or manual acceptance. Native resource tests disable interactive terminal setup in their

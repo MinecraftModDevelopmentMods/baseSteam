@@ -570,7 +570,7 @@ tasks.register('verifyReleaseConfiguration') {
             throw new GradleException('Unexpected CurseForge dependency or game-version metadata')
         }
         if (project.basemetals_version != '3.1.2.2601021'
-                || project.orespawn_version != '4.1.0.2601021') {
+                || project.orespawn_version != '4.1.1.2601021') {
             throw new GradleException('Unexpected development API versions')
         }
         if (project.poweradvantage_source_repository != 'MinecraftModDevelopmentMods/basePower') {

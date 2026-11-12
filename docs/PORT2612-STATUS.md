@@ -1,8 +1,80 @@
 # Steam on Minecraft 26.1.2
 
-Local port in progress. The bounded automated results below do not claim complete
-family/gameplay qualification or manual acceptance. No push, PR, tag or publication
-is authorized.
+Version 2.2.17.2601021 is accepted for release after automated qualification and
+manual testing. See the
+[family qualification record](../../../PowerAdvantage/docs/26.1.2/QUALIFICATION.md)
+for the exact tested jars, completed checks and scope limits. The usual fork,
+MMD merge and CurseForge/GitHub/MMD Maven release workflow is authorized.
+Publication has not happened. Source pushes, merges, tags and publisher runs
+remain held until the verified public Power and Base Metals dependency handoff.
+Power is released first, then Steam, then Electric.
+
+The existing source branch remains feature/basesteam-26.1.2-port. Public file IDs
+and final source pins must come from the actual released dependencies; no local
+pin or guessed ID satisfies the hosted gate. Earlier checkpoint notes, old holds
+and qualification receipts below remain historical and bound to their original
+inputs. They are not rewritten as proof of a later public-pin rebuild.
+
+## OreSpawn 4.1.1 Resume
+
+The resumed local qualification pins published OreSpawn 4.1.1.2601021, source
+101fd12b598934c353e417c57edc5c2bbefd5f53, CurseForge file 9572926. Player and
+development SHA-256 are both
+810284ECB32D5249381F246498CEFA57E70FFF7CCC40110F799FC276CBC42BF7.
+The actual public jar still declares Built-On 26.1.2-64.0.9 and Java 25;
+those provenance checks remain unchanged. Its hash and manifest were checked
+locally against both the supplied public download and the parent's frozen copy.
+
+The parent handed off exact Power source
+d0bd0bdbde6c499e800e5a5b4ecc7f9ac63d2055, player/development SHA-256
+23ABCC1FEFDAA6988BF709437EB165C8948C757E773ADAB738092EB93CA8D2B0.
+Those bytes and all four unit-helper inputs were verified and frozen locally.
+The clean full release suite executes 45 tasks and 276 tests across 47 suites,
+with zero failures, errors or skips. Javadoc, exact dependencies, archive,
+checksum and Eclipse production-classpath audits pass. Fresh ECJ compiles
+60 main, 54 test and three GameTest sources and passes the complete same
+276-test inventory, including the three inventory-rejection controls.
+
+Independent path-with-spaces warm and genuinely empty-cache exports both pass
+all 45 tasks and reproduce player, sources and Javadoc archives exactly.
+The cold export downloads Gradle and regenerates the native Forge SDK without
+seeding its cache. Two failed cache-only export setups and the first cold
+attempt's Windows CreateProcess error 267 remain unchanged. The latter had a
+268-character decompiler working directory; a new, shorter cache path inside
+this checkout passed in 6m33s. Both source and cache paths contain spaces.
+
+Final player/development SHA-256 remains
+4A4E7D8C3704DCF17F46EBB55A7A908A6E1B547FCAB93E3B6782EE32E49301CB.
+All 333 player entries are identical to candidate09. The profile12 actor/order
+campaign is separate; no new game launch, combined-family or manual-acceptance
+result is claimed by these child build receipts.
+Historical candidate receipts below remain bound to their original inputs.
+New Steam evidence is kept under
+D:/PowerAdvantage/_verification/base-2612-port-20261112/resume-orespawn411-20261112/steam.
+The parent owns the combined profiles and broader family campaigns. The
+separately assigned profile12 actor/order task completes all nine routes:
+original110, maintained112 and native1211-stopped-source pass strictly; all six
+dimension routes retain PASS_WITH_NATIVE_DIFFERENCE for independently proved
+native wolf health/max-health scaling. Their original strict differences and
+the no-Power native control remain intact; all other fields match strictly.
+
+Both actual machine orders and both strict actor-inclusive orders pass. Each
+actor order preserves the two saved musket witnesses through five semantic
+phases, rejects all 14 entity mutations and passes three stopped raw audits
+matching 15 entities each. Ten guard and eleven woven-code mutations reject
+per actual-order campaign. Six strict profile-boot audits and all 39 game
+process closures pass; assigned ports 29240-29249 are free. Instrumented
+order qualificationAllowed remains false.
+
+The first order attempt was correctly rejected before Minecraft because the
+parent regenerated its final Eclipse classpath after sidecar01 was built.
+That failure is preserved. Sidecar02 binds the final classpath with no guard
+relaxation; no parent source or classpath was edited by this task.
+The assigned handoff is actors-orders/final-owned-handoff-01.json under the
+resume directory, SHA-256
+53E74959A4B3DF78F92652FB4C79C77BC185E326F23F525CB12E1CDBB2B48020.
+Source fixtures, ordinary seed12, frozen family jars and all sealed inputs are
+unchanged. These assigned scopes do not claim human or global family acceptance.
 
 ## Baseline And Toolchain
 
