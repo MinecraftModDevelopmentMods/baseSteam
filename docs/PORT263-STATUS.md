@@ -1,7 +1,13 @@
 # baseSteam 26.3 Port Status
 
-Local work in progress. Version `2.2.19.2603001`, branched from accepted
+Ready for local manual testing. Version `2.2.19.2603001`, branched from accepted
 26.2 source `de4dcf6ed84461843a241bbaf93cf03e43e83eb2`.
+
+The matching basePower checkout's `docs/26.3/QUALIFICATION.md` records the
+completed combined machine, recipe, migration, client, restart and endurance
+checks and exact jar hashes. Nothing from 26.3 is pushed or published. The
+detailed entries below are implementation history; their earlier pending
+gates are superseded by that completed local test record.
 
 ## Target
 
@@ -11,15 +17,15 @@ Local work in progress. Version `2.2.19.2603001`, branched from accepted
 - Asset index 34, SHA-1 `e99f9973047785b5a9d52eaf72020b97545053c9`.
   The current Mojang version/index documents were downloaded and hashed;
   the strict Eclipse guard rejected the earlier stale index pin.
-- Later compatibility qualification targets Forge 66.1.5. It is not a pass
-  or an automatic change to the baseline.
+- Forge 66.1.5 has separate bounded dedicated-server compatibility evidence.
+  It is not an automatic change to the full 66.0.0 baseline.
 
 ## Inputs And Boundaries
 
 Required local inputs are basePower 2.4.18.2603001, Base Metals
 3.1.2.2603001 with its shared hook, and OreSpawn 4.1.1.2603001 with the
 retained-settings repair. All compiler inputs are pinned below. BM and OS
-remain compiler-only inputs, not runtime-qualified releases. Neither 26.2
+have passed the local combined runtime tests, but are not public releases. Neither 26.2
 artifacts nor public 4.1.0 are substitutes.
 
 - BM source `ac07e9cd960c4b48308fd3f245e06f108e4ac437`, JAR SHA-256

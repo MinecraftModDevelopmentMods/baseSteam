@@ -1,6 +1,6 @@
 # baseSteam
 
-**Minecraft 26.3 Forge, version 2.2.19.2603001. Local port in progress.**
+**Minecraft 26.3 Forge, version 2.2.19.2603001. Ready for manual testing.**
 
 baseSteam continues DrCyano's Steam Advantage and uses basePower's shared
 API, machines and creative tab. Existing `basesteam` registry and saved-data
@@ -15,8 +15,9 @@ Forge supplies hidden client metadata for resource format **97.1**.
 
 Required local versions are basePower **2.4.18.2603001**, Base Metals
 **3.1.2.2603001** and OreSpawn **4.1.1.2603001**. Base Metals is REQUIRED on
-both client and server. Base Metals and OreSpawn are pinned to the verified
-frozen compiler-only handoff; their runtime qualification remains pending.
+both client and server. Base Metals and OreSpawn are pinned to the exact local
+migration-hook and retained-settings builds used by the combined tests. These
+26.3 dependency patches are not published.
 Power source, JAR and test-support inputs are pinned to the immutable local
 handoff recorded in `gradle.properties`. Power handoff07 passes Steam's complete
 291-test suite and build/Eclipse/ECJ gates. Discovery advancements remain loaded in
@@ -25,7 +26,8 @@ saved discovery progress. All four native GameTests pass in all three recipe
 modes on this repaired artifact. Whole-table loot uses SHA-checked accepted
 goldens. Fresh cold/spaced-input and independent clean builds pass all 291
 tests; player, sources and Javadoc JARs are byte-identical to warm. Packaged
-and manual qualification remain separate.
+qualification now also passes against the matching three-mod test kit. Manual
+testing remains separate.
 Do not substitute 26.2 inputs or the published OreSpawn 4.1.0.
 
 The default sibling Power source root is `../../PowerAdvantage`. Base Metals
@@ -53,11 +55,12 @@ node tools/generate-recipe-unlocks.js --check
 
 ## Qualification
 
-See [26.3 port status](docs/PORT263-STATUS.md) for the current boundaries and
-remaining gates. Compilation, full unit/native suites, Eclipse/ECJ,
-reproducibility, cold inputs with spaces, packaged runtime, real-client and
-manual acceptance are separate proofs. No 26.2 result qualifies this candidate.
-Forge 66.1.5 compatibility remains a later gate, not an automatic baseline bump.
+See [26.3 port status](docs/PORT263-STATUS.md) for the exact inputs and history.
+The matching basePower checkout's `docs/26.3/QUALIFICATION.md` records the
+completed machine, recipe, old-world upgrade, graphical, full-restart and
+two-world 30-minute endurance checks. No 26.2 result was substituted for a
+26.3 test. Forge 66.1.5 has a separate bounded server check, not the full
+baseline suite. Manual acceptance remains next.
 
 This work is local only: no 26.3 push, PR, tag or publication is authorized.
 The [26.2](docs/PORT262-STATUS.md), [26.1.2](docs/PORT2612-STATUS.md),

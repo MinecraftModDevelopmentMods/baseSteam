@@ -1,4 +1,4 @@
-baseSteam 2.2.19.2603001 - local 26.3 port in progress
+baseSteam 2.2.19.2603001 - ready for local 26.3 manual testing
 
 - Target Minecraft 26.3, Forge 66.0.0, official MCP 20260918.230105 and Java 25.0.3+9.
 - Use native data format 121.0, hidden client metadata for 97.1, and asset index 34 in Eclipse launches.
@@ -12,7 +12,7 @@ baseSteam 2.2.19.2603001 - local 26.3 port in progress
 - Pass all four native GameTests in NORMAL, TECH_PROGRESSION and APOCALYPTIC against Power07, with 1280 trade offers and eight codec negatives per mode. Keep all 24 advancements loaded while checking live recipe conditions, exact active/empty recipe tags, ingredient OR requirements and 24 saved-progress roundtrips per mode, plus nine salvage codecs/input negatives in APOCALYPTIC.
 - Preserve all 15 accepted-26.2 loot tables through SHA-pinned syntax-only goldens, native whole-table roundtrips and actual loaded-mod table comparisons. Verify six generated templates, all 42 modifier/condition scopes and five silent-loss controls per mode. Unit-only builtin-item stand-ins are bijective and never registered; server checks retain real mod IDs.
 - Pass fresh cold/spaced-input and independent clean builds: all 46 tasks and 291 units each. All three release JARs and both bare SDK JARs match warm byte-for-byte. Spaced-input ECJ also passes all 291 units without ignored tests or assumptions.
-- Do not transfer 26.2 qualification to this candidate. Packaged runtime, Forge 66.1.5 compatibility, manual acceptance and release remain separate gates.
+- Complete the matching family's machine, recipe, old-world upgrade, graphical, full-restart and two-world 30-minute endurance checks. Forge 66.1.5 also has bounded server evidence. Manual testing is next; the code and dependency patches remain local and unpublished.
 
 baseSteam 2.2.18.2602001 - local candidate
 
