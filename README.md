@@ -1,10 +1,18 @@
 # baseSteam
 
-**Minecraft 26.3 Forge, version 2.2.19.2603001. Manual testing accepted; release preparation.**
+**Minecraft 26.3 Forge, version 2.2.19.2603001. Published.**
 
 baseSteam continues DrCyano's Steam Advantage and uses basePower's shared
 API, machines and creative tab. Existing `basesteam` registry and saved-data
 identities are retained.
+
+The 26.3 release is available from
+[CurseForge](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9589874),
+[MMD Maven](https://maven.moddev.zone/releases/zone/moddev/mc/basesteam/baseSteam/2.2.19.2603001/baseSteam-2.2.19.2603001.jar)
+and [GitHub Releases](https://github.com/MinecraftModDevelopmentMods/baseSteam/releases/tag/2.2.19.2603001).
+The [release record](docs/RELEASE263.md) keeps the exact published source,
+download hashes and earlier candidate evidence separate. This documentation
+update does not rebuild or republish the release.
 
 The target is Forge **66.0.0**, official Minecraft **26.3** names, MCP
 **20260918.230105**, Java **25.0.3+9**, ForgeGradle **7.0.34** and the
@@ -20,15 +28,18 @@ Base Metals is REQUIRED on both client and server. These public downloads
 match the exact migration-hook and retained-settings builds used by the
 combined tests. Source, file IDs and hashes are pinned in `gradle.properties`.
 Power's public API source is `4fae0a51`; unit-support source stays independently
-pinned at `c0eb83f7` with its original hashes. The exact dependency bytes pass Steam's complete
-291-test suite and build/Eclipse/ECJ gates. Discovery advancements remain loaded in
-every mode through exact optional recipe tags, preserving future unlocks and
+pinned at `c0eb83f7` with its original hashes. The exact dependency bytes pass
+Steam's complete 291-test suite and build/Eclipse/ECJ gates. Discovery
+advancements remain loaded in every mode through exact optional recipe tags,
+preserving future unlocks and
 saved discovery progress. All four native GameTests pass in all three recipe
 modes on this repaired artifact. Whole-table loot uses SHA-checked accepted
 goldens. Fresh cold/spaced-input and independent clean builds pass all 291
-tests; player, sources and Javadoc JARs are byte-identical to warm. Packaged
-qualification also passes against the matching three-mod test kit. Manual
-testing was accepted on 13 November 2026. This is not yet a published release.
+tests; all three local archives are byte-identical to warm. The published
+Linux CI Javadoc has only the documented JDK SVG line-ending difference.
+Packaged qualification also passes against the matching three-mod test kit. Manual
+testing was accepted on 13 November 2026. Public downloads were independently
+verified against the approved release artifacts.
 Do not substitute 26.2 inputs or the published OreSpawn 4.1.0.
 
 The default sibling Power source root is `../../PowerAdvantage`. Base Metals
@@ -57,18 +68,18 @@ node tools/generate-recipe-unlocks.js --check
 ## Qualification
 
 See [26.3 port status](docs/PORT263-STATUS.md) for the exact inputs and history.
-The matching basePower checkout's `docs/26.3/QUALIFICATION.md` records the
+The [family qualification record](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-26.3/docs/26.3/QUALIFICATION.md) records the
 completed machine, recipe, old-world upgrade, graphical, full-restart and
 two-world 30-minute endurance checks. No 26.2 result was substituted for a
 26.3 test. Forge 66.1.5 has a separate bounded server check, not the full
 baseline suite. Manual acceptance is recorded separately from those automated
 results; it does not rewrite the original evidence.
 
-Release work is authorized in dependency order: Base Metals and OreSpawn,
-basePower, Steam, then Electric. Power and the dependency patches are public.
-Steam's source still requires all hosted checks and upstream merge. Publication
-also requires the coordinator's explicit Steam gate. Pin changes that alter
-the player JAR require updated combined-family qualification first.
+Power and the dependency patches were publicly verified before Steam. Source,
+security, artifact, tag and publisher checks passed before release. The public
+Steam player is byte-identical to the accepted candidate, so its runtime
+qualification was explicitly reused. Steam and Electric are independent
+siblings that both require public Power; neither requires the other.
 Unit-support sources remain sealed at Power's `c0eb83f7` checkpoint unless
 the released source is independently verified to provide the same bytes.
 
