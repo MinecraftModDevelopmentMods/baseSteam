@@ -11,7 +11,7 @@ gates are superseded by that completed local test record.
 
 ## Release Preparation: 13 November 2026
 
-The user accepted the profile04 family for manual testing and authorized the
+The user accepted manual testing of the profile04 family and authorized the
 fork/PR/merge and CurseForge, Maven and GitHub release sequence. The accepted
 Steam player remains `770E46CF87FEE3CC1EFF73C666858BFC03D6922E866B4C07C0A093B746B2CF44`.
 The final automated family index records 825 tests and remains unchanged;
