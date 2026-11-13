@@ -14,13 +14,21 @@ Start a new run with the recorded CurseForge file ID so it verifies that upload
 without submitting the jar again. The release workflow sets Java 8 through
 Minecraft 1.16.5, Java 16 for Minecraft 1.17.1, and Java 17 for Minecraft 1.18.2
 through 1.20.1, Java 21 for Minecraft 1.20.6, 1.21.1 and 1.21.11, and Java 25
-for Minecraft 26.1.2 and 26.2. The pure target helper in verify.py uses an
-explicit whitelist; unqualified targets, including 26.3, are rejected.
+for Minecraft 26.1.2, 26.2 and 26.3. The pure target helper in verify.py uses an
+explicit whitelist; unqualified or malformed targets, including 26.4 and
+26.3.0, are rejected.
 
 The dispatcher runs its offline tests before staging an artifact. Release
 records still require the actual merged source, successful version-branch CI
 run, artifact ID and checksums. A prepared route is not an approved release
 record and does not publish anything.
+
+The 26.3 route is prepared locally after manual acceptance of the exact
+candidate. It adds no approved 26.3 release entry. Wait for verified public
+Power and companion pins, the exact upstream merge, every required check
+including CodeQL, the matching tag and sealed CI artifact before recording
+the release. Run check-only first; live publication also requires the
+coordinator's explicit Steam gate. Resume an accepted CurseForge file ID.
 
 The GitHub release targets the exact version-branch source recorded in
 `releases.json`, not the publication workflow's default branch.
