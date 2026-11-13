@@ -1,4 +1,4 @@
-baseSteam 2.2.19.2603001 (Minecraft 26.3 / Forge)
+baseSteam 2.2.19.2603001 (Minecraft 26.3 / Forge) - published 13 November 2026
 
 - Updated for Minecraft 26.3, Forge 66 and Java 25.
 - Kept existing machine balance, item IDs, inventories, fluids and musket state.
@@ -7,6 +7,10 @@ baseSteam 2.2.19.2603001 (Minecraft 26.3 / Forge)
 - Passed the Steam unit, native, Eclipse, cold-cache and matching-archive checks.
 - Completed the combined machine, old-world, graphical, restart and two-world endurance checks. Manual testing was accepted on 13 November 2026.
 - Requires basePower 2.4.18.2603001, Base Metals 3.1.2.2603001 and OreSpawn 4.1.1.2603001, with the same bytes used by the accepted tests.
+- Downloads: https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9589874
+- MMD Maven: https://maven.moddev.zone/releases/zone/moddev/mc/basesteam/baseSteam/2.2.19.2603001/baseSteam-2.2.19.2603001.jar
+- GitHub: https://github.com/MinecraftModDevelopmentMods/baseSteam/releases/tag/2.2.19.2603001
+- Published source and download hashes: docs/RELEASE263.md. This follow-up changes documentation only.
 
 baseSteam 2.2.18.2602001 (Minecraft 26.2 / Forge) - published 13 November 2026
 

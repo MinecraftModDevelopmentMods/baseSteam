@@ -1,7 +1,16 @@
 # baseSteam 26.3 Port Status
 
-Manual testing accepted; release preparation. Version `2.2.19.2603001`, branched from accepted
-26.2 source `de4dcf6ed84461843a241bbaf93cf03e43e83eb2`.
+Version `2.2.19.2603001` was published on 13 November 2026. See the
+[published release record](RELEASE263.md) for its exact source and verified
+CurseForge, Maven and GitHub downloads.
+
+> Dated candidate and implementation history, 12-13 November 2026. Earlier
+> pending-gate wording below is retained from those checkpoints, not current
+> download instructions. Publication adds no new gameplay qualification and
+> does not rewrite the original receipts.
+
+The port branched from accepted 26.2 source
+`de4dcf6ed84461843a241bbaf93cf03e43e83eb2`.
 
 The matching basePower checkout's `docs/26.3/QUALIFICATION.md` records the
 completed combined machine, recipe, migration, client, restart and endurance
