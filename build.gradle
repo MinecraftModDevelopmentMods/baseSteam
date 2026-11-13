@@ -233,9 +233,15 @@ tasks.withType(JavaExec).configureEach {
             }
             def salvage = output =~ /BASESTEAM_NATIVE_SALVAGE_PASS mode=(NORMAL|TECH_PROGRESSION|APOCALYPTIC) present=(\d+) absent=(\d+) nativeCodecs=(\d+) inputNegatives=(\d+)/
             if (!salvage.find()) throw new GradleException("Missing native salvage recipe witness: ${receipt}")
-            List<String> expectedSalvage = salvage.group(1) == 'APOCALYPTIC' ? ['9', '0', '9', '9'] : ['0', '9', '0', '0']
+            String testedRecipeMode = salvage.group(1)
+            List<String> expectedSalvage = testedRecipeMode == 'APOCALYPTIC' ? ['9', '0', '9', '9'] : ['0', '9', '0', '0']
             if ((2..5).collect { salvage.group(it) } != expectedSalvage || salvage.find()) {
                 throw new GradleException("Incorrect native salvage recipe witness: ${receipt}")
+            }
+            def unlocks = output =~ /BASESTEAM_NATIVE_UNLOCKS_PASS mode=(NORMAL|TECH_PROGRESSION|APOCALYPTIC) definitions=24 present=(\d+) absent=(\d+)/
+            if (!unlocks.find() || unlocks.group(1) != testedRecipeMode
+                    || unlocks.group(2).toInteger() + unlocks.group(3).toInteger() != 24 || unlocks.find()) {
+                throw new GradleException("Missing or incorrect native recipe/unlock availability witness: ${receipt}")
             }
             File report = new File(steamGameTestRunDirectory.get().asFile, 'steam-gametest-results.xml')
             if (!report.isFile()) throw new GradleException('Missing native GameTest XML report')

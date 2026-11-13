@@ -18,10 +18,12 @@ Required local versions are basePower **2.4.18.2603001**, Base Metals
 both client and server. Base Metals and OreSpawn are pinned to the verified
 frozen compiler-only handoff; their runtime qualification remains pending.
 Power source, JAR and test-support inputs are pinned to the immutable local
-handoff recorded in `gradle.properties`. Handoff03 passes Steam's full unit,
-build, Eclipse and independent ECJ gates. Native server qualification remains
-blocked on shared material-condition tag loading. Do not substitute 26.2 inputs
-or the published OreSpawn 4.1.0.
+handoff recorded in `gradle.properties`. Power handoff05 passes Steam's 287-test
+suite, build and Eclipse gates. The independent ECJ and three-mode native
+GameTest proofs against Power04 remain historical until retested on Power05.
+Accepted-26.2 golden whole-table loot checks, cold/repro and packaged
+qualification remain separate.
+Do not substitute 26.2 inputs or the published OreSpawn 4.1.0.
 
 The default sibling Power source root is `../../PowerAdvantage`. Base Metals
 and OreSpawn use the existing `BaseMetals 263/BaseMetals` and `OS263/OreSpawn`

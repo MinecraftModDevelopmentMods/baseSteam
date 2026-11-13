@@ -26,8 +26,8 @@ artifacts nor public 4.1.0 are substitutes.
   `B03388D10E5B83046A5D2D540E7D956202A8A6CC78B2302A412D3092192CAAE8`.
 - OS source `bbdd80a9c1f7972d81bedf8e6c2b1d4338ec9fa6`, JAR SHA-256
   `7FBAFEFF97683DA0E7ABD0035B85C3A19276B3AD9CB50DBC071F9993B33E490D`.
-- Power handoff03 source `83a52b5945e7a65f1e90d6058d391938c5289d3a`, JAR SHA-256
-  `D03CB5DB644075CE6C2E0CC663DD62FBB5CCDDCDB0EBC6C0CA09088F1FE616E1`.
+- Power handoff05 source `9d6e31a9c9d116b72a3758edfb18e81a25d939e3`, JAR SHA-256
+  `F225B3EC1B9B272CCBA82716B6D105D3BF0A613E31437BBFA0F9CAB39E4FE9BB`.
 - Frozen Power test-support source hashes are pinned in `gradle.properties`.
   The unchanged bootstrap agent SHA-256 is
   `088FC137BEBB9B2E75C596DE868499E6099CF228BECFCF07EAE36791245FD1B6`.
@@ -48,23 +48,30 @@ current handoff contract live in
 
 Source and resource audits, compilation, unit tests, native GameTests,
 packaged startup/migration and real-client proof are distinct gates.
-The inherited unit inventory starts at 276 tests. Nine regressions were
-added, for 209 annotated methods and 285 executed expanded tests in 49 suites.
+The inherited unit inventory starts at 276 tests. Eleven regressions were
+added, for 211 annotated methods and 287 executed expanded tests in 49 suites.
 `full-07-ba2` preserved one failure: the unchanged shared-API Forge item-override
 assertion expected 237 and received zero. The parent fixed the confirmed API
 bug in handoff03. `full-08-d03` reran all 44 tasks and passed all 285 tests with
-zero failures, errors or skips. No assertion was waived.
+zero failures, errors or skips. No assertion was waived. Power04 then passed
+`full-09-power04` with the same 285-test inventory. The added native modifier
+canonicalization regression brings `full-11-power04-oracle` to 286 passing tests.
+`full-12-power04-final` reruns all 44 tasks on the expanded mode oracle and
+passes the same 286 tests. After the whole-table scope regression, the exact
+Power05 handoff passes `full-13-power05-initial`: all 44 tasks rerun, 287 tests,
+zero failures/errors/skips.
 
 Main, test and GameTest source scopes compile. Javadoc, exact dependency and
 artifact audits, checksums and Eclipse production-only classpath checks pass
-against handoff03. Installed ECJ 3.46.0 independently compiled all three scopes
-and executed the complete 285-test inventory in `ecj-263-02-d03`, with zero
+against handoff05. Installed ECJ 3.46.0 independently compiled all three scopes
+and executed the complete 286-test inventory in `ecj-263-06-power04-final`, with zero
 failures, ignored tests or assumptions. Omitted-suite, omitted-method and
 stale-method controls all fail as required. The earlier ECJ run correctly
 remained red while the dependency regression was red.
+That ECJ proof uses Power04. The expanded inventory requires fresh ECJ on Power05.
 
 The three current artifacts and source snapshot are frozen in evidence
-`initial-d03-01`; the player/compiler JAR SHA-256 is
+`initial-power05-01`; the player/compiler JAR SHA-256 is
 `D1027BE8E9A9DFB5187411BE944A58E165B6DC828581C206EEB817A4255F2DED`.
 Cold inputs with spaces and reproducibility remain pending. The first cold
 run regenerated the bare SDK and reached unit/artifact tasks, but was stopped
@@ -94,7 +101,7 @@ fluid-result cache is removed because contextual providers and reloads cannot
 share a cached value. Configured fuel precedence, quantities and conversion
 factors remain unchanged. The coal/blast helper retains its existing integer
 duration and null-recipe-type behavior rather than adopting Power's short cap.
-The shared-API item-override regression now passes unchanged against Power03;
+The shared-API item-override regression passes unchanged against Power03 and Power04;
 ForgeEventFactory only fires the event and does not invoke the item override.
 
 Trades use singular `given_item_modifier`, native `type` function dispatch and
@@ -106,7 +113,20 @@ fixtures, eight codec negatives, three silently ignored plural-field witnesses,
 and native explosion predicate positive/negative controls. It intentionally
 does not impersonate Steam item registrations or qualify the enchanted musket.
 The actual five-trade GameTest retains 1280 offers and now requires eight codec
-negatives, a provider witness and the old-plural semantic-loss witness.
+negatives, a provider witness and the old-plural semantic-loss witness. A new
+actual DIRECT_CODEC regression verifies that a singleton modifier sequence
+canonically encodes as a function object, replays the old array-cast failure,
+and rejects unknown/legacy function discriminators.
+
+The whole-table native fixture additionally preserves modifiers at table, pool
+and entry scope, single and multi-term conditions, default weight one and exact
+counts. Five controls prove that old plural fields can decode successfully yet
+silently lose only the affected scope. Steam's 15 production tables and six
+generated templates already use singular native fields. Independent goldens
+from the accepted Steam 2.2.18 JAR (SHA-256
+`EDD10D6ED4A623F6EAA364D21480FDA3B777FB15C2195D437882DB09C0F415AB`)
+and actual whole-production-table server checks are still being added. No global
+Forge loot-modifier `conditions` arrays are converted.
 
 The standalone fixture registers real Forge HolderSet types through native
 NewRegistry/Register phases. Steam has no custom tag condition: it delegates
@@ -124,10 +144,34 @@ These isolated criterion tests do not claim actual recipe-mode availability.
 Steam fix and Power handoff02, fresh `gametest-normal-02-ba2` gets beyond that
 failure but stops before executing tests: Power's material condition accesses
 unbound item tags while loading advancements and recipes. Fresh
-`gametest-normal-03-d03` confirms the same blocker on the current frozen Power
+`gametest-normal-03-d03` confirms the same blocker on the historical Power03
 JAR. All three logs and disposable run directories are retained.
-The parent owns this shared condition fix. No native mode, trade or machine
-GameTest pass is claimed; all runtime assertions remain required.
+Power04's scoped pending-tag lookup fixes this actual startup failure without
+a Steam production change. `gametest-normal-04-power04` starts and executes all
+four tests, exposing an old array-cast oracle in trade negative controls.
+After the native canonical-object adaptation, `gametest-normal-05-power04`
+passes all four tests, 1280 production trade offers, eight codec negatives,
+provider/plural witnesses and NORMAL salvage absence checks.
+
+Fresh TECH execution exposed the former oracle's unconditional NORMAL unlock
+lookup. The runtime oracle now checks all 24 recipe/unlock pairs against their
+exact condition trees and live bound tags, checks exact native recipe references
+and ingredient OR groups, and retains the ingredient-positive/negative checks
+even for intentionally absent variants by parsing their actual native criterion
+data. The final native matrix is green in `native-matrix-power04-01`:
+
+- NORMAL: four tests, 19 unlocks present and five absent.
+- TECH_PROGRESSION: four tests, 18 unlocks present and six absent.
+- APOCALYPTIC: four tests, 16 unlocks present and eight absent, all nine salvage
+  recipes present with native codec roundtrips and unrelated-input negatives.
+
+Each mode executes 1280 production trade offers, all eight codec negatives,
+the provider witness and the legacy-plural semantic-loss witness. That is
+12 successful native GameTests and 3840 offers, with no ERROR/FATAL log entries
+or skipped cases. No availability assertion is removed or waived. These are
+native Forge userdev checks, not packaged/client/endurance/manual qualification.
+The matrix uses Power04 and is preserved as historical proof; Power05 requires
+new server runs after the whole-table/golden oracle is complete.
 
 `source-05` passes release configuration, hygiene, recipe guards, datapack and
 source-layout checks and exact BM/OS development/player byte audits. The Node

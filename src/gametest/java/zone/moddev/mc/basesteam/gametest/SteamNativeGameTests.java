@@ -152,18 +152,29 @@ public final class SteamNativeGameTests {
                 "The fragile block tag must not include solid stone");
         var manager = level.getServer().getAdvancements();
         helper.assertTrue(manager.get(id("recipes/steam_pipe")) != null, "Missing Steam pipe recipe advancement");
-        var unlock = manager.get(id("recipes/musket_right_normal")).value();
-        var ingredient = (InventoryChangeTrigger.TriggerInstance)
-                unlock.criteria().get("has_ingredient_1").triggerInstance();
+        var blueprints = assertRecipeUnlockAvailability(helper);
+        String variant = zone.moddev.mc.basepower.PowerAdvantage.recipeMode
+                == zone.moddev.mc.basepower.RecipeMode.TECH_PROGRESSION ? "musket_right_tech" : "musket_right_normal";
+        var unlock = manager.get(id("recipes/" + variant));
+        var ops = registries.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
+        var criteria = blueprints.get(variant).getAsJsonObject("criteria");
+        var ingredient = unlock != null ? (InventoryChangeTrigger.TriggerInstance)
+                unlock.value().criteria().get("has_ingredient_1").triggerInstance()
+                : InventoryChangeTrigger.TriggerInstance.CODEC.parse(ops,
+                        criteria.getAsJsonObject("has_ingredient_1").get("conditions")).getOrThrow();
         var predicate = ingredient.items().getFirst();
         helper.assertTrue(predicate.test(new ItemStack(net.minecraft.world.item.Items.FLINT_AND_STEEL)),
                 "Musket discovery lost the matching ingredient");
         helper.assertTrue(!predicate.test(new ItemStack(net.minecraft.world.item.Items.STONE)),
                 "An unrelated item unlocked the musket recipe");
-        var tagIngredient = (InventoryChangeTrigger.TriggerInstance)
-                unlock.criteria().get("has_ingredient_3").triggerInstance();
+        var tagIngredient = unlock != null ? (InventoryChangeTrigger.TriggerInstance)
+                unlock.value().criteria().get("has_ingredient_3").triggerInstance()
+                : InventoryChangeTrigger.TriggerInstance.CODEC.parse(ops,
+                        criteria.getAsJsonObject("has_ingredient_3").get("conditions")).getOrThrow();
         helper.assertTrue(tagIngredient.items().getFirst().test(new ItemStack(net.minecraft.world.item.Items.OAK_PLANKS)),
                 "Musket discovery lost the plank tag predicate");
+        helper.assertTrue(!tagIngredient.items().getFirst().test(new ItemStack(net.minecraft.world.item.Items.STONE)),
+                "An unrelated item matched the musket plank tag predicate");
         var loot = level.getServer().reloadableRegistries();
         var chest = ResourceKey.create(Registries.LOOT_TABLE, id("chests/advantage_parts"));
         LootTable chestTable = loot.getLootTable(chest);
@@ -192,6 +203,62 @@ public final class SteamNativeGameTests {
         NativeVillagerTradeProof.verify(helper);
         assertSalvageRecipes(helper);
         helper.succeed();
+    }
+
+    private static java.util.Map<String, com.google.gson.JsonObject> assertRecipeUnlockAvailability(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var resources = level.getServer().getResourceManager();
+        var definitions = resources.listResources("advancement/recipes", key ->
+                key.getNamespace().equals(SteamAdvantage.MODID) && key.getPath().endsWith(".json"));
+        helper.assertTrue(definitions.size() == 24, "Expected all 24 production recipe unlock definitions");
+        var ops = level.registryAccess().createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
+        var blueprints = new java.util.HashMap<String, com.google.gson.JsonObject>();
+        int present = 0;
+        for (var entry : definitions.entrySet()) {
+            String path = entry.getKey().getPath();
+            String name = path.substring("advancement/recipes/".length(), path.length() - ".json".length());
+            var advancement = readJson(entry.getValue());
+            var recipeId = id("recipe/" + name + ".json");
+            var recipe = readJson(resources.getResource(recipeId).orElseThrow(() ->
+                    new IllegalStateException("Missing native recipe resource: " + recipeId)));
+            helper.assertTrue(java.util.Objects.equals(recipe.get("forge:condition"), advancement.get("forge:condition")),
+                    "Recipe/unlock condition tree differs: " + name);
+            boolean expected = !recipe.has("forge:condition")
+                    || net.minecraftforge.common.crafting.conditions.ICondition.CODEC
+                            .parse(ops, recipe.get("forge:condition")).getOrThrow()
+                            .test(net.minecraftforge.common.crafting.conditions.ICondition.IContext.EMPTY, ops);
+            var loadedRecipe = level.recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, id(name)));
+            var loadedUnlock = level.getServer().getAdvancements().get(id("recipes/" + name));
+            helper.assertTrue(loadedRecipe.isPresent() == expected,
+                    "Wrong native recipe availability for " + name);
+            helper.assertTrue((loadedUnlock != null) == expected,
+                    "Wrong native unlock availability for " + name);
+            if (expected) {
+                var value = loadedUnlock.value();
+                var trigger = (net.minecraft.advancements.triggers.RecipeUnlockedTrigger.TriggerInstance)
+                        value.criteria().get("has_recipe").triggerInstance();
+                helper.assertTrue(trigger.recipes().size() == 1 && trigger.matches(loadedRecipe.orElseThrow()),
+                        "Unlock criterion lost its exact loaded recipe: " + name);
+                var requirements = value.requirements().requirements();
+                helper.assertTrue(requirements.size() == 1
+                                && java.util.Set.copyOf(requirements.getFirst()).equals(value.criteria().keySet()),
+                        "Native unlock must retain all ingredient alternatives in one OR group: " + name);
+                present++;
+            }
+            blueprints.put(name, advancement);
+        }
+        com.mojang.logging.LogUtils.getLogger().info(
+                "BASESTEAM_NATIVE_UNLOCKS_PASS mode={} definitions=24 present={} absent={}",
+                zone.moddev.mc.basepower.PowerAdvantage.recipeMode, present, 24 - present);
+        return blueprints;
+    }
+
+    private static com.google.gson.JsonObject readJson(net.minecraft.server.packs.resources.Resource resource) {
+        try (var reader = resource.openAsReader()) {
+            return com.google.gson.JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (java.io.IOException exception) {
+            throw new java.io.UncheckedIOException("Cannot read native recipe/unlock resource", exception);
+        }
     }
 
     private static void assertSalvageRecipes(GameTestHelper helper) {

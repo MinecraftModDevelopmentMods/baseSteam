@@ -110,6 +110,10 @@ final class NativeVillagerTradeProof {
             helper.assertTrue(counts.equals(expectedCounts), "Native sampling did not cover every inclusive count for " + name);
         }
         helper.assertTrue(enchantedData != null, "Missing actual native enchanted-trade codec data");
+        helper.assertTrue(enchantedData.get("given_item_modifier").isJsonObject()
+                        && enchantedData.getAsJsonObject("given_item_modifier").get("type").getAsString()
+                                .equals("minecraft:enchant_with_levels"),
+                "Native singleton modifier sequence did not retain its canonical function object");
         helper.assertTrue(pipeData != null, "Missing native pipe-trade modifier witness");
         JsonObject plural = pipeData.deepCopy();
         plural.add("given_item_modifiers", plural.remove("given_item_modifier"));
@@ -128,9 +132,9 @@ final class NativeVillagerTradeProof {
             switch (control) {
                 case 0 -> invalid.getAsJsonObject("wants").addProperty("id", "missing_mod:unregistered_item");
                 case 1 -> invalid.getAsJsonObject("gives").addProperty("count", 0);
-                case 2 -> invalid.getAsJsonArray("given_item_modifier").get(0).getAsJsonObject()
+                case 2 -> invalid.getAsJsonObject("given_item_modifier")
                         .addProperty("type", "missing_mod:unregistered_function");
-                case 3 -> invalid.getAsJsonArray("given_item_modifier").get(0).getAsJsonObject()
+                case 3 -> invalid.getAsJsonObject("given_item_modifier")
                         .addProperty("options", "#missing_mod:unbound_enchantment_tag");
                 case 4 -> {
                     JsonObject count = invalid.getAsJsonObject("wants").getAsJsonObject("count");
