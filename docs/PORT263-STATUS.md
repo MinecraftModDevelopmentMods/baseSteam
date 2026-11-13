@@ -26,8 +26,8 @@ artifacts nor public 4.1.0 are substitutes.
   `B03388D10E5B83046A5D2D540E7D956202A8A6CC78B2302A412D3092192CAAE8`.
 - OS source `bbdd80a9c1f7972d81bedf8e6c2b1d4338ec9fa6`, JAR SHA-256
   `7FBAFEFF97683DA0E7ABD0035B85C3A19276B3AD9CB50DBC071F9993B33E490D`.
-- Power handoff06 source `2d9bb107221a620a3c1a0533f1b9e970bd88b6ea`, JAR SHA-256
-  `4D72332401D8521E8DAEAF57DE4BA7B0B3D2965C575E1DB454A811526538832B`.
+- Power handoff07 source `c0eb83f7ba91cf8c83caea75e63057407a345949`, JAR SHA-256
+  `97525CE9C75509C55225E0061D43BAF9D29BDBDE6DF853E1552A64A54C14C3DE`.
 - Frozen Power test-support source hashes are pinned in `gradle.properties`.
   The unchanged bootstrap agent SHA-256 is
   `088FC137BEBB9B2E75C596DE868499E6099CF228BECFCF07EAE36791245FD1B6`.
@@ -48,8 +48,8 @@ current handoff contract live in
 
 Source and resource audits, compilation, unit tests, native GameTests,
 packaged startup/migration and real-client proof are distinct gates.
-The inherited unit inventory starts at 276 tests. Twelve regressions were
-added, for 212 annotated methods and 288 executed expanded tests in 49 suites.
+The inherited unit inventory starts at 276 tests. Fifteen regressions were
+added, for 215 annotated methods and 291 executed expanded tests in 49 suites.
 `full-07-ba2` preserved one failure: the unchanged shared-API Forge item-override
 assertion expected 237 and received zero. The parent fixed the confirmed API
 bug in handoff03. `full-08-d03` reran all 44 tasks and passed all 285 tests with
@@ -65,27 +65,32 @@ tests with zero failures/errors/skips; all 45 actionable tasks rerun and pass.
 `full-15-power06-initial` then reruns all 45 tasks against Power06 and passes
 all 288 tests, zero failures/errors/skips. No Steam production behavior changes
 were needed for the parent actor-memory compatibility repair.
+`full-16-power07-discovery` reruns all 45 tasks against Power07 and passes
+291 tests, zero failures/errors/skips, including optional-tag discovery regressions.
 
 Main, test and GameTest source scopes compile. Javadoc, exact dependency and
 artifact audits, checksums and Eclipse production-only classpath checks pass
-against handoff06. Installed ECJ 3.46.0 independently compiled all three scopes
+against handoff07. Installed ECJ 3.46.0 independently compiled all three scopes
 and executed the complete 288-test inventory in `ecj-263-07-power05-golden`, with zero
 failures, ignored tests or assumptions. Omitted-suite, omitted-method and
 stale-method controls all fail as required. The earlier ECJ run correctly
 remained red while the dependency regression was red.
-That ECJ proof uses frozen Power05 and the complete compiled/XML inventory,
-not a selected test subset. Fresh ECJ is required for the Power06 input.
+That historical ECJ proof uses frozen Power05 and the complete compiled/XML
+inventory, not a selected subset. Power06 also passed its 288-test ECJ proof;
+fresh ECJ is required for the new Power07 discovery artifact.
 
 The three current artifacts and source snapshot are frozen in evidence
-`initial-power06-01`; the player/compiler JAR SHA-256 is
-`D1027BE8E9A9DFB5187411BE944A58E165B6DC828581C206EEB817A4255F2DED`.
+`initial-power07-01`; the player/compiler JAR SHA-256 is
+`770E46CF87FEE3CC1EFF73C666858BFC03D6922E866B4C07C0A093B746B2CF44`.
+The prior D1027 artifact is preserved but does not qualify cross-mode discovery.
 Power05 cold/spaced inputs pass in `cold-spaces-02-power05`: all 46 tasks and
 288 tests, with all three release archives and both SDK JARs byte-identical to
 warm. Independent clean reproduction remains pending. The earlier first cold
 run was stopped at the user's request; that interrupted receipt is preserved,
 not relabelled green. The parent is now correcting a direct-26.2 actor-memory
-compatibility issue and has provided Power06. Current final ECJ, native, cold
-and clean-repro gates must be rebound to it; Power05 results remain historical
+compatibility issue in Power06, then repaired future recipe discoveries in
+Power07. Current ECJ/native/cold/clean-repro gates must be rebound to the latter;
+older input results remain historical
 and cannot qualify the new input. Passing child gates do not qualify packaged runtime,
 endurance, real-client behavior or manual acceptance.
 
@@ -150,12 +155,15 @@ NewRegistry/Register phases. Steam has no custom tag condition: it delegates
 those to Power and retains mode/musket condition assertions. No Forge patch,
 recipe-mode waiver or ConditionContext substitute is introduced.
 
-All 24 recipe unlocks now use native `recipe_unlocked.recipes`. Their generator
-copies each recipe's `forge:condition` intact onto its unlock advancement, while
-retaining ingredient OR requirements, rewards and IDs. Two new tests exercise
-the actual native criterion CODEC, every generated recipe ID and roundtrip,
-and negative controls for the old field, missing references and empty criteria.
-These isolated criterion tests do not claim actual recipe-mode availability.
+All 24 recipe unlocks use native `recipe_unlocked.recipes` with
+`#basesteam:discovery/<stem>`. Each generated recipe tag contains exactly the
+matching recipe ID with explicit `required:false`. Recipe conditions stay on
+recipes only. Advancements remain unconditional so mode changes cannot discard
+future discovery state. Native tests cover 24 singleton active tags and 24 empty
+tags with no recipe holders, exact roundtrips, unrelated tags and required-flag
+identity guards. Ingredient OR requirements, rewards and logical IDs are unchanged.
+The earlier condition-parity design prevented dangling holders but failed actual
+mode-change restore; it is superseded, not relabelled as accepted behavior.
 
 `gametest-normal-01` exposed the removed singular criterion field. After the
 Steam fix and Power handoff02, fresh `gametest-normal-02-ba2` gets beyond that

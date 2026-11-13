@@ -238,7 +238,7 @@ tasks.withType(JavaExec).configureEach {
             if ((2..5).collect { salvage.group(it) } != expectedSalvage || salvage.find()) {
                 throw new GradleException("Incorrect native salvage recipe witness: ${receipt}")
             }
-            def unlocks = output =~ /BASESTEAM_NATIVE_UNLOCKS_PASS mode=(NORMAL|TECH_PROGRESSION|APOCALYPTIC) definitions=24 present=(\d+) absent=(\d+)/
+            def unlocks = output =~ /BASESTEAM_NATIVE_UNLOCKS_PASS mode=(NORMAL|TECH_PROGRESSION|APOCALYPTIC) definitions=24 advancements=24 activeRecipeTags=(\d+) emptyRecipeTags=(\d+) progressRoundTrips=24 optionalTagGuards=24/
             if (!unlocks.find() || unlocks.group(1) != testedRecipeMode
                     || unlocks.group(2).toInteger() + unlocks.group(3).toInteger() != 24 || unlocks.find()) {
                 throw new GradleException("Missing or incorrect native recipe/unlock availability witness: ${receipt}")

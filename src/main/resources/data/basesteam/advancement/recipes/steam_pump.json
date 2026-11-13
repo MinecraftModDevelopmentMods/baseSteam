@@ -58,9 +58,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": [
-          "basesteam:steam_pump"
-        ]
+        "recipes": "#basesteam:discovery/steam_pump"
       }
     }
   },
@@ -77,23 +75,6 @@
   "rewards": {
     "recipes": [
       "basesteam:steam_pump"
-    ]
-  },
-  "forge:condition": {
-    "type": "forge:and",
-    "values": [
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:frames/steel"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:governors"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:plates/iron"
-      }
     ]
   }
 }

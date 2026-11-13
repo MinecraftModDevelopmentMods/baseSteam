@@ -36,9 +36,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": [
-          "basesteam:musket_right_normal"
-        ]
+        "recipes": "#basesteam:discovery/musket_right_normal"
       }
     }
   },
@@ -53,22 +51,6 @@
   "rewards": {
     "recipes": [
       "basesteam:musket_right_normal"
-    ]
-  },
-  "forge:condition": {
-    "type": "forge:and",
-    "values": [
-      {
-        "type": "basesteam:recipe_mode",
-        "mode": "NORMAL"
-      },
-      {
-        "type": "basesteam:musket_enabled"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:ingots/steel"
-      }
     ]
   }
 }

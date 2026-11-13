@@ -34,9 +34,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": [
-          "basesteam:steam_governor_tech"
-        ]
+        "recipes": "#basesteam:discovery/steam_governor_tech"
       }
     }
   },
@@ -51,27 +49,6 @@
   "rewards": {
     "recipes": [
       "basesteam:steam_governor_tech"
-    ]
-  },
-  "forge:condition": {
-    "type": "forge:and",
-    "values": [
-      {
-        "type": "basesteam:recipe_mode",
-        "mode": "TECH_PROGRESSION"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:ingots/brass"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:rods"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:sprockets"
-      }
     ]
   }
 }

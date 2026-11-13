@@ -152,25 +152,19 @@ public final class SteamNativeGameTests {
                 "The fragile block tag must not include solid stone");
         var manager = level.getServer().getAdvancements();
         helper.assertTrue(manager.get(id("recipes/steam_pipe")) != null, "Missing Steam pipe recipe advancement");
-        var blueprints = assertRecipeUnlockAvailability(helper);
+        assertRecipeUnlockAvailability(helper);
         String variant = zone.moddev.mc.basepower.PowerAdvantage.recipeMode
                 == zone.moddev.mc.basepower.RecipeMode.TECH_PROGRESSION ? "musket_right_tech" : "musket_right_normal";
-        var unlock = manager.get(id("recipes/" + variant));
-        var ops = registries.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
-        var criteria = blueprints.get(variant).getAsJsonObject("criteria");
-        var ingredient = unlock != null ? (InventoryChangeTrigger.TriggerInstance)
-                unlock.value().criteria().get("has_ingredient_1").triggerInstance()
-                : InventoryChangeTrigger.TriggerInstance.CODEC.parse(ops,
-                        criteria.getAsJsonObject("has_ingredient_1").get("conditions")).getOrThrow();
+        var unlock = manager.get(id("recipes/" + variant)).value();
+        var ingredient = (InventoryChangeTrigger.TriggerInstance)
+                unlock.criteria().get("has_ingredient_1").triggerInstance();
         var predicate = ingredient.items().getFirst();
         helper.assertTrue(predicate.test(new ItemStack(net.minecraft.world.item.Items.FLINT_AND_STEEL)),
                 "Musket discovery lost the matching ingredient");
         helper.assertTrue(!predicate.test(new ItemStack(net.minecraft.world.item.Items.STONE)),
                 "An unrelated item unlocked the musket recipe");
-        var tagIngredient = unlock != null ? (InventoryChangeTrigger.TriggerInstance)
-                unlock.value().criteria().get("has_ingredient_3").triggerInstance()
-                : InventoryChangeTrigger.TriggerInstance.CODEC.parse(ops,
-                        criteria.getAsJsonObject("has_ingredient_3").get("conditions")).getOrThrow();
+        var tagIngredient = (InventoryChangeTrigger.TriggerInstance)
+                unlock.criteria().get("has_ingredient_3").triggerInstance();
         helper.assertTrue(tagIngredient.items().getFirst().test(new ItemStack(net.minecraft.world.item.Items.OAK_PLANKS)),
                 "Musket discovery lost the plank tag predicate");
         helper.assertTrue(!tagIngredient.items().getFirst().test(new ItemStack(net.minecraft.world.item.Items.STONE)),
@@ -206,14 +200,18 @@ public final class SteamNativeGameTests {
         helper.succeed();
     }
 
-    private static java.util.Map<String, com.google.gson.JsonObject> assertRecipeUnlockAvailability(GameTestHelper helper) {
+    private static void assertRecipeUnlockAvailability(GameTestHelper helper) {
         var level = helper.getLevel();
         var resources = level.getServer().getResourceManager();
         var definitions = resources.listResources("advancement/recipes", key ->
                 key.getNamespace().equals(SteamAdvantage.MODID) && key.getPath().endsWith(".json"));
         helper.assertTrue(definitions.size() == 24, "Expected all 24 production recipe unlock definitions");
         var ops = level.registryAccess().createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE);
-        var blueprints = new java.util.HashMap<String, com.google.gson.JsonObject>();
+        var recipeRegistry = level.getServer().reloadableRegistries().lookup().lookupOrThrow(Registries.RECIPE);
+        var unrelated = recipeRegistry.listElements().filter(holder -> !holder.unwrapKey().orElseThrow()
+                .identifier().getNamespace().equals(SteamAdvantage.MODID)).findFirst().orElseThrow();
+        var unrelatedRecipe = new net.minecraft.world.item.crafting.RecipeHolder<>(
+                unrelated.unwrapKey().orElseThrow(), unrelated.value());
         int present = 0;
         for (var entry : definitions.entrySet()) {
             String path = entry.getKey().getPath();
@@ -222,8 +220,17 @@ public final class SteamNativeGameTests {
             var recipeId = id("recipe/" + name + ".json");
             var recipe = readJson(resources.getResource(recipeId).orElseThrow(() ->
                     new IllegalStateException("Missing native recipe resource: " + recipeId)));
-            helper.assertTrue(java.util.Objects.equals(recipe.get("forge:condition"), advancement.get("forge:condition")),
-                    "Recipe/unlock condition tree differs: " + name);
+            helper.assertTrue(!advancement.has("forge:condition"), "A future discovery was gated out: " + name);
+            var tagData = readJson(resources.getResource(id("tags/recipe/discovery/" + name + ".json")).orElseThrow());
+            var values = tagData.getAsJsonArray("values");
+            helper.assertTrue(tagData.keySet().equals(java.util.Set.of("values")) && values.size() == 1
+                    && values.get(0).isJsonObject(), "Wrong discovery tag structure: " + name);
+            var optional = values.get(0).getAsJsonObject();
+            helper.assertTrue(optional.keySet().equals(java.util.Set.of("id", "required"))
+                    && optional.get("id").getAsString().equals(id(name).toString())
+                    && optional.get("required").isJsonPrimitive()
+                    && optional.get("required").getAsJsonPrimitive().isBoolean()
+                    && !optional.get("required").getAsBoolean(), "Discovery tag lost optional recipe identity: " + name);
             boolean expected = !recipe.has("forge:condition")
                     || net.minecraftforge.common.crafting.conditions.ICondition.CODEC
                             .parse(ops, recipe.get("forge:condition")).getOrThrow()
@@ -232,26 +239,38 @@ public final class SteamNativeGameTests {
             var loadedUnlock = level.getServer().getAdvancements().get(id("recipes/" + name));
             helper.assertTrue(loadedRecipe.isPresent() == expected,
                     "Wrong native recipe availability for " + name);
-            helper.assertTrue((loadedUnlock != null) == expected,
-                    "Wrong native unlock availability for " + name);
-            if (expected) {
-                var value = loadedUnlock.value();
-                var trigger = (net.minecraft.advancements.triggers.RecipeUnlockedTrigger.TriggerInstance)
-                        value.criteria().get("has_recipe").triggerInstance();
-                helper.assertTrue(trigger.recipes().size() == 1 && trigger.matches(loadedRecipe.orElseThrow()),
-                        "Unlock criterion lost its exact loaded recipe: " + name);
-                var requirements = value.requirements().requirements();
-                helper.assertTrue(requirements.size() == 1
-                                && java.util.Set.copyOf(requirements.getFirst()).equals(value.criteria().keySet()),
-                        "Native unlock must retain all ingredient alternatives in one OR group: " + name);
-                present++;
-            }
-            blueprints.put(name, advancement);
+            helper.assertTrue(loadedUnlock != null, "Mode change lost a future native discovery: " + name);
+            var value = loadedUnlock.value();
+            var trigger = (net.minecraft.advancements.triggers.RecipeUnlockedTrigger.TriggerInstance)
+                    value.criteria().get("has_recipe").triggerInstance();
+            var tag = TagKey.create(Registries.RECIPE, id("discovery/" + name));
+            var contents = recipeRegistry.getOrThrow(tag);
+            helper.assertTrue(trigger.recipes().unwrapKey().equals(java.util.Optional.of(tag))
+                            && contents.size() == (expected ? 1 : 0) && trigger.recipes().size() == contents.size(),
+                    "Native discovery tag has wrong identity or availability: " + name);
+            if (expected) helper.assertTrue(trigger.matches(loadedRecipe.orElseThrow()), "Active recipe did not match its discovery tag: " + name);
+            helper.assertTrue(!trigger.matches(unrelatedRecipe), "Unrelated recipe matched a discovery tag: " + name);
+            helper.assertTrue(value.rewards().recipes().equals(java.util.List.of(ResourceKey.create(Registries.RECIPE, id(name)))),
+                    "Future recipe reward key changed: " + name);
+            var requirements = value.requirements().requirements();
+            helper.assertTrue(requirements.size() == 1
+                            && java.util.Set.copyOf(requirements.getFirst()).equals(value.criteria().keySet()),
+                    "Native unlock must retain all ingredient alternatives in one OR group: " + name);
+            var progress = new net.minecraft.advancements.AdvancementProgress();
+            progress.update(value.requirements());
+            helper.assertTrue(progress.grantProgress("has_ingredient_1") && progress.isDone(),
+                    "One ingredient must preserve future discovery completion: " + name);
+            var stored = net.minecraft.advancements.AdvancementProgress.CODEC.encodeStart(
+                    com.mojang.serialization.JsonOps.INSTANCE, progress).getOrThrow();
+            var restored = net.minecraft.advancements.AdvancementProgress.CODEC.parse(
+                    com.mojang.serialization.JsonOps.INSTANCE, stored).getOrThrow();
+            restored.update(value.requirements());
+            helper.assertTrue(restored.isDone(), "Native save/restore lost future discovery progress: " + name);
+            if (expected) present++;
         }
         com.mojang.logging.LogUtils.getLogger().info(
-                "BASESTEAM_NATIVE_UNLOCKS_PASS mode={} definitions=24 present={} absent={}",
+                "BASESTEAM_NATIVE_UNLOCKS_PASS mode={} definitions=24 advancements=24 activeRecipeTags={} emptyRecipeTags={} progressRoundTrips=24 optionalTagGuards=24",
                 zone.moddev.mc.basepower.PowerAdvantage.recipeMode, present, 24 - present);
-        return blueprints;
     }
 
     static com.google.gson.JsonObject readJson(net.minecraft.server.packs.resources.Resource resource) {

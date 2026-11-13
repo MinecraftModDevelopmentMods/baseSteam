@@ -46,9 +46,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipes": [
-          "basesteam:steam_drill_diamond_pickaxe_normal"
-        ]
+        "recipes": "#basesteam:discovery/steam_drill_diamond_pickaxe_normal"
       }
     }
   },
@@ -64,27 +62,6 @@
   "rewards": {
     "recipes": [
       "basesteam:steam_drill_diamond_pickaxe_normal"
-    ]
-  },
-  "forge:condition": {
-    "type": "forge:and",
-    "values": [
-      {
-        "type": "basesteam:recipe_mode",
-        "mode": "NORMAL"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:frames/steel"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:governors"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:plates/iron"
-      }
     ]
   }
 }
