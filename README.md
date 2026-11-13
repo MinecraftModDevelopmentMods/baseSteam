@@ -1,6 +1,6 @@
 # baseSteam
 
-**Minecraft 26.3 Forge, version 2.2.19.2603001. Ready for manual testing.**
+**Minecraft 26.3 Forge, version 2.2.19.2603001. Manual testing accepted; release preparation.**
 
 baseSteam continues DrCyano's Steam Advantage and uses basePower's shared
 API, machines and creative tab. Existing `basesteam` registry and saved-data
@@ -13,11 +13,11 @@ Forge supplies hidden client metadata for resource format **97.1**.
 
 ## Build
 
-Required local versions are basePower **2.4.18.2603001**, Base Metals
+Required versions are basePower **2.4.18.2603001**, Base Metals
 **3.1.2.2603001** and OreSpawn **4.1.1.2603001**. Base Metals is REQUIRED on
 both client and server. Base Metals and OreSpawn are pinned to the exact local
-migration-hook and retained-settings builds used by the combined tests. These
-26.3 dependency patches are not published.
+migration-hook and retained-settings builds used by the combined tests. Public
+dependency releases must be verified before the Steam source is pushed.
 Power source, JAR and test-support inputs are pinned to the immutable local
 handoff recorded in `gradle.properties`. Power handoff07 passes Steam's complete
 291-test suite and build/Eclipse/ECJ gates. Discovery advancements remain loaded in
@@ -26,8 +26,8 @@ saved discovery progress. All four native GameTests pass in all three recipe
 modes on this repaired artifact. Whole-table loot uses SHA-checked accepted
 goldens. Fresh cold/spaced-input and independent clean builds pass all 291
 tests; player, sources and Javadoc JARs are byte-identical to warm. Packaged
-qualification now also passes against the matching three-mod test kit. Manual
-testing remains separate.
+qualification also passes against the matching three-mod test kit. Manual
+testing was accepted on 13 November 2026. This is not yet a published release.
 Do not substitute 26.2 inputs or the published OreSpawn 4.1.0.
 
 The default sibling Power source root is `../../PowerAdvantage`. Base Metals
@@ -60,9 +60,20 @@ The matching basePower checkout's `docs/26.3/QUALIFICATION.md` records the
 completed machine, recipe, old-world upgrade, graphical, full-restart and
 two-world 30-minute endurance checks. No 26.2 result was substituted for a
 26.3 test. Forge 66.1.5 has a separate bounded server check, not the full
-baseline suite. Manual acceptance remains next.
+baseline suite. Manual acceptance is recorded separately from those automated
+results; it does not rewrite the original evidence.
 
-This work is local only: no 26.3 push, PR, tag or publication is authorized.
+Release work is authorized in dependency order: Base Metals and OreSpawn,
+basePower, Steam, then Electric. Steam waits for verified public Power pins
+before its source push, all required checks and upstream merge. Publication
+also requires the coordinator's explicit Steam gate. Pin changes that alter
+the player JAR require updated combined-family qualification first.
+Unit-support sources remain sealed at Power's `c0eb83f7` checkpoint unless
+the released source is independently verified to provide the same bytes.
+
+The [published 26.2 record](docs/RELEASE262.md) links its CurseForge, Maven and
+GitHub downloads. The [26.1.2 release](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9577519)
+remains available for that Minecraft version.
 The [26.2](docs/PORT262-STATUS.md), [26.1.2](docs/PORT2612-STATUS.md),
 [1.21.11](docs/PORT12111-STATUS.md) and [1.21.1](docs/PORT1211-STATUS.md)
 records remain historical proof for their original candidates.

@@ -1,26 +1,24 @@
-baseSteam 2.2.19.2603001 - ready for local 26.3 manual testing
+baseSteam 2.2.19.2603001 (Minecraft 26.3 / Forge) - release preparation
 
-- Target Minecraft 26.3, Forge 66.0.0, official MCP 20260918.230105 and Java 25.0.3+9.
-- Use native data format 121.0, hidden client metadata for 97.1, and asset index 34 in Eclipse launches.
-- Retain machine balance, registry and saved-data identities, recipe modes, dependency audits and test guards.
-- Adapt cooking fuel to native contextual components and split world/reloadable registry lookups without changing burn times or machine multipliers.
-- Preserve trade quantities and explosion-safe drops through native singular modifier/condition fields, type discriminators and explicit uniform providers.
-- Prepare the oil boiler's contextual Power fuel call without caching results across machines, worlds or reloads.
-- Pin frozen Base Metals 3.1.2.2603001, OreSpawn 4.1.1.2603001, basePower 2.4.18.2603001 and exact native test-support inputs.
-- Keep all 24 discovery advancements loaded across recipe modes. Use native recipes tag references with exact required:false recipe entries; leave conditions on recipes, not advancements. Preserve ingredient OR groups, rewards, IDs and future discovery progress; add active/empty tag, missing-holder, unrelated-tag and required-flag regressions.
-- Pass 291 Steam units, independent ECJ execution and all 45 build/artifact/Eclipse tasks against Power handoff07.
-- Pass all four native GameTests in NORMAL, TECH_PROGRESSION and APOCALYPTIC against Power07, with 1280 trade offers and eight codec negatives per mode. Keep all 24 advancements loaded while checking live recipe conditions, exact active/empty recipe tags, ingredient OR requirements and 24 saved-progress roundtrips per mode, plus nine salvage codecs/input negatives in APOCALYPTIC.
-- Preserve all 15 accepted-26.2 loot tables through SHA-pinned syntax-only goldens, native whole-table roundtrips and actual loaded-mod table comparisons. Verify six generated templates, all 42 modifier/condition scopes and five silent-loss controls per mode. Unit-only builtin-item stand-ins are bijective and never registered; server checks retain real mod IDs.
-- Pass fresh cold/spaced-input and independent clean builds: all 46 tasks and 291 units each. All three release JARs and both bare SDK JARs match warm byte-for-byte. Spaced-input ECJ also passes all 291 units without ignored tests or assumptions.
-- Complete the matching family's machine, recipe, old-world upgrade, graphical, full-restart and two-world 30-minute endurance checks. Forge 66.1.5 also has bounded server evidence. Manual testing is next; the code and dependency patches remain local and unpublished.
+- Updated for Minecraft 26.3, Forge 66 and Java 25.
+- Kept existing machine balance, item IDs, inventories, fluids and musket state.
+- Updated fuel, trades and loot to Minecraft's new formats without changing quantities.
+- Fixed recipe discoveries across recipe-mode changes, including future unlocks.
+- Passed the Steam unit, native, Eclipse, cold-cache and matching-archive checks.
+- Completed the combined machine, old-world, graphical, restart and two-world endurance checks. Manual testing was accepted on 13 November 2026.
+- Publication is waiting for verified public dependencies and the Steam release gate. This is not a published download.
 
-baseSteam 2.2.18.2602001 - local candidate
+baseSteam 2.2.18.2602001 (Minecraft 26.2 / Forge) - published 13 November 2026
 
 - Target Minecraft 26.2 and Forge 65 with Java 25.
 - Keep the shared Base Metals migration hook and existing machine, item and saved-data identities.
 - Retain exact dependency, native pack, artifact and classpath guards.
 - Pass the combined profile03 machine, migration, actor/order, client and two-world endurance checks, including independent 66-checkpoint replay.
-- Prepare for manual testing once the final root cold-cache gate is confirmed; manual acceptance and publication remain pending.
+- Release, cold-cache and manual checks completed. Published with the released basePower dependency.
+- Downloads: https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9584145
+- MMD Maven: https://maven.moddev.zone/releases/zone/moddev/mc/basesteam/baseSteam/2.2.18.2602001/baseSteam-2.2.18.2602001.jar
+- GitHub: https://github.com/MinecraftModDevelopmentMods/baseSteam/releases/tag/2.2.18.2602001
+- Published source and download hash: docs/RELEASE262.md. Original candidate evidence stays dated and unchanged.
 
 baseSteam 2.2.17.2601021 (Minecraft 26.1.2 / Forge)
 

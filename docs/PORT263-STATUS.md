@@ -1,13 +1,42 @@
 # baseSteam 26.3 Port Status
 
-Ready for local manual testing. Version `2.2.19.2603001`, branched from accepted
+Manual testing accepted; release preparation. Version `2.2.19.2603001`, branched from accepted
 26.2 source `de4dcf6ed84461843a241bbaf93cf03e43e83eb2`.
 
 The matching basePower checkout's `docs/26.3/QUALIFICATION.md` records the
 completed combined machine, recipe, migration, client, restart and endurance
-checks and exact jar hashes. Nothing from 26.3 is pushed or published. The
+checks and exact jar hashes. The
 detailed entries below are implementation history; their earlier pending
 gates are superseded by that completed local test record.
+
+## Release Preparation: 13 November 2026
+
+The user accepted the profile04 family for manual testing and authorized the
+fork/PR/merge and CurseForge, Maven and GitHub release sequence. The accepted
+Steam player remains `770E46CF87FEE3CC1EFF73C666858BFC03D6922E866B4C07C0A093B746B2CF44`.
+The final automated family index records 825 tests and remains unchanged;
+its earlier manual/publication flags are historical, not the new authorization.
+
+Upstream 26.2 release documentation and public pin metadata were reviewed from
+`cfdfabef1972ca36102c8fff4fe4f8e3624f9196`. Its gameplay sources did not change.
+The upstream and fork `master-26.3` base refs were created at that exact commit;
+this does not push the local 26.3 port. The published 26.2 history is retained.
+
+Power, Base Metals and OreSpawn public release pins remain pending. No source
+push is allowed before the coordinator confirms `Power PUBLIC_VERIFIED`.
+Unit-support source bytes remain pinned to the `c0eb83f7` checkpoint unless
+the published Power source independently supplies the same hashes. The three
+installed Forge 66.0.0 runtime pins now come from proof05's sealed inventory,
+checked against the actual server files, never 26.2 values.
+
+All required hosted checks, including CodeQL, must pass before merge. A
+changed player hash needs updated combined-family qualification. The existing
+publisher must pass check-only with the actual merged source, tag and sealed
+CI artifact, and live publication must wait for the explicit Steam gate.
+An accepted CurseForge file ID must be resumed rather than uploaded again.
+
+Current release coordination is recorded outside the checkout in
+`D:/PowerAdvantage/_verification/base-263-publication-20261113/steam/HANDOFF.json`.
 
 ## Target
 
