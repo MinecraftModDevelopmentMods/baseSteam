@@ -7,18 +7,18 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class Native2612ToolchainContractTest {
-    @Test public void targetUsesExactJava25AndRecommendedForge64() throws Exception {
+    @Test public void targetUsesExactJava25AndForge65() throws Exception {
         Properties pins = new Properties();
         try (var reader = Files.newBufferedReader(Path.of("gradle.properties"))) {
             pins.load(reader);
         }
-        assertEquals("26.1.2", pins.getProperty("minecraft_version"));
-        assertEquals("[26.1.2]", pins.getProperty("minecraft_version_range"));
-        assertEquals("64.1.5", pins.getProperty("forge_version"));
-        assertEquals("[64.1.5,65)", pins.getProperty("forge_version_range"));
-        assertEquals("[64,65)", pins.getProperty("loader_version_range"));
-        assertEquals("20260409.101008", pins.getProperty("mcp_version"));
-        assertEquals("2.2.17.2601021", pins.getProperty("mod_version"));
+        assertEquals("26.2", pins.getProperty("minecraft_version"));
+        assertEquals("[26.2]", pins.getProperty("minecraft_version_range"));
+        assertEquals("65.1.0", pins.getProperty("forge_version"));
+        assertEquals("[65.1.0,66)", pins.getProperty("forge_version_range"));
+        assertEquals("[65,66)", pins.getProperty("loader_version_range"));
+        assertEquals("20260616.103818", pins.getProperty("mcp_version"));
+        assertEquals("2.2.18.2602001", pins.getProperty("mod_version"));
         assertEquals("25", pins.getProperty("java_version"));
         assertEquals("25", pins.getProperty("gradle_java_version"));
         assertEquals("25.0.3+9", pins.getProperty("java_toolchain_version"));
@@ -34,8 +34,8 @@ public class Native2612ToolchainContractTest {
         String build = Files.readString(Path.of("build.gradle"));
         assertTrue(build.contains("apply from: 'gradle/forge64-mavenizer.gradle'"));
         String tool = Files.readString(Path.of("gradle/forge64-mavenizer.gradle"));
-        assertTrue(tool.contains("BB0DACB3DEB2A711CA67DD402D5FDAB5A9847C37C7B9B596DEC7CF37378FA085"));
-        assertTrue(tool.contains("21D1F5984E735BCEA1B1EFB9F965655796B39538FC91AAED1C3474004710423D"));
+        assertTrue(tool.contains("5ABAB52A3F1BE115381C3CE80D5FD38DBE6C9F4C0B9ECF70A957700EC90FB88B"));
+        assertTrue(tool.contains("9437E03FC5E1CB5D605D72F0538C4DF4417B64DB0A57D0AABDC5184781517AC1"));
         assertTrue(tool.contains("JavaLanguageVersion.of(25)"));
         assertFalse(tool.contains("B36CA046"));
         assertFalse(tool.contains("88F2EE4C"));

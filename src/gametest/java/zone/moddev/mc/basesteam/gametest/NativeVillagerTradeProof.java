@@ -54,7 +54,7 @@ final class NativeVillagerTradeProof {
             placementCount += own.size();
         }
         helper.assertTrue(placementCount == 10, "Missing a legacy trade placement");
-        var trader = helper.spawnWithNoFreeWill(EntityType.VILLAGER, new BlockPos(1, 1, 1));
+        var trader = helper.spawnWithNoFreeWill(net.minecraft.world.entity.EntityTypes.VILLAGER, new BlockPos(1, 1, 1));
         var params = new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, trader.position())
                 .withParameter(LootContextParams.THIS_ENTITY, trader)

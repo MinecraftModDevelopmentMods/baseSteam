@@ -2,7 +2,8 @@
 param(
     [Parameter(Mandatory)][ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$RunId,
     [string]$JavaExe = "$env:USERPROFILE/.jdks/jdk-25.0.3+9/bin/java.exe",
-    [string]$CompilerJar = "$env:USERPROFILE/.p2/pool/plugins/org.eclipse.jdt.core.compiler.batch_3.46.0.v20260528-0407.jar"
+    [string]$CompilerJar = "$env:USERPROFILE/.p2/pool/plugins/org.eclipse.jdt.core.compiler.batch_3.46.0.v20260528-0407.jar",
+    [string]$BootstrapJar = '../../PowerAdvantage/build/unit-bootstrap/forge-native-unit-bootstrap.jar'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -87,7 +88,7 @@ try {
         $receipt.scopes[$scope].exitCode = $LASTEXITCODE
         if ($LASTEXITCODE -ne 0) { throw "ECJ $scope failed; see $run/$scope.log" }
     }
-    $bootstrap = ProjectPath '../../PowerAdvantage/build/unit-bootstrap/forge-native-unit-bootstrap.jar'
+    $bootstrap = ProjectPath $BootstrapJar
     if ((Get-FileHash -LiteralPath $bootstrap -Algorithm SHA256).Hash -cne $pins.poweradvantage_test_bootstrap_sha256) {
         throw 'Pinned native unit bootstrap changed'
     }

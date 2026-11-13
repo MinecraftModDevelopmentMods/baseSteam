@@ -210,7 +210,7 @@ public final class NativePackResourceProof {
     }
 
     private static void installResourceFixture(ModFile mod) throws ReflectiveOperationException {
-        // Isolated reader fixture, not a dependency/startup test. Forge 64 removed ModList.of.
+        // Isolated reader fixture, not a dependency/startup test. Forge 65 removed ModList.of.
         Class<?> state = Class.forName("net.minecraftforge.fml.loading.ModSorter$State");
         var constructor = state.getDeclaredConstructor(List.class, List.class);
         constructor.setAccessible(true);
@@ -223,7 +223,7 @@ public final class NativePackResourceProof {
         ModList.init();
         if (ModList.getModFiles().size() != 1 || ModList.getModFiles().getFirst() != mod.getModFileInfo()
                 || !net.minecraftforge.fml.loading.LoadingModList.getErrors().isEmpty()) {
-            throw new AssertionError("The native Forge 64 resource fixture changed");
+            throw new AssertionError("The native Forge 65 resource fixture changed");
         }
     }
 }

@@ -1,95 +1,73 @@
 # baseSteam
 
-**Minecraft 26.1.2 (Forge), baseSteam 2.2.17.2601021.**
+**Minecraft 26.2 Forge, version 2.2.18.2602001. Automated and manual testing complete.**
 
-The frozen profile12 family has completed automated qualification and manual
-testing. See the
-[family qualification record](../../PowerAdvantage/docs/26.1.2/QUALIFICATION.md)
-for the exact tested jars, completed checks and scope limits. Manual acceptance
-is complete. [This release is available on CurseForge](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9577519),
-MMD Maven and GitHub Releases. All three player-jar downloads match the tested
-checksum.
+baseSteam continues DrCyano's Steam Advantage and uses basePower's shared
+API, machines and creative tab. Existing `basesteam` registry and saved-data
+identities are retained.
 
-baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
-and a blackpowder musket to basePower. Items and blocks share the basePower
-creative tab. The mod ID and resource namespace remain `basesteam`.
+The earlier [26.1.2 release](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9577519)
+remains available on CurseForge, MMD Maven and GitHub Releases. The 26.2
+release is being prepared separately; the version and dependency pins below
+apply to this branch.
+
+This port targets Forge **65.1.0**, official Minecraft **26.2** names,
+MCP **20260616.103818**, Java **25.0.3+9**, ForgeGradle **7.0.34** and the
+checksum-pinned Gradle **9.6.1** wrapper. Native pack formats are data
+**107.1** and client **88.0**.
 
 ## Build
 
-Target: Forge 64.1.5, official Minecraft 26.1.2 names and MCP
-20260409.101008, with reobf=false. ForgeGradle 7.0.34 and the checksum-pinned
-Gradle 9.6.1 wrapper use Temurin 25.0.3+9. The compiler, Minecraft,
-Mavenizer and Slime launcher also use that Java 25 toolchain.
-
-This port requires released basePower 2.4.16.2601021,
-Base Metals 3.1.2.2601021 and OreSpawn 4.1.1.2601021.
-They remain separate Forge jars on both client and server, not bundled copies.
+The coordinated published dependency versions are basePower **2.4.17.2602001**
+and Base Metals **3.1.2.2602001**. The Base Metals hook source is
+`523335a59ecff399e40a7c66eb121a3aabdc45ba`, player SHA-256
+`15CBD0C8DD95BBA846969929B8767887BA4B8152DFB10C9C58FB314AD39FB9E1`.
 Base Metals is REQUIRED on both client and server, not an optional integration.
-The default build paths use the coordinated 26.1.2 checkouts. The public inputs
-are Power source a684e71e/player 23ABCC1F (CurseForge 9576332), Base Metals
-source 5e708468/player 67862388 (9576007), and OreSpawn 810284EC (9572926).
-Their anonymous downloads match the tested jars. Exact source, jar and fixture08
-bootstrap pins are in gradle.properties. No 1.21.11 dependency is substituted.
+The released Power262 source is
+`98863570ae84c5658a6b8ec2f8878e1f10009192`, player SHA-256
+`7E456DE1A45140E86415A701D186FEDE08C4AB63D53C6B7848935DB70CBC68B1`.
+Its public CurseForge file is [9583433](https://www.curseforge.com/minecraft/mc-mods/basepower/files/9583433);
+Base Metals is [9583122](https://www.curseforge.com/minecraft/mc-mods/base-metals/files/9583122).
 
-The public-pin rebuild retains the accepted Steam jar bytes. Publication
-follows Power, then Steam, then Electric; local acceptance does not stand in
-for merged-source CI or public downloads.
-The new clean release suite and fresh ECJ each pass 276 tests; independent
-warm and empty-cache builds in paths with spaces reproduce all three archives.
-These are child build gates, not combined-family or manual acceptance.
+OreSpawn **4.1.1.2602001** is the published retained-settings repair,
+qualified source `dcaaa933299dd8b1ebc73e31c9e5acd36dd7957c`, SHA-256
+`BC0658DF2E149CC23E65E5771F3FF62E2BB13FFDA4E316AB632EB92EF7FA5A1F`.
+Its public CurseForge file is [9582731](https://www.curseforge.com/minecraft/mc-mods/orespawn/files/9582731).
+The qualified Base Metals and OreSpawn source pins are ancestors of their
+released `master-26.2` merges. Their public CurseForge, Maven and GitHub
+downloads have been verified against these exact hashes.
 
-The released 1.21.11 baseline and its receipts remain separate historical
-evidence. Native 26.1.2
-metadata declares server data format 101.1 and client format 84.0; the hidden
-client resource aggregate remains Forge's responsibility. The current kit's
-native reader, machine, migration, side-loading and GUI results are recorded in
-the family qualification record. Its original automated and manual-only scope
-labels remain historical; manual acceptance was confirmed afterward.
+The Mavenizer fixture and its source-rule, patch, licence and provenance files
+are checksum-sealed from the existing OS262 checkout. The established
+`-Pforge64MavenizerJar` property remains a path alias; it selects the Forge65
+fixture here. Dependencies stay separate mods and must match the source and
+artifact pins in `gradle.properties`.
 
-The sealed BB0D Mavenizer fixture comes from OreSpawn's OS2612 checkout. Another
-layout can use `-Pforge64MavenizerJar=<path>`. The `*DeobfJar` and `*PlayerJar`
-properties select separate development and packaged inputs; both must
-satisfy the committed checksums.
-
-After the coordinated native dependency pins are available locally:
-
-```powershell
-$env:JAVA_HOME = "$env:USERPROFILE/.jdks/jdk-25.0.3+9"
-$env:GRADLE_USER_HOME = 'D:/GradleCaches/basesteam-2612-port'
-$toolchains = @("-Porg.gradle.java.installations.paths=$env:JAVA_HOME",
-  '-Porg.gradle.java.installations.auto-detect=false',
-  '-Porg.gradle.java.installations.auto-download=false')
-./gradlew.bat @toolchains check build deobfJar verifyReleaseArtifacts writeReleaseChecksums
-./gradlew.bat @toolchains verifyEclipseProductionClasspath
-./gradlew.bat @toolchains -PsteamGameTestRunId=candidate verifyPlayerDependencies runGameTestServer
-./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_2612_SERVER_INSTALL -RunId candidate-with-metals -UseNioTransport -Reopen
-```
-
-For a checkout outside the sibling-folder layout, unit tests also need the
-verified Power test bootstrap and its three source files. Build Power first,
-then supply these paths as well as the dependency-jar overrides:
+Use Temurin 25 and clear `JAVA_TOOL_OPTIONS`, `JDK_JAVA_OPTIONS` and
+`_JAVA_OPTIONS` before qualification. The prepared sibling layout is the
+default; explicit `*DeobfJar` and `*PlayerJar` flags change
+paths, not the required bytes. With these exact coordinated inputs:
 
 ```text
--PforgeCapabilityBootstrapJar=<Power checkout>/build/unit-bootstrap/forge-native-unit-bootstrap.jar
--PforgeCapabilityBootstrapSource=<Power checkout>/test-rig/unit-bootstrap/ForgeCapabilityBootstrap.java
--PforgeUnitRegistriesSource=<Power checkout>/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/ForgeUnitRegistries.java
--Pforge64UnitLoaderSource=<Power checkout>/test-rig/unit-support/zone/moddev/mc/advantageworks/unit/Forge64UnitLoader.java
+./gradlew clean check build javadoc verifyReleaseDependencies verifyReleaseArtifacts writeReleaseChecksums --no-build-cache --no-daemon
+./gradlew verifyEclipseProductionClasspath --no-daemon
+node tools/verify-native-port.js
+node tools/generate-recipe-unlocks.js --check
 ```
 
-The atlas test uses the same verified Power jar selected for compilation;
-it does not look for a second copy in a fixed local folder. Missing or
-changed inputs fail the checks. The previous candidate09 passed 276 unit
-tests and a fresh independent ECJ run of the same complete inventory. The
-scoped runtime and reproducibility results are in the port status below;
-they do not imply family or manual acceptance. Native resource tests disable interactive terminal setup in their
-child process, while keeping warnings and errors fatal.
-Keep Java option environment variables unset
-when running the packaged family rig; it records its own runtime arguments.
+## Qualification
 
-Independent source checks: `node tools/verify-native-port.js` and
-`node tools/generate-recipe-unlocks.js --check`.
-Hosted CI and CodeQL verify merged dependency sources and checksum-matching
-public downloads before compiling.
+Combined profile03 passed the machine, migration, actor/dimension, actual
+transformer-order and real-client checks, plus two 30-minute worlds, restart
+and independent 66-checkpoint replay. See [26.2 port status](docs/PORT262-STATUS.md)
+for the counts and exact inputs. The [family qualification record](https://github.com/MinecraftModDevelopmentMods/basePower/blob/master-26.2/docs/26.2/QUALIFICATION.md)
+keeps the completed checks and their scope limits together.
+
+The final root build and cold-cache checks passed, and manual testing was
+accepted on 12 November 2026. Publication follows the dependency order:
+OreSpawn and Base Metals, then basePower, then this expansion. The accepted
+26.1.2 records remain historical proof of their original bytes, not a
+substitute for the 26.2 results.
 
 ## Old Worlds
 
@@ -106,7 +84,7 @@ check machines, restarts, redstone, all drill directions, elevators,
 GUI captions, whole fluid gauges, track transparency and musket effects
 in-game. Release acceptance does not turn the remaining manual checks into
 automated passes or qualify every modpack.
-See the [26.1.2 port status](docs/PORT2612-STATUS.md). The
+The [26.1.2 port status](docs/PORT2612-STATUS.md) is historical. The
 [1.21.11 notes](docs/PORT12111-STATUS.md) and the
 [1.21.1 notes](docs/PORT1211-STATUS.md) describe the accepted source baseline,
 not qualification of this port.
