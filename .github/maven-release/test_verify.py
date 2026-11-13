@@ -1,6 +1,7 @@
 import contextlib
 import inspect
 import io
+import json
 from pathlib import Path
 import re
 import unittest
@@ -16,18 +17,37 @@ class ReleaseTargetTests(unittest.TestCase):
             16: ("1.17.1",),
             17: ("1.18.2", "1.19.4", "1.20.1"),
             21: ("1.20.6", "1.21.1", "1.21.11"),
-            25: ("26.1.2", "26.2"),
+            25: ("26.1.2", "26.2", "26.3"),
         }.items():
             for version in versions:
                 with self.subTest(version=version):
                     self.assertEqual((version, f"Java {java}"), verify.release_target(f"master-{version}"))
 
     def test_unqualified_or_malformed_targets_are_rejected(self):
-        for branch in ("master-26.3", "master-26.2.0", "master-26.1.1", "master-26.1.3",
+        for branch in ("master-26.4", "master-26.3.0", "master-26.2.0", "master-26.1.1", "master-26.1.3",
                        "master-1.21.12", "master-26.1.2-extra", "feature/26.1.2",
                        "26.1.2", "master-main", "master-26.1.2\n"):
             with self.subTest(branch=branch), self.assertRaises(ValueError):
                 verify.release_target(branch)
+
+    def test_263_route_does_not_approve_an_unlisted_release(self):
+        with patch.object(verify.sys, "argv", ["verify.py", "target", "0.0.0.2603001", "unused"]), \
+                self.assertRaisesRegex(ValueError, "Version is not approved"):
+            verify.main()
+
+    def test_263_target_cli_has_no_network_or_publication_side_effects(self):
+        output = io.StringIO()
+        manifest = {"releases": {"2.2.19.2603001": {"branch": "master-26.3"}}}
+        with patch.object(verify.sys, "argv", ["verify.py", "target", "2.2.19.2603001", "unused"]), \
+                patch.object(verify, "MANIFEST") as source, \
+                patch.object(verify, "github") as github, patch.object(verify, "read_url") as read_url, \
+                patch.object(verify, "stage") as stage, contextlib.redirect_stdout(output):
+            source.read_text.return_value = json.dumps(manifest)
+            verify.main()
+        self.assertEqual("minecraft=26.3\njava=Java 25\n", output.getvalue())
+        github.assert_not_called()
+        read_url.assert_not_called()
+        stage.assert_not_called()
 
     def test_missing_java25_entry_is_rejected(self):
         source = inspect.getsource(verify.release_target)
@@ -38,6 +58,16 @@ class ReleaseTargetTests(unittest.TestCase):
         exec(compile(mutated, "<missing-java25-control>", "exec"), namespace)
         with self.assertRaisesRegex(ValueError, "Unsupported Minecraft version"):
             namespace["release_target"]("master-26.1.2")
+
+    def test_missing_263_entry_does_not_fall_back_to_an_older_runtime(self):
+        source = inspect.getsource(verify.release_target)
+        marker = '"26.3": 25,'
+        self.assertIn(marker, source)
+        namespace = {"require": verify.require}
+        exec(compile(source.replace(marker, ""), "<missing-263-control>", "exec"), namespace)
+        with self.assertRaisesRegex(ValueError, "Unsupported Minecraft version"):
+            namespace["release_target"]("master-26.3")
+        self.assertEqual(("26.2", "Java 25"), namespace["release_target"]("master-26.2"))
 
     def test_target_cli_has_no_publication_side_effects(self):
         output = io.StringIO()
