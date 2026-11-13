@@ -19,11 +19,13 @@ both client and server. Base Metals and OreSpawn are pinned to the verified
 frozen compiler-only handoff; their runtime qualification remains pending.
 Power source, JAR and test-support inputs are pinned to the immutable local
 handoff recorded in `gradle.properties`. Power handoff07 passes Steam's complete
-291-test suite and build/Eclipse gates. Discovery advancements remain loaded in
+291-test suite and build/Eclipse/ECJ gates. Discovery advancements remain loaded in
 every mode through exact optional recipe tags, preserving future unlocks and
-saved discovery progress. Older ECJ/native/cold results remain historical until
-retested on this repaired artifact. Whole-table loot uses SHA-checked accepted
-goldens; final cold/repro and packaged qualification remain separate.
+saved discovery progress. All four native GameTests pass in all three recipe
+modes on this repaired artifact. Whole-table loot uses SHA-checked accepted
+goldens. Fresh cold/spaced-input and independent clean builds pass all 291
+tests; player, sources and Javadoc JARs are byte-identical to warm. Packaged
+and manual qualification remain separate.
 Do not substitute 26.2 inputs or the published OreSpawn 4.1.0.
 
 The default sibling Power source root is `../../PowerAdvantage`. Base Metals

@@ -76,21 +76,43 @@ failures, ignored tests or assumptions. Omitted-suite, omitted-method and
 stale-method controls all fail as required. The earlier ECJ run correctly
 remained red while the dependency regression was red.
 That historical ECJ proof uses frozen Power05 and the complete compiled/XML
-inventory, not a selected subset. Power06 also passed its 288-test ECJ proof;
-fresh ECJ is required for the new Power07 discovery artifact.
+inventory, not a selected subset. Power06 also passed its 288-test ECJ proof.
+Current Power07 proof `ecj-263-09-power07` independently compiles all three
+scopes and passes all 291 units with zero failures, ignored tests or assumptions.
+All three exact inventory negative controls remain required and pass.
+Spaced-input `ecj-263-10-power07-cold-spaces` repeats the complete result.
+The complete output directories are preserved under `pre-cold-build-03` and
+`pre-repro-build-01` respectively, not overwritten by later clean builds.
 
 The three current artifacts and source snapshot are frozen in evidence
 `initial-power07-01`; the player/compiler JAR SHA-256 is
 `770E46CF87FEE3CC1EFF73C666858BFC03D6922E866B4C07C0A093B746B2CF44`.
+Sources JAR SHA-256 is
+`120E5088E7E3A6CCDF5108D9CC6FD86697350A00E1575DCDDE1FCF4B006BAAAA`;
+Javadoc JAR SHA-256 is
+`5EAC97764A468523DBA718A195CBCBB89AD0FDA9EDBF810DFFD2BB52C0A818B5`.
+Tested code is locally pinned at `c6b5db5fef401d62f11f535a236ca5e1999ff55d`;
+only human qualification text changes afterward. Final source and all 182
+changed-file hashes are listed in `HANDOFF-current-power07-01.json` and
+`CHANGED-PATHS-current-power07-01.md` in the external evidence directory.
 The prior D1027 artifact is preserved but does not qualify cross-mode discovery.
 Power05 cold/spaced inputs pass in `cold-spaces-02-power05`: all 46 tasks and
 288 tests, with all three release archives and both SDK JARs byte-identical to
-warm. Independent clean reproduction remains pending. The earlier first cold
+warm. Current Power07 `cold-spaces-03-power07` passes all 46 tasks and all
+291 tests in 49 suites with zero failures/errors/skips, in 9m 56s. Its Steam-only
+Gradle home and project SDK were initially absent; seven hash-identical ordinary
+input copies use paths containing spaces. The official bare SDK rebuild applies
+zero repairs. All three release archives and both SDK JARs match warm exactly.
+`clean-repro-01-power07` independently repeats all 46 tasks and 291 tests in
+55s with build caching disabled, and all five JAR hashes match again. Complete
+comparison receipts are `cold-spaces-03-power07-comparison` and
+`clean-repro-01-power07-comparison`. Path-bearing metadata ZIP cross-path
+reproducibility is not claimed. The earlier first cold
 run was stopped at the user's request; that interrupted receipt is preserved,
-not relabelled green. The parent is now correcting a direct-26.2 actor-memory
-compatibility issue in Power06, then repaired future recipe discoveries in
-Power07. Current ECJ/native/cold/clean-repro gates must be rebound to the latter;
-older input results remain historical
+not relabelled green. The parent repaired direct-26.2 actor-memory compatibility
+in Power06, then repaired future recipe discoveries in Power07. Current
+ECJ/native/cold/clean-repro proofs all use Power07.
+Older input results remain historical
 and cannot qualify the new input. Passing child gates do not qualify packaged runtime,
 endurance, real-client behavior or manual acceptance.
 
@@ -178,12 +200,12 @@ After the native canonical-object adaptation, `gametest-normal-05-power04`
 passes all four tests, 1280 production trade offers, eight codec negatives,
 provider/plural witnesses and NORMAL salvage absence checks.
 
-Fresh TECH execution exposed the former oracle's unconditional NORMAL unlock
-lookup. The runtime oracle now checks all 24 recipe/unlock pairs against their
+Historical TECH execution exposed the former oracle's unconditional NORMAL unlock
+lookup. That oracle checked all 24 recipe/unlock pairs against their
 exact condition trees and live bound tags, checks exact native recipe references
 and ingredient OR groups, and retains the ingredient-positive/negative checks
 even for intentionally absent variants by parsing their actual native criterion
-data. The final native matrix is green in `native-matrix-power04-01`:
+data. The historical matrix is green in `native-matrix-power04-01`:
 
 - NORMAL: four tests, 19 unlocks present and five absent.
 - TECH_PROGRESSION: four tests, 18 unlocks present and six absent.
@@ -200,7 +222,17 @@ That Power04 matrix is preserved as historical proof. Fresh Power05 runs
 `gametest-apocalyptic-02-power05-whole` pass the same complete four-test/mode
 inventory plus 15 accepted-golden production tables, six generated templates,
 42 semantic fields and five whole-table silent-loss controls per mode. The
-sealed current matrix is `native-matrix-power05-01`.
+sealed historical matrix is `native-matrix-power05-01`. Power06 also passed
+that oracle. Those results do not qualify future discoveries across mode changes.
+
+Current Power07 runs `gametest-normal-09-power07`, `gametest-tech-06-power07`
+and `gametest-apocalyptic-04-power07` pass all four tests per mode. The sealed
+receipt is `native-matrix-power07-01`. All 24 advancements remain loaded in
+every mode, with 19/18/16 singleton active recipe tags and 5/6/8 empty recipe
+tags respectively. Each mode proves 24 optional-tag identities and 24 actual
+AdvancementProgress codec roundtrips, ingredient OR requirements and exact
+recipe rewards. Trade, salvage, golden whole-table and all negative controls
+remain mandatory. There are no skipped tests or ERROR/FATAL log entries.
 
 `source-05` passes release configuration, hygiene, recipe guards, datapack and
 source-layout checks and exact BM/OS development/player byte audits. The Node
@@ -208,6 +240,10 @@ source/data checks pass for 224 JSON inputs, 12 factories, 17 mining identities,
 four enchantments, five trade definitions, fourteen trade negative controls,
 fourteen block loot tables, the six-entry chest and its generated template,
 three loot negative controls and 24 unlocks.
+Current source/data audits pass 248 production JSON inputs, 60 Java sources,
+215 annotated test methods and all 24 unlock/optional-tag pairs. Recipe bodies,
+assets, mining tags and all historical qualification documents remain unchanged
+from the accepted source.
 The earlier `compiler-01` missing-pin failure is preserved. No Power API stub
 or legacy library was substituted to bypass it or the later failures.
 
