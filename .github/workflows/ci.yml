@@ -34,11 +34,11 @@ jobs:
           repository: MinecraftModDevelopmentMods/OreSpawn
           ref: ${{ steps.public-pins.outputs.orespawn_ref }}
           path: .ci-dependencies/OreSpawn
-      - name: Check out released basePower source
+      - name: Check out pinned basePower unit-support source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           repository: MinecraftModDevelopmentMods/basePower
-          ref: ${{ steps.public-pins.outputs.power_ref }}
+          ref: ${{ steps.public-pins.outputs.power_test_ref }}
           path: .ci-dependencies/basePower
       - name: Install Java 25 for Gradle, compiler, Mavenizer and Slime
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
@@ -56,17 +56,17 @@ jobs:
         shell: bash
         env:
           ORESPAWN_REF: ${{ steps.public-pins.outputs.orespawn_ref }}
-          POWER_REF: ${{ steps.public-pins.outputs.power_ref }}
+          POWER_TEST_REF: ${{ steps.public-pins.outputs.power_test_ref }}
         run: |
           set -euo pipefail
           orespawn="$GITHUB_WORKSPACE/.ci-dependencies/OreSpawn"
           power="$GITHUB_WORKSPACE/.ci-dependencies/basePower"
           test "$(git -C "$orespawn" rev-parse HEAD)" = "$ORESPAWN_REF"
-          test "$(git -C "$power" rev-parse HEAD)" = "$POWER_REF"
+          test "$(git -C "$power" rev-parse HEAD)" = "$POWER_TEST_REF"
           mavenizer="$orespawn/ci-fixtures/tools/minecraft-mavenizer-0.5.21-orespawn-compat.jar"
           printf '%s  %s\n' '4150926F33A696B2088AB2675C1C3B45745CE4F9F2DEB31CCD88C9ADC834062F' "$mavenizer" | sha256sum -c -
           echo "MAVENIZER=$mavenizer" >> "$GITHUB_ENV"
-      - name: Build the released basePower test bootstrap
+      - name: Build the pinned basePower test bootstrap
         shell: bash
         run: |
           set -euo pipefail

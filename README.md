@@ -13,13 +13,14 @@ Forge supplies hidden client metadata for resource format **97.1**.
 
 ## Build
 
-Required versions are basePower **2.4.18.2603001**, Base Metals
-**3.1.2.2603001** and OreSpawn **4.1.1.2603001**. Base Metals is REQUIRED on
-both client and server. Base Metals and OreSpawn are pinned to the exact local
-migration-hook and retained-settings builds used by the combined tests. Public
-dependency releases must be verified before the Steam source is pushed.
-Power source, JAR and test-support inputs are pinned to the immutable local
-handoff recorded in `gradle.properties`. Power handoff07 passes Steam's complete
+Required versions are [basePower **2.4.18.2603001**](https://www.curseforge.com/minecraft/mc-mods/basepower/files/9589309),
+[Base Metals **3.1.2.2603001**](https://www.curseforge.com/minecraft/mc-mods/base-metals/files/9589195)
+and [OreSpawn **4.1.1.2603001**](https://www.curseforge.com/minecraft/mc-mods/orespawn/files/9589145).
+Base Metals is REQUIRED on both client and server. These public downloads
+match the exact migration-hook and retained-settings builds used by the
+combined tests. Source, file IDs and hashes are pinned in `gradle.properties`.
+Power's public API source is `4fae0a51`; unit-support source stays independently
+pinned at `c0eb83f7` with its original hashes. The exact dependency bytes pass Steam's complete
 291-test suite and build/Eclipse/ECJ gates. Discovery advancements remain loaded in
 every mode through exact optional recipe tags, preserving future unlocks and
 saved discovery progress. All four native GameTests pass in all three recipe
@@ -64,8 +65,8 @@ baseline suite. Manual acceptance is recorded separately from those automated
 results; it does not rewrite the original evidence.
 
 Release work is authorized in dependency order: Base Metals and OreSpawn,
-basePower, Steam, then Electric. Steam waits for verified public Power pins
-before its source push, all required checks and upstream merge. Publication
+basePower, Steam, then Electric. Power and the dependency patches are public.
+Steam's source still requires all hosted checks and upstream merge. Publication
 also requires the coordinator's explicit Steam gate. Pin changes that alter
 the player JAR require updated combined-family qualification first.
 Unit-support sources remain sealed at Power's `c0eb83f7` checkpoint unless

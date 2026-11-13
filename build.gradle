@@ -355,6 +355,7 @@ def prepareNativeUnitSupport = tasks.register('prepareNativeUnitSupport', Sync) 
     into nativeUnitSupportDirectory
     nativeUnitSupportSources.keySet().each { inputs.property(it, providers.gradleProperty(it)) }
     doFirst {
+        committedPin('poweradvantage_test_source_ref', /[a-f0-9]{40}/)
         nativeUnitSupportSources.each { key, source ->
             String expected = committedPin(key, /[A-F0-9]{64}/)
             if (!source.isFile() || MessageDigest.getInstance('SHA-256').digest(source.bytes)

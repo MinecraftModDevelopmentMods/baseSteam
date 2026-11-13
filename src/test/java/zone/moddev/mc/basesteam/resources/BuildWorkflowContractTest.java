@@ -18,7 +18,8 @@ public class BuildWorkflowContractTest {
         assertEquals("official", pins.getProperty("mapping_channel"));
         assertEquals("26.3", pins.getProperty("mapping_version"));
         assertEquals("2.4.18.2603001", pins.getProperty("poweradvantage_version"));
-        for (String key : new String[] {"poweradvantage_source_ref", "poweradvantage_deobf_sha256",
+        assertEquals("c0eb83f7ba91cf8c83caea75e63057407a345949", pins.getProperty("poweradvantage_test_source_ref"));
+        for (String key : new String[] {"poweradvantage_source_ref", "poweradvantage_test_source_ref", "poweradvantage_deobf_sha256",
                 "poweradvantage_player_sha256", "poweradvantage_test_bootstrap_sha256",
                 "poweradvantage_test_bootstrap_source_sha256", "poweradvantage_test_registry_source_sha256",
                 "poweradvantage_test_loader_source_sha256",
@@ -42,7 +43,10 @@ public class BuildWorkflowContractTest {
         for (String name : new String[] {"ci.yml", "codeql-analysis.yml"}) {
             String source = Files.readString(Path.of(".github/workflows", name));
             int pinCheck = source.indexOf("bash .github/verify-published-pins.sh");
-            assertTrue(name, pinCheck > 0 && pinCheck < source.indexOf("Check out released basePower source"));
+            String checkout = name.equals("ci.yml") ? "Check out pinned basePower unit-support source"
+                    : "Check out released basePower source";
+            assertTrue(name, pinCheck > 0 && pinCheck < source.indexOf(checkout));
+            assertTrue(name, source.contains(name.equals("ci.yml") ? "outputs.power_test_ref" : "outputs.power_ref"));
             assertTrue(name, source.contains("branches: [master-26.3"));
             assertTrue(name, source.contains("java-version: '25.0.3+9.0.LTS'"));
             assertFalse(name, source.contains("JAVA_HOME_8_X64"));
@@ -53,6 +57,8 @@ public class BuildWorkflowContractTest {
         }
         String script = Files.readString(Path.of(".github/verify-published-pins.sh"));
         assertTrue(script.contains("$(value poweradvantage_public_file_id)"));
+        assertTrue(script.contains("$(value poweradvantage_test_source_ref)"));
+        assertTrue(script.contains("require_merged basePower \"$power_test_ref\""));
         assertTrue(script.contains("$(value basemetals_public_file_id)"));
         assertTrue(script.contains("$(value orespawn_public_file_id)"));
         assertTrue(script.contains("sha256sum -c -"));

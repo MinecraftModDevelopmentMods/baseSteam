@@ -22,10 +22,18 @@ Upstream 26.2 release documentation and public pin metadata were reviewed from
 The upstream and fork `master-26.3` base refs were created at that exact commit;
 this does not push the local 26.3 port. The published 26.2 history is retained.
 
-Power, Base Metals and OreSpawn public release pins remain pending. No source
-push is allowed before the coordinator confirms `Power PUBLIC_VERIFIED`.
-Unit-support source bytes remain pinned to the `c0eb83f7` checkpoint unless
-the published Power source independently supplies the same hashes. The three
+Power is publicly verified at source `4fae0a51feb3e49875f09c500b869266122a711a`,
+CF file 9589309; Base Metals and OreSpawn are public at files 9589195 and
+9589145. All three player hashes match the accepted profile04 inputs.
+The parent public verification receipt SHA-256 is
+`ABC318097FDFF71953CF6CAE9572E3EE34B3459090326C6A6FEC1A3C1A55297C`.
+The post-pin full rebuild passes all 45 tasks and 291 units with no skips.
+All three Steam archives remain byte-identical, including all 425 player
+entries, the manifest and mod metadata. The exact external delta receipt is
+`post-pin-01/delta.json` in the publication evidence directory.
+
+Public API source and unit support use separate pins: unit-support source
+bytes remain at the `c0eb83f7` checkpoint with their original hashes. The three
 installed Forge 66.0.0 runtime pins now come from proof05's sealed inventory,
 checked against the actual server files, never 26.2 values.
 
@@ -51,25 +59,26 @@ Current release coordination is recorded outside the checkout in
 
 ## Inputs And Boundaries
 
-Required local inputs are basePower 2.4.18.2603001, Base Metals
+Required public inputs are basePower 2.4.18.2603001, Base Metals
 3.1.2.2603001 with its shared hook, and OreSpawn 4.1.1.2603001 with the
 retained-settings repair. All compiler inputs are pinned below. BM and OS
-have passed the local combined runtime tests, but are not public releases. Neither 26.2
+have passed the combined runtime tests and public-byte verification. Neither 26.2
 artifacts nor public 4.1.0 are substitutes.
 
 - BM source `ac07e9cd960c4b48308fd3f245e06f108e4ac437`, JAR SHA-256
   `B03388D10E5B83046A5D2D540E7D956202A8A6CC78B2302A412D3092192CAAE8`.
 - OS source `bbdd80a9c1f7972d81bedf8e6c2b1d4338ec9fa6`, JAR SHA-256
   `7FBAFEFF97683DA0E7ABD0035B85C3A19276B3AD9CB50DBC071F9993B33E490D`.
-- Power handoff07 source `c0eb83f7ba91cf8c83caea75e63057407a345949`, JAR SHA-256
+- Power public source `4fae0a51feb3e49875f09c500b869266122a711a`, JAR SHA-256
   `97525CE9C75509C55225E0061D43BAF9D29BDBDE6DF853E1552A64A54C14C3DE`.
-- Frozen Power test-support source hashes are pinned in `gradle.properties`.
+- Independent Power test-support source remains `c0eb83f7ba91cf8c83caea75e63057407a345949`;
+  its hashes are pinned in `gradle.properties`.
   The unchanged bootstrap agent SHA-256 is
   `088FC137BEBB9B2E75C596DE868499E6099CF228BECFCF07EAE36791245FD1B6`.
 
 Only this existing Steam checkout is owned by this port. Power's shared
 APIs and dependency hooks are coordinated separately. No parent output is
-built by Steam. Local edits do not authorize a push, PR, tag or publication.
+built by Steam. Release writes follow the separate authorization gates above.
 The parent's redundant AT is removed; the final SDK is bare Forge 66,
 matching Base Metals and OreSpawn. Do not copy the historical Power AT.
 Parent preserves the existing APIs and adds contextual
