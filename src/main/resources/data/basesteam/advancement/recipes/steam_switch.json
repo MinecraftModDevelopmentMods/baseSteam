@@ -36,7 +36,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:steam_switch"
+        "recipes": "#basesteam:discovery/steam_switch"
       }
     }
   },

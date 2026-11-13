@@ -27,9 +27,9 @@ for (const tag of ['non_treasure', 'tooltip_order']) {
 }
 assert.deepEqual(read('data/basesteam/tags/item/muskets.json'), {replace: false, values: ['basesteam:musket']});
 const loot = read('data/basesteam/loot_table/chests/advantage_parts.json');
-const enchanted = loot.pools[0].entries.find(entry => entry.functions?.some(f => f.function === 'minecraft:enchant_with_levels'));
+const enchanted = loot.pools[0].entries.find(entry => entry.modifier?.some(f => f.type === 'minecraft:enchant_with_levels'));
 assert.equal(enchanted.name, 'basesteam:musket');
 assert.equal(enchanted.weight, 2);
 // No options means all registry enchantments, retaining the old treasure=true loot policy.
-assert.deepEqual(enchanted.functions, [{function: 'minecraft:enchant_with_levels', levels: 10}]);
+assert.deepEqual(enchanted.modifier, [{type: 'minecraft:enchant_with_levels', levels: 10}]);
 console.log('BASESTEAM_ENCHANTMENT_DATA_PASS definitions=4 distributionTags=2');

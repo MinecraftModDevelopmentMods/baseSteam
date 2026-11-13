@@ -38,7 +38,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:blackpowder_cartridge"
+        "recipes": "#basesteam:discovery/blackpowder_cartridge"
       }
     }
   },

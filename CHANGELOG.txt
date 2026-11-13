@@ -1,3 +1,13 @@
+baseSteam 2.2.19.2603001 (Minecraft 26.3 / Forge)
+
+- Updated for Minecraft 26.3, Forge 66 and Java 25.
+- Kept existing machine balance, item IDs, inventories, fluids and musket state.
+- Updated fuel, trades and loot to Minecraft's new formats without changing quantities.
+- Fixed recipe discoveries across recipe-mode changes, including future unlocks.
+- Passed the Steam unit, native, Eclipse, cold-cache and matching-archive checks.
+- Completed the combined machine, old-world, graphical, restart and two-world endurance checks. Manual testing was accepted on 13 November 2026.
+- Requires basePower 2.4.18.2603001, Base Metals 3.1.2.2603001 and OreSpawn 4.1.1.2603001, with the same bytes used by the accepted tests.
+
 baseSteam 2.2.18.2602001 (Minecraft 26.2 / Forge) - published 13 November 2026
 
 - Target Minecraft 26.2 and Forge 65 with Java 25.

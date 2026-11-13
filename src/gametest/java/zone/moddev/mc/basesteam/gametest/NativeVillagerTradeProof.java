@@ -63,13 +63,18 @@ final class NativeVillagerTradeProof {
         String[] names = {"steam_governor", "steam_pipe", "blackpowder_cartridge", "musket", "enchanted_musket"};
         int[][] bounds = {{1, 4, 1, 1}, {4, 8, 1, 1}, {5, 7, 1, 1}, {1, 1, 10, 15}, {1, 1, 20, 44}};
         JsonObject enchantedData = null;
+        JsonObject pipeData = null;
         for (int index = 0; index < names.length; index++) {
             String name = names[index];
             var nativeTrade = registry.getOrThrow(ResourceKey.create(Registries.VILLAGER_TRADE, id(name))).value();
             var encoded = VillagerTrade.CODEC.encodeStart(ops, nativeTrade).getOrThrow();
             var parsed = VillagerTrade.CODEC.parse(ops, encoded);
             helper.assertTrue(parsed.error().isEmpty() && parsed.result().isPresent(), "Native codec rejected " + name);
+            helper.assertTrue(!encoded.getAsJsonObject().has("given_item_modifiers")
+                            && encoded.getAsJsonObject().has("given_item_modifier"),
+                    "Native codec lost the singular item modifier for " + name);
             if (name.equals("enchanted_musket")) enchantedData = encoded.getAsJsonObject();
+            if (name.equals("steam_pipe")) pipeData = encoded.getAsJsonObject();
             Set<Integer> counts = new HashSet<>();
             for (int sample = 1; sample <= 256; sample++) {
                 long seed = 0x9E3779B97F4A7C15L * sample;
@@ -105,21 +110,31 @@ final class NativeVillagerTradeProof {
             helper.assertTrue(counts.equals(expectedCounts), "Native sampling did not cover every inclusive count for " + name);
         }
         helper.assertTrue(enchantedData != null, "Missing actual native enchanted-trade codec data");
-        JsonObject fallbackData = enchantedData.deepCopy();
-        fallbackData.getAsJsonObject("wants").getAsJsonObject("count")
-                .addProperty("type", "missing_mod:unregistered_number_provider");
-        var fallback = VillagerTrade.CODEC.parse(ops, fallbackData);
-        helper.assertTrue(fallback.error().isEmpty() && fallback.result().isPresent()
-                        && VillagerTrade.CODEC.encodeStart(ops, fallback.getOrThrow()).getOrThrow().equals(enchantedData),
-                "Native uniform-number fallback changed the exact trade definition");
-        for (int control = 0; control < 5; control++) {
+        helper.assertTrue(enchantedData.get("given_item_modifier").isJsonObject()
+                        && enchantedData.getAsJsonObject("given_item_modifier").get("type").getAsString()
+                                .equals("minecraft:enchant_with_levels"),
+                "Native singleton modifier sequence did not retain its canonical function object");
+        helper.assertTrue(pipeData != null, "Missing native pipe-trade modifier witness");
+        JsonObject plural = pipeData.deepCopy();
+        plural.add("given_item_modifiers", plural.remove("given_item_modifier"));
+        var silentlyIgnored = VillagerTrade.CODEC.parse(ops, plural).getOrThrow();
+        var witnessContext = new LootContext.Builder(params).withOptionalRandomSeed(19L).create(Optional.empty());
+        var lostModifier = silentlyIgnored.getOffer(witnessContext);
+        helper.assertTrue(lostModifier != null && lostModifier.getResult().getCount() == 1,
+                "Legacy plural-field negative control must expose the native silently ignored modifier");
+        var providerCodec = net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders.CODEC;
+        var providerData = enchantedData.getAsJsonObject("wants").get("count");
+        var provider = providerCodec.parse(ops, providerData).getOrThrow();
+        helper.assertTrue(providerCodec.encodeStart(ops, provider).getOrThrow().equals(providerData),
+                "Native context-int holder codec changed the uniform price bounds");
+        for (int control = 0; control < 8; control++) {
             JsonObject invalid = enchantedData.deepCopy();
             switch (control) {
                 case 0 -> invalid.getAsJsonObject("wants").addProperty("id", "missing_mod:unregistered_item");
                 case 1 -> invalid.getAsJsonObject("gives").addProperty("count", 0);
-                case 2 -> invalid.getAsJsonArray("given_item_modifiers").get(0).getAsJsonObject()
-                        .addProperty("function", "missing_mod:unregistered_function");
-                case 3 -> invalid.getAsJsonArray("given_item_modifiers").get(0).getAsJsonObject()
+                case 2 -> invalid.getAsJsonObject("given_item_modifier")
+                        .addProperty("type", "missing_mod:unregistered_function");
+                case 3 -> invalid.getAsJsonObject("given_item_modifier")
                         .addProperty("options", "#missing_mod:unbound_enchantment_tag");
                 case 4 -> {
                     JsonObject count = invalid.getAsJsonObject("wants").getAsJsonObject("count");
@@ -127,6 +142,9 @@ final class NativeVillagerTradeProof {
                     count.remove("min");
                     count.remove("max");
                 }
+                case 5 -> invalid.addProperty("max_uses", "missing_mod:unregistered_int_provider");
+                case 6 -> invalid.add("xp", new com.google.gson.JsonArray());
+                case 7 -> invalid.addProperty("reputation_discount", "missing_mod:unregistered_float_provider");
                 default -> throw new AssertionError("Unexpected negative control");
             }
             var rejected = VillagerTrade.CODEC.parse(ops, invalid);
@@ -134,7 +152,7 @@ final class NativeVillagerTradeProof {
                     "Native codec accepted invalid trade control " + control);
         }
         com.mojang.logging.LogUtils.getLogger().info(
-                "BASESTEAM_NATIVE_TRADES_PASS definitions=5 placements=10 samples=1280 codecNegatives=5 fallbackWitnesses=1");
+                "BASESTEAM_NATIVE_TRADES_PASS definitions=5 placements=10 samples=1280 codecNegatives=8 providerWitnesses=1 legacyPluralWitnesses=1");
     }
 
     private static Identifier id(String path) {

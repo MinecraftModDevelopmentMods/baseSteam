@@ -14,7 +14,7 @@ public class SteamTrackBlock extends BlockSimplePowerConduit {
         super(SteamBlockProperties.pistonLike("steam_track").noOcclusion()
                         .isRedstoneConductor((state, world, pos) -> false)
                         .isSuffocating((state, world, pos) -> false)
-                        .isViewBlocking((state, world, pos) -> false),
+                        .isViewBlocking((state, world, pos, nearPlane) -> false),
                 2.0F / 16.0F, Power.steam_power);
     }
     @Override public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) { return Shapes.block(); }

@@ -34,7 +34,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:steam_tank"
+        "recipes": "#basesteam:discovery/steam_tank"
       }
     }
   },

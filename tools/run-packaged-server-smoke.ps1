@@ -23,9 +23,9 @@ if ($WithoutBaseMetals) {
 $project = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $forge = (Resolve-Path -LiteralPath $ForgeInstall).Path
 $pins = Get-Content -Raw -LiteralPath (Join-Path $project 'gradle.properties') | ConvertFrom-StringData
-if ($pins.minecraft_version -ne '26.2' -or $pins.forge_version -ne '65.1.0' -or
+if ($pins.minecraft_version -ne '26.3' -or $pins.forge_version -ne '66.0.0' -or
         $pins.poweradvantage_source_ref -cnotmatch '^[0-9a-f]{40}$') {
-    throw 'An exact Forge 65.1.0 candidate and committed Power source pin are required.'
+    throw 'An exact Forge 66.0.0 candidate and committed Power source pin are required.'
 }
 $java = (Resolve-Path -LiteralPath $JavaExe).Path
 $javaVersion = (& $java -version 2>&1 | Out-String).Trim()
@@ -44,10 +44,10 @@ if (!$PowerJar) {
     $PowerJar = Join-Path $project "../../PowerAdvantage/build/libs/basePower-$($pins.poweradvantage_version).jar"
 }
 if (!$BaseMetalsJar) {
-    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/BaseMetals 262/BaseMetals/build/libs/BaseMetals-$($pins.basemetals_version).jar"
+    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/BaseMetals 263/BaseMetals/build/libs/BaseMetals-$($pins.basemetals_version).jar"
 }
 if (!$OreSpawnJar) {
-    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS262/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
+    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS263/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
 }
 $mods = [ordered]@{
     $steamName = @{ Path = (Join-Path $project "build/libs/$steamName"); Sha256 = $steamSha }
@@ -65,7 +65,7 @@ $forgeJars = [ordered]@{
 }
 foreach ($file in $forgeJars.Keys) {
     if ($forgeJars[$file] -cnotmatch '^[A-F0-9]{64}$') {
-        throw "Supply the coordinated Forge 65.1.0 runtime hash in gradle.properties: $file"
+        throw "Supply the coordinated Forge 66.0.0 runtime hash in gradle.properties: $file"
     }
     if ((Get-FileHash -LiteralPath (Join-Path $forge $file)).Hash -cne $forgeJars[$file]) {
         throw "Installed Forge runtime hash mismatch: $file"

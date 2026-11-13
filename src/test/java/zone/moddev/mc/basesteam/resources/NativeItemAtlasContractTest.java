@@ -51,7 +51,8 @@ public class NativeItemAtlasContractTest {
         var parent = new FilePackResources.FileResourcesSupplier(power);
         assertEquals(Identifier.withDefaultNamespace("items"), AtlasIds.ITEMS);
         try (var resources = new MultiPackResourceManager(PackType.CLIENT_RESOURCES,
-                List.of(parent.openPrimary(info("basepower")), steam.openPrimary(info("basesteam"))))) {
+                java.util.stream.Stream.concat(open(parent, info("basepower")).stream(),
+                        open(steam, info("basesteam")).stream()).toList())) {
             Set<Identifier> registered = new HashSet<>();
             Set<Identifier> blockSprites = sprites(resources, AtlasIds.BLOCKS, registered);
             Set<Identifier> itemSprites = sprites(resources, AtlasIds.ITEMS, registered);
@@ -94,7 +95,7 @@ public class NativeItemAtlasContractTest {
             }
         }
         try (var resources = new MultiPackResourceManager(PackType.CLIENT_RESOURCES,
-                List.of(steam.openPrimary(info("basesteam"))))) {
+                open(steam, info("basesteam")))) {
             assertEquals("Steam contributes one explicit item-atlas definition", 1,
                     resources.getResourceStack(Identifier.withDefaultNamespace("atlases/items.json")).size());
             assertTrue("Shared materials cannot exist without the required Power pack", resources.getResource(
@@ -108,6 +109,17 @@ public class NativeItemAtlasContractTest {
             missing.removeAll(available);
             assertTrue("Omitting Power must still expose the missing shared material",
                     missing.contains(Identifier.parse("basepower:materials/wood")));
+        }
+    }
+
+    private static List<net.minecraft.server.packs.PackResources> open(
+            net.minecraft.server.packs.repository.Pack.ResourcesSupplier supplier, PackLocationInfo info) {
+        var metadata = net.minecraft.server.packs.repository.Pack.readPackMetadata(info, supplier,
+                net.minecraft.SharedConstants.getCurrentVersion().packVersion(PackType.CLIENT_RESOURCES),
+                PackType.CLIENT_RESOURCES);
+        assertNotNull("Native atlas input must retain its actual metadata", metadata);
+        try (var resources = supplier.openResources(info, metadata)) {
+            return resources.toList();
         }
     }
 

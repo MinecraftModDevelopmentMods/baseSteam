@@ -41,13 +41,13 @@ public class NativePackFormatContractTest {
         assertEquals(server, PackMetadataSection.forPackType(PackType.SERVER_DATA).codec()
                 .parse(JsonOps.INSTANCE, pack).getOrThrow());
         var version = SharedConstants.getCurrentVersion();
-        assertEquals(PackFormat.of(88, 0), version.packVersion(PackType.CLIENT_RESOURCES));
-        assertEquals(PackFormat.of(107, 1), version.packVersion(PackType.SERVER_DATA));
+        assertEquals(PackFormat.of(97, 1), version.packVersion(PackType.CLIENT_RESOURCES));
+        assertEquals(PackFormat.of(121, 0), version.packVersion(PackType.SERVER_DATA));
         assertTrue(client.supportedFormats().isValueInRange(version.packVersion(PackType.CLIENT_RESOURCES)));
         assertTrue(server.supportedFormats().isValueInRange(version.packVersion(PackType.SERVER_DATA)));
         assertFalse(client.supportedFormats().isValueInRange(PackFormat.of(83)));
         assertFalse(server.supportedFormats().isValueInRange(PackFormat.of(102)));
-        assertFalse(client.supportedFormats().isValueInRange(PackFormat.of(107, 1)));
-        assertFalse(server.supportedFormats().isValueInRange(PackFormat.of(88, 0)));
+        assertFalse(client.supportedFormats().isValueInRange(PackFormat.of(121, 0)));
+        assertFalse(server.supportedFormats().isValueInRange(PackFormat.of(97, 1)));
     }
 }

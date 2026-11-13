@@ -46,7 +46,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:steam_drill"
+        "recipes": "#basesteam:discovery/steam_drill"
       }
     }
   },

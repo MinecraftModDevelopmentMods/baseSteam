@@ -58,7 +58,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:steam_pump"
+        "recipes": "#basesteam:discovery/steam_pump"
       }
     }
   },

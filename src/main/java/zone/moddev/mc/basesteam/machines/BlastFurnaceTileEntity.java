@@ -201,7 +201,7 @@ public class BlastFurnaceTileEntity extends cyano.poweradvantage.api.simple.Tile
 	
 	private int getFuelBurnTime(ItemStack item) {
 		if(item == null) return 0;
-		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(item, getLevel());
+		return zone.moddev.mc.basesteam.util.FurnaceFuelHelper.getBurnTime(item, this);
 	}
 	
 	private void decrementFuel() {

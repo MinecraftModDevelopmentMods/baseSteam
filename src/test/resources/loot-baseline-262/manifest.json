@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "acceptedJar": "baseSteam-2.2.18.2602001.jar",
+  "acceptedJarSha256": "EDD10D6ED4A623F6EAA364D21480FDA3B777FB15C2195D437882DB09C0F415AB",
+  "acceptedSourceBaseline": "de4dcf6ed84461843a241bbaf93cf03e43e83eb2",
+  "builtOn": "26.2-65.1.0",
+  "tables": 15,
+  "syntaxOnly": [
+    "Loot container functions -> modifier",
+    "Loot conditions -> condition or all_of terms",
+    "Function/predicate discriminator -> type",
+    "Implicit uniform count provider -> explicit minecraft:uniform"
+  ],
+  "itemCountWeightRollAndFunctionValuesUnchanged": true,
+  "entries": [
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_boiler_coal.json",
+      "original": "original/blocks/steam_boiler_coal.json",
+      "originalSha256": "42548073AFB130E156E939366002CAE68D3A9CC2F1E206529629679CB5A9B51E",
+      "native": "native/blocks/steam_boiler_coal.json",
+      "nativeSha256": "0209F74EE0D78146B023E3BB9E4477E14BB403F9CD77E0C2F8C18E4FB0F96B34"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_boiler_electric.json",
+      "original": "original/blocks/steam_boiler_electric.json",
+      "originalSha256": "8859D9D55482245171D532811293000E47CE9184E89CF81114EEFD5C8D19B3CC",
+      "native": "native/blocks/steam_boiler_electric.json",
+      "nativeSha256": "0084227C40104F4BCD93310633EE54F1069495E8FDA9E0A6C9E17475382B11D2"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_boiler_geothermal.json",
+      "original": "original/blocks/steam_boiler_geothermal.json",
+      "originalSha256": "8A87B52C0E622CFC1AB46E14103276FE5018B71DD463182C113007DFB13EDF8F",
+      "native": "native/blocks/steam_boiler_geothermal.json",
+      "nativeSha256": "FB3FFB28B4954CD9F60396FBB5C014D554F84DB9CE44B651E50AC0FEA0E2EEEF"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_boiler_oil.json",
+      "original": "original/blocks/steam_boiler_oil.json",
+      "originalSha256": "3A4506FE34CB7FAFF6FEF6CEDBACB9CED75B94BAAFC3BDF6963506FAB9508742",
+      "native": "native/blocks/steam_boiler_oil.json",
+      "nativeSha256": "1CFCC89A2751E88F9DF89197D128247B4F0D836449BF54F72DAB50945AB1DAFE"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_crusher.json",
+      "original": "original/blocks/steam_crusher.json",
+      "originalSha256": "4D469621B90FF89DBDF685EB555DC9372B2422590A79CEDF8F33FCE01FA722CF",
+      "native": "native/blocks/steam_crusher.json",
+      "nativeSha256": "8639D1F7C1D115CCFC86ED8F13B019CF54D08A908C279067A76D7D33154188D1"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_drill.json",
+      "original": "original/blocks/steam_drill.json",
+      "originalSha256": "75AC6378CE28CA88E379D22445F1AE5B1D490CAAAE37091B4A8CAC09388BC769",
+      "native": "native/blocks/steam_drill.json",
+      "nativeSha256": "0E4AE8FFDD19ABA91CF2C088E9204034F02E0EEF1620DBF601F9AF3C25146685"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_elevator.json",
+      "original": "original/blocks/steam_elevator.json",
+      "originalSha256": "E8FA84A9D25F9C747FDA33548981527EA35D25889B1FEE1A1B26A302AB1D8BFE",
+      "native": "native/blocks/steam_elevator.json",
+      "nativeSha256": "9F84AD75BF0A3155C6E16BB1D11919B45A4C49FE490ECA99DCE3858B59862B66"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_furnace.json",
+      "original": "original/blocks/steam_furnace.json",
+      "originalSha256": "6944925F1CA31B0138418AF179A38A70AFAD5698D7CA3A743E70D8925E6B5705",
+      "native": "native/blocks/steam_furnace.json",
+      "nativeSha256": "943CDED5B55B1592C3E6E70810A7B266CDA18E64315AA3491C549C3C83EFEAD6"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_pipe.json",
+      "original": "original/blocks/steam_pipe.json",
+      "originalSha256": "34C500FAB043EF88083B8ECA998F72B1F126EB96C4FE3389EF9FE8A7FAA179F4",
+      "native": "native/blocks/steam_pipe.json",
+      "nativeSha256": "96C061504216CDCF0B6D46B0F8ADA4DB8562F132BB169669759CBA555AEBC711"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_pump.json",
+      "original": "original/blocks/steam_pump.json",
+      "originalSha256": "1A4B82D09FE60C468DDAB12EE43FCF49D641E7ABFEB7599B65F2AE95D5793F79",
+      "native": "native/blocks/steam_pump.json",
+      "nativeSha256": "FC35FDBF01E4C953625C208DF13371D8518DB1C74174F6C47071B36759BA7D8A"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_still.json",
+      "original": "original/blocks/steam_still.json",
+      "originalSha256": "0C2E77B1E31DECACC9EA52F20B6A0AD62A437C24781140CBA65501892CF4E966",
+      "native": "native/blocks/steam_still.json",
+      "nativeSha256": "EC5253DDEC33768DFDEF2B24765F48801B6AD52B214E99D8058EFC662B07C89F"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_switch.json",
+      "original": "original/blocks/steam_switch.json",
+      "originalSha256": "1682B82E2019AF0D7D30B835ECDAA3CA5625AFEB09CC95547BF655935CFD86E9",
+      "native": "native/blocks/steam_switch.json",
+      "nativeSha256": "A70F1CAA70384678E617E576569617EB25465B03F304D9A811D295082D13B237"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_tank.json",
+      "original": "original/blocks/steam_tank.json",
+      "originalSha256": "07E2B5F43452AFE26EECF2765086D87FA5BB9F9A73F5FC4E5E6B1B3149C09F97",
+      "native": "native/blocks/steam_tank.json",
+      "nativeSha256": "F2B212959122966B02339B43485852AF432FA614B5E1B9DBEB1A1F3AB472C0B1"
+    },
+    {
+      "resource": "data/basesteam/loot_table/blocks/steam_track.json",
+      "original": "original/blocks/steam_track.json",
+      "originalSha256": "9BB3ECC53D2A4584515829FA848CE3A44480C2F9AB405C33AA1EFAA02BBBDC40",
+      "native": "native/blocks/steam_track.json",
+      "nativeSha256": "FD4DBED10EB3CF91EF18274CA831E04B746A9068B7DA86381C5FB0DEC972E0FD"
+    },
+    {
+      "resource": "data/basesteam/loot_table/chests/advantage_parts.json",
+      "original": "original/chests/advantage_parts.json",
+      "originalSha256": "9C6F0F83FC5467B6C63476A4C3B79BB5A89D03C38232D1CDC991CDA2456CE131",
+      "native": "native/chests/advantage_parts.json",
+      "nativeSha256": "3EB3306EE2F9590CB9863488488A419C7E88D1335E0CAB9686DC28DB9F60A591"
+    }
+  ]
+}

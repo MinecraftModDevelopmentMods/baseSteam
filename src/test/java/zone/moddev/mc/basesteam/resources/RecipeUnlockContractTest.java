@@ -42,8 +42,11 @@ public class RecipeUnlockContractTest {
         }
         Set<String> actual = files(DATA.resolve("advancement/recipes")).stream()
                 .map(file -> file.getFileName().toString()).collect(Collectors.toSet());
+        Set<String> tags = files(DATA.resolve("tags/recipe/discovery")).stream()
+                .map(file -> file.getFileName().toString()).collect(Collectors.toSet());
         assertFalse("No crafting recipes found", expected.isEmpty());
         assertEquals("Missing or orphaned recipe unlocks", expected, actual);
+        assertEquals("Every unlock needs exactly one optional discovery tag", expected, tags);
     }
 
     @Test public void discoveriesAreSingleIngredientAlternativesNotAnEntireCraftingGrid() throws IOException {
@@ -51,6 +54,8 @@ public class RecipeUnlockContractTest {
             JsonObject recipe = read(file);
             if (!crafting(recipe)) continue;
             JsonObject unlock = read(DATA.resolve("advancement/recipes").resolve(file.getFileName()));
+            assertFalse("Future discoveries must survive an inactive recipe mode: " + file,
+                    unlock.has("forge:condition"));
             assertEquals("minecraft:recipes/root", unlock.get("parent").getAsString());
             assertFalse("Recipe unlocks should not create visible advancement tabs", unlock.has("display"));
             JsonObject criteria = unlock.getAsJsonObject("criteria");
@@ -91,9 +96,49 @@ public class RecipeUnlockContractTest {
             assertEquals(id, recipes.get(0).getAsString());
             JsonObject criterion = unlock.getAsJsonObject("criteria").getAsJsonObject("has_recipe");
             assertEquals("minecraft:recipe_unlocked", criterion.get("trigger").getAsString());
-            assertEquals(id, criterion.getAsJsonObject("conditions").get("recipe").getAsString());
+            JsonObject condition = criterion.getAsJsonObject("conditions");
+            assertFalse("The singular field is not part of the native 26.3 criterion", condition.has("recipe"));
+            assertEquals("#" + MOD + ":discovery/" + file.getFileName().toString().replace(".json", ""),
+                    condition.get("recipes").getAsString());
+            assertFalse("Discovery advancements must remain loaded in every mode", unlock.has("forge:condition"));
+            assertOptionalDiscoveryTag(read(DATA.resolve("tags/recipe/discovery").resolve(file.getFileName())), id);
             assertFalse("Forge recipe conditions are not valid advancement conditions", unlock.has("conditions"));
         }
+    }
+
+    @Test public void optionalDiscoveryTagIdentityAndRequiredFlagCannotBeChangedOrDefaulted() throws IOException {
+        for (Path file : files(DATA.resolve("tags/recipe/discovery"))) {
+            String id = MOD + ":" + file.getFileName().toString().replace(".json", "");
+            JsonObject valid = read(file);
+            assertOptionalDiscoveryTag(valid, id);
+            for (int control = 0; control < 5; control++) {
+                JsonObject invalid = valid.deepCopy();
+                JsonObject entry = invalid.getAsJsonArray("values").get(0).getAsJsonObject();
+                switch (control) {
+                    case 0 -> entry.addProperty("required", true);
+                    case 1 -> entry.remove("required");
+                    case 2 -> entry.addProperty("id", MOD + ":unrelated_recipe");
+                    case 3 -> invalid.getAsJsonArray("values").set(0, new com.google.gson.JsonPrimitive(id));
+                    case 4 -> entry.addProperty("id", "#" + MOD + ":discovery/unrelated");
+                    default -> throw new AssertionError("Unexpected optional tag control");
+                }
+                assertThrows("Discovery tag accepted an identity/required-flag regression", AssertionError.class,
+                        () -> assertOptionalDiscoveryTag(invalid, id));
+            }
+        }
+    }
+
+    private static void assertOptionalDiscoveryTag(JsonObject tag, String id) {
+        assertEquals(Set.of("values"), tag.keySet());
+        JsonArray values = tag.getAsJsonArray("values");
+        assertEquals(1, values.size());
+        assertTrue(values.get(0).isJsonObject());
+        JsonObject entry = values.get(0).getAsJsonObject();
+        assertEquals(Set.of("id", "required"), entry.keySet());
+        assertTrue(entry.get("id").isJsonPrimitive() && entry.get("id").getAsJsonPrimitive().isString());
+        assertEquals(id, entry.get("id").getAsString());
+        assertTrue(entry.get("required").isJsonPrimitive() && entry.get("required").getAsJsonPrimitive().isBoolean());
+        assertFalse(entry.get("required").getAsBoolean());
     }
 
     @Test public void recipeBookGroupsIdentifyTheOutputNotABroadMachineCategory() throws IOException {

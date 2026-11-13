@@ -66,10 +66,10 @@ public class DrillBitRenderer implements BlockEntityRenderer<DrillBitTileEntity,
     private static void positionGeometry(Direction.Axis axis, float rotation, PoseStack matrices) {
         matrices.translate(0.5D, 0.5D, 0.5D);
         if (axis != Direction.Axis.Y) {
-            matrices.mulPose(Axis.XP.rotationDegrees(90.0F));
-            if (axis != Direction.Axis.Z) matrices.mulPose(Axis.ZP.rotationDegrees(90.0F));
+            matrices.rotate(Axis.XP.rotationDegrees(90.0F));
+            if (axis != Direction.Axis.Z) matrices.rotate(Axis.ZP.rotationDegrees(90.0F));
         }
-        matrices.mulPose(Axis.YP.rotationDegrees(rotation));
+        matrices.rotate(Axis.YP.rotationDegrees(rotation));
     }
 
     private static void renderQuads(PoseStack.Pose transform, VertexConsumer vertices, int light, int overlay) {

@@ -36,7 +36,7 @@
     "has_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "basesteam:musket_left_tech"
+        "recipes": "#basesteam:discovery/musket_left_tech"
       }
     }
   },

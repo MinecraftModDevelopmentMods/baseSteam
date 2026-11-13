@@ -50,10 +50,11 @@ public class TreasureChests {
 			"                    \"type\": \"item\",\n" +
 			"                    \"name\": \"basesteam:steam_governor\",\n" +
 			"                    \"weight\": 50,\n" +
-			"                    \"functions\": [\n" +
+			"                    \"modifier\": [\n" +
 			"                        {\n" +
-			"                            \"function\": \"set_count\",\n" +
+			"                            \"type\": \"set_count\",\n" +
 			"                            \"count\": {\n" +
+			"                                \"type\": \"minecraft:uniform\",\n" +
 			"                                \"min\": 1,\n" +
 			"                                \"max\": 6\n" +
 			"                            }\n" +
@@ -64,10 +65,11 @@ public class TreasureChests {
 			"                    \"type\": \"item\",\n" +
 			"                    \"name\": \"basesteam:steam_pipe\",\n" +
 			"                    \"weight\": 25,\n" +
-			"                    \"functions\": [\n" +
+			"                    \"modifier\": [\n" +
 			"                        {\n" +
-			"                            \"function\": \"set_count\",\n" +
+			"                            \"type\": \"set_count\",\n" +
 			"                            \"count\": {\n" +
+			"                                \"type\": \"minecraft:uniform\",\n" +
 			"                                \"min\": 3,\n" +
 			"                                \"max\": 6\n" +
 			"                            }\n" +
@@ -78,10 +80,11 @@ public class TreasureChests {
 			"                    \"type\": \"item\",\n" +
 			"                    \"name\": \"basesteam:blackpowder_cartridge\",\n" +
 			"                    \"weight\": 50,\n" +
-			"                    \"functions\": [\n" +
+			"                    \"modifier\": [\n" +
 			"                        {\n" +
-			"                            \"function\": \"set_count\",\n" +
+			"                            \"type\": \"set_count\",\n" +
 			"                            \"count\": {\n" +
+			"                                \"type\": \"minecraft:uniform\",\n" +
 			"                                \"min\": 5,\n" +
 			"                                \"max\": 15\n" +
 			"                            }\n" +
@@ -99,9 +102,9 @@ public class TreasureChests {
 			"                    \"name\": \"basesteam:musket\",\n" +
 			"                    \"entryName\": \"basesteam:musket_enchanted\",\n" +
 			"                    \"weight\": 2,\n" +
-			"                    \"functions\": [\n" +
+			"                    \"modifier\": [\n" +
 			"                        {\n" +
-			"                            \"function\": \"minecraft:enchant_with_levels\",\n" +
+			"                            \"type\": \"minecraft:enchant_with_levels\",\n" +
 			"                            \"levels\": 10\n" +
 			"                        }\n" +
 			"                    ]\n" +
