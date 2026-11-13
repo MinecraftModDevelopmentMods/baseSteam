@@ -1,15 +1,19 @@
 # baseSteam
 
-**Minecraft 26.2 Forge, version 2.2.18.2602001. Automated and manual testing complete.**
+**Minecraft 26.2 Forge, version 2.2.18.2602001. Published.**
 
 baseSteam continues DrCyano's Steam Advantage and uses basePower's shared
 API, machines and creative tab. Existing `basesteam` registry and saved-data
 identities are retained.
 
-The earlier [26.1.2 release](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9577519)
-remains available on CurseForge, MMD Maven and GitHub Releases. The 26.2
-release is being prepared separately; the version and dependency pins below
-apply to this branch.
+The 26.2 release is available from
+[CurseForge](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9584145),
+[MMD Maven](https://maven.moddev.zone/releases/zone/moddev/mc/basesteam/baseSteam/2.2.18.2602001/baseSteam-2.2.18.2602001.jar)
+and [GitHub Releases](https://github.com/MinecraftModDevelopmentMods/baseSteam/releases/tag/2.2.18.2602001).
+The [published release record](docs/RELEASE262.md) keeps its source commit,
+download hash and the earlier candidate evidence separate. The
+[26.1.2 release](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9577519)
+remains available for that Minecraft version.
 
 This port targets Forge **65.1.0**, official Minecraft **26.2** names,
 MCP **20260616.103818**, Java **25.0.3+9**, ForgeGradle **7.0.34** and the
@@ -64,8 +68,8 @@ for the counts and exact inputs. The [family qualification record](https://githu
 keeps the completed checks and their scope limits together.
 
 The final root build and cold-cache checks passed, and manual testing was
-accepted on 12 November 2026. Publication follows the dependency order:
-OreSpawn and Base Metals, then basePower, then this expansion. The accepted
+accepted on 12 November 2026. Publication is complete: this release uses the
+published basePower, Base Metals and OreSpawn versions above. The accepted
 26.1.2 records remain historical proof of their original bytes, not a
 substitute for the 26.2 results.
 

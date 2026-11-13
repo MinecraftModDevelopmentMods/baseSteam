@@ -1,5 +1,10 @@
 # Minecraft 26.2 combined checks passed
 
+> Historical candidate record, 12 November 2026. The exact inputs and pending
+> gate wording below are preserved from that checkpoint, not current download
+> instructions. See the [13 November 2026 release record](RELEASE262.md) for
+> the published source and files. This note adds no gameplay qualification.
+
 Version 2.2.18.2602001 targets Forge65.1.0, MCP20260616.103818, Java25 and
 native pack formats107.1/88.0. This candidate is local-only. The combined
 checks below passed; the final root cold-cache gate is still pending.
