@@ -26,8 +26,8 @@ artifacts nor public 4.1.0 are substitutes.
   `B03388D10E5B83046A5D2D540E7D956202A8A6CC78B2302A412D3092192CAAE8`.
 - OS source `bbdd80a9c1f7972d81bedf8e6c2b1d4338ec9fa6`, JAR SHA-256
   `7FBAFEFF97683DA0E7ABD0035B85C3A19276B3AD9CB50DBC071F9993B33E490D`.
-- Power handoff05 source `9d6e31a9c9d116b72a3758edfb18e81a25d939e3`, JAR SHA-256
-  `F225B3EC1B9B272CCBA82716B6D105D3BF0A613E31437BBFA0F9CAB39E4FE9BB`.
+- Power handoff06 source `2d9bb107221a620a3c1a0533f1b9e970bd88b6ea`, JAR SHA-256
+  `4D72332401D8521E8DAEAF57DE4BA7B0B3D2965C575E1DB454A811526538832B`.
 - Frozen Power test-support source hashes are pinned in `gradle.properties`.
   The unchanged bootstrap agent SHA-256 is
   `088FC137BEBB9B2E75C596DE868499E6099CF228BECFCF07EAE36791245FD1B6`.
@@ -48,8 +48,8 @@ current handoff contract live in
 
 Source and resource audits, compilation, unit tests, native GameTests,
 packaged startup/migration and real-client proof are distinct gates.
-The inherited unit inventory starts at 276 tests. Eleven regressions were
-added, for 211 annotated methods and 287 executed expanded tests in 49 suites.
+The inherited unit inventory starts at 276 tests. Twelve regressions were
+added, for 212 annotated methods and 288 executed expanded tests in 49 suites.
 `full-07-ba2` preserved one failure: the unchanged shared-API Forge item-override
 assertion expected 237 and received zero. The parent fixed the confirmed API
 bug in handoff03. `full-08-d03` reran all 44 tasks and passed all 285 tests with
@@ -60,25 +60,34 @@ canonicalization regression brings `full-11-power04-oracle` to 286 passing tests
 passes the same 286 tests. After the whole-table scope regression, the exact
 Power05 handoff passes `full-13-power05-initial`: all 44 tasks rerun, 287 tests,
 zero failures/errors/skips.
+The accepted-golden corpus regression brings `full-14-power05-golden` to 288
+tests with zero failures/errors/skips; all 45 actionable tasks rerun and pass.
+`full-15-power06-initial` then reruns all 45 tasks against Power06 and passes
+all 288 tests, zero failures/errors/skips. No Steam production behavior changes
+were needed for the parent actor-memory compatibility repair.
 
 Main, test and GameTest source scopes compile. Javadoc, exact dependency and
 artifact audits, checksums and Eclipse production-only classpath checks pass
-against handoff05. Installed ECJ 3.46.0 independently compiled all three scopes
-and executed the complete 286-test inventory in `ecj-263-06-power04-final`, with zero
+against handoff06. Installed ECJ 3.46.0 independently compiled all three scopes
+and executed the complete 288-test inventory in `ecj-263-07-power05-golden`, with zero
 failures, ignored tests or assumptions. Omitted-suite, omitted-method and
 stale-method controls all fail as required. The earlier ECJ run correctly
 remained red while the dependency regression was red.
-That ECJ proof uses Power04. The expanded inventory requires fresh ECJ on Power05.
+That ECJ proof uses frozen Power05 and the complete compiled/XML inventory,
+not a selected test subset. Fresh ECJ is required for the Power06 input.
 
 The three current artifacts and source snapshot are frozen in evidence
-`initial-power05-01`; the player/compiler JAR SHA-256 is
+`initial-power06-01`; the player/compiler JAR SHA-256 is
 `D1027BE8E9A9DFB5187411BE944A58E165B6DC828581C206EEB817A4255F2DED`.
-Cold inputs with spaces and reproducibility remain pending. The first cold
-run regenerated the bare SDK and reached unit/artifact tasks, but was stopped
-during Eclipse generation at the user's request to hold cold work until the
-shared tag-condition diagnosis. Its interrupted receipt is preserved and is
-not a complete cold pass. Passing compiler gates do not qualify packaged
-runtime or gameplay.
+Power05 cold/spaced inputs pass in `cold-spaces-02-power05`: all 46 tasks and
+288 tests, with all three release archives and both SDK JARs byte-identical to
+warm. Independent clean reproduction remains pending. The earlier first cold
+run was stopped at the user's request; that interrupted receipt is preserved,
+not relabelled green. The parent is now correcting a direct-26.2 actor-memory
+compatibility issue and has provided Power06. Current final ECJ, native, cold
+and clean-repro gates must be rebound to it; Power05 results remain historical
+and cannot qualify the new input. Passing child gates do not qualify packaged runtime,
+endurance, real-client behavior or manual acceptance.
 
 The SDK removes `FuelValues` in favor of contextual cooking-fuel components.
 Steam now resolves them with the actual machine's `CONTAINER_PROCESS` context,
@@ -125,7 +134,15 @@ silently lose only the affected scope. Steam's 15 production tables and six
 generated templates already use singular native fields. Independent goldens
 from the accepted Steam 2.2.18 JAR (SHA-256
 `EDD10D6ED4A623F6EAA364D21480FDA3B777FB15C2195D437882DB09C0F415AB`)
-and actual whole-production-table server checks are still being added. No global
+are checked byte-for-byte in separate unit/GameTest-only resource scopes. The
+manifest SHA-256 is
+`DDA294A1509FA8ED837F5EBF9F6DDD9F7BBBAE857A824212B6D74F489999C094`.
+Unit whole-table checks use a reversible builtin-item bijection and assert that
+no item IDs are registered; server checks use actual mod IDs and actual loaded
+tables. Native canonicalization permits only singleton modifier flattening,
+inert defaults and type-identifier namespace normalization. All other fields,
+IDs, counts, weights and effect paths must match. Generated ALT comments and
+entry labels are checked verbatim before their native projection. No global
 Forge loot-modifier `conditions` arrays are converted.
 
 The standalone fixture registers real Forge HolderSet types through native
@@ -170,8 +187,12 @@ the provider witness and the legacy-plural semantic-loss witness. That is
 12 successful native GameTests and 3840 offers, with no ERROR/FATAL log entries
 or skipped cases. No availability assertion is removed or waived. These are
 native Forge userdev checks, not packaged/client/endurance/manual qualification.
-The matrix uses Power04 and is preserved as historical proof; Power05 requires
-new server runs after the whole-table/golden oracle is complete.
+That Power04 matrix is preserved as historical proof. Fresh Power05 runs
+`gametest-normal-07-power05-whole`, `gametest-tech-04-power05-whole` and
+`gametest-apocalyptic-02-power05-whole` pass the same complete four-test/mode
+inventory plus 15 accepted-golden production tables, six generated templates,
+42 semantic fields and five whole-table silent-loss controls per mode. The
+sealed current matrix is `native-matrix-power05-01`.
 
 `source-05` passes release configuration, hygiene, recipe guards, datapack and
 source-layout checks and exact BM/OS development/player byte audits. The Node

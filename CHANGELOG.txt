@@ -8,8 +8,9 @@ baseSteam 2.2.19.2603001 - local 26.3 port in progress
 - Prepare the oil boiler's contextual Power fuel call without caching results across machines, worlds or reloads.
 - Pin frozen Base Metals 3.1.2.2603001, OreSpawn 4.1.1.2603001, basePower 2.4.18.2603001 and exact native test-support inputs.
 - Generate all 24 recipe unlocks with the native recipes criterion and intact recipe-condition parity; add actual criterion CODEC and negative-control regressions.
-- Pass 287 Steam units and build/artifact/Eclipse gates against Power handoff05, including the unchanged shared-fuel regression and native singleton-modifier/whole-table scope regressions. Fresh ECJ and server whole-table/golden checks remain required.
-- Preserve the Power04 proof of all four native GameTests in NORMAL, TECH_PROGRESSION and APOCALYPTIC, with 1280 trade offers and eight codec negatives per mode. Verify all 24 recipe/unlock pairs against live mode/tag conditions, exact recipe references and ingredient OR requirements, plus nine salvage codecs/input negatives in APOCALYPTIC. This does not qualify the new Power05 input without retest.
+- Pass 288 Steam units and all 45 build/artifact/Eclipse tasks against Power handoff06, including the unchanged shared-fuel regression and native singleton-modifier/whole-table scope regressions. Power05 ECJ/native/cold proofs remain historical until rebound to Power06.
+- Pass all four native GameTests in NORMAL, TECH_PROGRESSION and APOCALYPTIC against Power05, with 1280 trade offers and eight codec negatives per mode. Verify all 24 recipe/unlock pairs against live conditions, exact recipe references and ingredient OR requirements, plus nine salvage codecs/input negatives in APOCALYPTIC.
+- Preserve all 15 accepted-26.2 loot tables through SHA-pinned syntax-only goldens, native whole-table roundtrips and actual loaded-mod table comparisons. Verify six generated templates, all 42 modifier/condition scopes and five silent-loss controls per mode. Unit-only builtin-item stand-ins are bijective and never registered; server checks retain real mod IDs.
 - Do not transfer 26.2 qualification to this candidate. Full tests, packaged runtime, manual acceptance and release remain pending.
 
 baseSteam 2.2.18.2602001 - local candidate

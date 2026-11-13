@@ -200,6 +200,7 @@ public final class SteamNativeGameTests {
         } else {
             helper.assertTrue(pipe.isEmpty(), "Recipe must not load with an empty brass tag");
         }
+        NativeLootTableProof.verify(helper);
         NativeVillagerTradeProof.verify(helper);
         assertSalvageRecipes(helper);
         helper.succeed();
@@ -253,7 +254,7 @@ public final class SteamNativeGameTests {
         return blueprints;
     }
 
-    private static com.google.gson.JsonObject readJson(net.minecraft.server.packs.resources.Resource resource) {
+    static com.google.gson.JsonObject readJson(net.minecraft.server.packs.resources.Resource resource) {
         try (var reader = resource.openAsReader()) {
             return com.google.gson.JsonParser.parseReader(reader).getAsJsonObject();
         } catch (java.io.IOException exception) {
