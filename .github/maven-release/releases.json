@@ -150,6 +150,16 @@
       "artifactId": 13794068087,
       "archiveSha256": "f7b69aaa86fc59017240497fd2b47ba8f9e16cb7d416ae92ec37118910777e14",
       "mainSha256": "5ddabc83b01a8cc8bae3188baaace01bdcf6f756b7049dadf1adaa3f9cf480fd"
+    },
+    "2.2.20.121012": {
+      "branch": "master-1.21.1-neo",
+      "loader": "neoforge",
+      "commit": "9c12ea211173b9167ebc89c08f87b5b4ea0f586c",
+      "tag": "2.2.20.121012",
+      "runId": 43701613943,
+      "artifactId": 14156438827,
+      "archiveSha256": "e4b0cbbd0941f8422dee1cc0773762486d9f5093192b164f5d31645daaa14d80",
+      "mainSha256": "ad4bacd5158252f4ae257df694098e47e7c309b21bfd9f583af6a18e569fabb9"
     }
   }
 }
