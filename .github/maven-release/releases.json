@@ -6,6 +6,15 @@
   "license": "GNU General Public License, Version 3",
   "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.txt",
   "releases": {
+    "2.2.8.113021": {
+      "branch": "master-1.13.2",
+      "commit": "2d333cd49ca037fb1f069c4b74f4125aa2415337",
+      "tag": "2.2.8.113021",
+      "runId": 43770618449,
+      "artifactId": 14184397163,
+      "archiveSha256": "4b08079effee9515b65c080206bf772750f0cd4977a9550d0160e3d155bc4d00",
+      "mainSha256": "2a7c74108b5c2e426c00e27748da1dc07f52156ba667984244641ac73e524c7f"
+    },
     "2.2.6.110021": {
       "branch": "master-1.10.2",
       "commit": "0dfbdcc9ed1069c5037dba1a59b8bbb1f496a787",
