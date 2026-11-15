@@ -1,3 +1,8 @@
+2.2.8.113021 - baseSteam for Minecraft 1.13.2
+
+- Use the released Base Metals 3.0.3 and OreSpawn 4.1.7 builds with basePower 2.4.7.
+- Require the basePower update that fixes an intermittent world load and save crash.
+
 2.2.7.113021 - baseSteam for Minecraft 1.13.2
 
 - Bring baseSteam to Forge 1.13.2. Keep your steam workshop when moving from Steam Advantage or an earlier baseSteam release.

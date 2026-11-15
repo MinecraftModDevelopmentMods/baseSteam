@@ -35,7 +35,7 @@ import zone.moddev.mc.basesteam.recipe.RecipeConditions;
 public final class SteamAdvantage {
     public static final String MODID = "basesteam";
     public static final String NAME = "Steam Advantage";
-    public static final String VERSION = "2.2.7.113021";
+    public static final String VERSION = "2.2.8.113021";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static float MUSKET_DAMAGE = 20.0F;
