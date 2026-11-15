@@ -18,7 +18,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:conduits/steam"
+            "items": "#c:conduits/steam"
           }
         ]
       }
@@ -28,7 +28,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:frames/steel"
+            "items": "#c:frames/steel"
           }
         ]
       }

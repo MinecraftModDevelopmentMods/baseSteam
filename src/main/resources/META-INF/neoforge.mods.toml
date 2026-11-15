@@ -13,28 +13,35 @@ description='''Steam-powered machines and infrastructure for basePower.'''
 
 [[dependencies.basesteam]]
 modId="basepower"
-mandatory=true
+type="required"
 versionRange="[${poweradvantage_version},3.0.0)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.basesteam]]
 modId="basemetals"
-mandatory=false
-versionRange="[3.1.2.121011,4.0.0)"
+type="optional"
+versionRange="[4.0.1.121012,5.0.0)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.basesteam]]
-modId="forge"
-mandatory=true
-versionRange="${forge_version_range}"
+modId="mmdlib"
+type="required"
+versionRange="[2.0.2.121012,3.0.0)"
+ordering="AFTER"
+side="BOTH"
+
+[[dependencies.basesteam]]
+modId="neoforge"
+type="required"
+versionRange="${neo_version_range}"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.basesteam]]
 modId="minecraft"
-mandatory=true
+type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"

@@ -10,14 +10,16 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import zone.moddev.mc.basesteam.blocks.DrillBitBlock;
 import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.init.Entities;
+import zone.moddev.mc.basesteam.init.Blocks;
 import zone.moddev.mc.basesteam.machines.*;
 
 /** Actual type/block pairs for detached tests, with every Entities field restored even on failure. */
@@ -59,29 +61,29 @@ public final class NativeMachineFixture implements TestRule {
 
     private static final class Fixtures {
         private static final List<Fixture<?>> ALL = List.of(
-                new Fixture<>("steam_boiler_coal", new CoalBoilerBlock(), CoalBoilerTileEntity::new,
+                new Fixture<>("steam_boiler_coal", Blocks.steam_boiler_coal, CoalBoilerTileEntity::new,
                         () -> Entities.STEAM_BOILER_COAL, type -> Entities.STEAM_BOILER_COAL = type),
-                new Fixture<>("steam_boiler_electric", new ElectricBoilerBlock(), ElectricBoilerTileEntity::new,
+                new Fixture<>("steam_boiler_electric", Blocks.steam_boiler_electric, ElectricBoilerTileEntity::new,
                         () -> Entities.STEAM_BOILER_ELECTRIC, type -> Entities.STEAM_BOILER_ELECTRIC = type),
-                new Fixture<>("steam_boiler_geothermal", new GeothermalBoilerBlock(), GeothermalBoilerTileEntity::new,
+                new Fixture<>("steam_boiler_geothermal", Blocks.steam_boiler_geothermal, GeothermalBoilerTileEntity::new,
                         () -> Entities.STEAM_BOILER_GEOTHERMAL, type -> Entities.STEAM_BOILER_GEOTHERMAL = type),
-                new Fixture<>("steam_boiler_oil", new OilBoilerBlock(), OilBoilerTileEntity::new,
+                new Fixture<>("steam_boiler_oil", Blocks.steam_boiler_oil, OilBoilerTileEntity::new,
                         () -> Entities.STEAM_BOILER_OIL, type -> Entities.STEAM_BOILER_OIL = type),
-                new Fixture<>("steam_tank", new SteamTankBlock(), SteamTankTileEntity::new,
+                new Fixture<>("steam_tank", Blocks.steam_tank, SteamTankTileEntity::new,
                         () -> Entities.STEAM_TANK, type -> Entities.STEAM_TANK = type),
-                new Fixture<>("steam_furnace", new BlastFurnaceBlock(), BlastFurnaceTileEntity::new,
+                new Fixture<>("steam_furnace", Blocks.steam_furnace, BlastFurnaceTileEntity::new,
                         () -> Entities.STEAM_FURNACE, type -> Entities.STEAM_FURNACE = type),
-                new Fixture<>("steam_crusher", new RockCrusherBlock(), RockCrusherTileEntity::new,
+                new Fixture<>("steam_crusher", Blocks.steam_crusher, RockCrusherTileEntity::new,
                         () -> Entities.STEAM_CRUSHER, type -> Entities.STEAM_CRUSHER = type),
-                new Fixture<>("steam_drill", new SteamDrillBlock(), SteamDrillTileEntity::new,
+                new Fixture<>("steam_drill", Blocks.steam_drill, SteamDrillTileEntity::new,
                         () -> Entities.STEAM_DRILL, type -> Entities.STEAM_DRILL = type),
-                new Fixture<>("steam_elevator", new SteamElevatorBlock(), SteamElevatorTileEntity::new,
+                new Fixture<>("steam_elevator", Blocks.steam_elevator, SteamElevatorTileEntity::new,
                         () -> Entities.STEAM_ELEVATOR, type -> Entities.STEAM_ELEVATOR = type),
-                new Fixture<>("drillbit", new DrillBitBlock(), DrillBitTileEntity::new,
+                new Fixture<>("drillbit", Blocks.drillbit, DrillBitTileEntity::new,
                         () -> Entities.DRILLBIT, type -> Entities.DRILLBIT = type),
-                new Fixture<>("steam_still", new SteamStillBlock(), SteamStillTileEntity::new,
+                new Fixture<>("steam_still", Blocks.steam_still, SteamStillTileEntity::new,
                         () -> Entities.STEAM_STILL, type -> Entities.STEAM_STILL = type),
-                new Fixture<>("steam_pump", new SteamPumpBlock(), SteamPumpTileEntity::new,
+                new Fixture<>("steam_pump", Blocks.steam_pump, SteamPumpTileEntity::new,
                         () -> Entities.STEAM_PUMP, type -> Entities.STEAM_PUMP = type));
     }
 
@@ -98,14 +100,9 @@ public final class NativeMachineFixture implements TestRule {
             this.block = block;
             this.getter = getter;
             this.setter = setter;
-            type = BlockEntityType.Builder.of(factory, block).build(null);
-            ForgeRegistry<BlockEntityType<?>> registry = (ForgeRegistry<BlockEntityType<?>>) ForgeRegistries.BLOCK_ENTITY_TYPES;
-            boolean locked = registry.isLocked();
-            registry.unfreeze();
-            try {
-                registry.register(ResourceLocation.fromNamespaceAndPath("basesteam", id), type);
-            } finally {
-                if (locked) registry.freeze();
+            type = getter.get();
+            if (type == null || !type.isValid(block.defaultBlockState())) {
+                throw new IllegalStateException("The native NeoForge test launch did not register basesteam:" + id);
             }
         }
 

@@ -30,7 +30,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:governors"
+            "items": "#c:governors"
           }
         ]
       }
@@ -40,7 +40,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:plates/iron"
+            "items": "#c:plates/iron"
           }
         ]
       }
@@ -50,7 +50,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:frames/steel"
+            "items": "#c:frames/steel"
           }
         ]
       }

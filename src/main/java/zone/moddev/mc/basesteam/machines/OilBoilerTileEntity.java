@@ -148,7 +148,7 @@ public class OilBoilerTileEntity extends cyano.poweradvantage.api.simple.TileEnt
 	}
 
 	private static Float getConfiguredBurnTimePerBucketFor(Fluid fluid) {
-		ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.FLUIDS.getKey(fluid);
+		ResourceLocation id = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(fluid);
 		if (id != null) {
 			if (SteamAdvantage.fluidBurnValues.containsKey(id.toString())) return SteamAdvantage.fluidBurnValues.get(id.toString());
 			if (SteamAdvantage.fluidBurnValues.containsKey(id.getPath())) return SteamAdvantage.fluidBurnValues.get(id.getPath());

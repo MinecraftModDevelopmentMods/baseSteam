@@ -7,41 +7,38 @@
   ],
   "key": {
     "t": {
-      "tag": "forge:sprockets"
+      "tag": "c:sprockets"
     },
     "s": {
-      "tag": "forge:rods"
+      "tag": "c:rods"
     },
     "r": {
-      "tag": "forge:rods"
+      "tag": "c:rods"
     },
     "b": {
-      "tag": "forge:ingots/brass"
+      "tag": "c:ingots/brass"
     }
   },
   "result": {
     "id": "basesteam:steam_governor"
   },
-  "forge:condition": {
-    "type": "forge:and",
-    "values": [
-      {
-        "type": "basesteam:recipe_mode",
-        "mode": "TECH_PROGRESSION"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:ingots/brass"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:rods"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:sprockets"
-      }
-    ]
-  },
-  "group": "basesteam:steam_governor"
+  "group": "basesteam:steam_governor",
+  "neoforge:conditions": [
+    {
+      "type": "basesteam:recipe_mode",
+      "mode": "TECH_PROGRESSION"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "c:ingots/brass"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "c:rods"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "c:sprockets"
+    }
+  ]
 }

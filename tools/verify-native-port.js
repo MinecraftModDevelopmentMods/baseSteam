@@ -27,10 +27,12 @@ for (const name of files(resources).filter(name => /\.(json|mcmeta)$/.test(name)
 assert.deepEqual(json.get(`${resources}/pack.mcmeta`).pack, {
   pack_format: 34, supported_formats: {min_inclusive: 34, max_inclusive: 48}, description: 'baseSteam'
 });
-const metadata = read(`${resources}/META-INF/mods.toml`);
+const metadata = read(`${resources}/META-INF/neoforge.mods.toml`);
 assert.match(metadata, /modId="basesteam"/);
-assert.match(metadata, /modId="basepower"\r?\nmandatory=true\r?\nversionRange="\[\$\{poweradvantage_version\},3\.0\.0\)"/);
-assert.match(metadata, /modId="basemetals"\r?\nmandatory=false/);
+assert.match(metadata, /modId="basepower"\r?\ntype="required"\r?\nversionRange="\[\$\{poweradvantage_version\},3\.0\.0\)"/);
+assert.match(metadata, /modId="basemetals"\r?\ntype="optional"/);
+assert.match(metadata, /modId="mmdlib"\r?\ntype="required"/);
+assert.match(metadata, /modId="neoforge"\r?\ntype="required"/);
 assert.doesNotMatch(metadata, /dependencies\.steamadvantage|modId="(?:steamadvantage|poweradvantage)"/);
 
 function verifyLocalAsset(id, directory, extension, name) {
@@ -63,6 +65,7 @@ for (const sourceRoot of ['src/main/java', 'src/test/java', 'src/gametest/java']
 const source = files('src/main/java').filter(name => name.endsWith('.java'));
 for (const name of source) {
   const text = read(name);
+  assert(!/net\.minecraftforge\./.test(text), name);
   assert(!/net\.minecraft\.(?:block|tileentity|entity|item|inventory)\./.test(text), name);
   assert(!/net\.minecraft\.world\.level\.material\.Material;|\.getMaterial\(\)/.test(text), name);
   assert(!/setPosition\(|setLevelAndPosition\(|ITickableTileEntity|\[native code\]/.test(text), name);
@@ -104,7 +107,21 @@ for (const id of pickaxe.values.map(value => value.split(':')[1]).filter(id => !
   assert.equal(loot.pools[0].entries[0].name, `${mod}:${id}`);
 }
 const tests = files('src/test/java').filter(name => name.endsWith('.java'));
+let crushing = 0;
+for (const [name, recipe] of json) {
+  if (!name.startsWith(`${data}/recipe/`)) continue;
+  assert(!Object.hasOwn(recipe, 'forge:condition') && !Object.hasOwn(recipe, 'conditions'), name);
+  assert(!/"forge:/.test(JSON.stringify(recipe)), name);
+  if (recipe.type === 'mmdlib:crushing') {
+    crushing++;
+    assert.deepEqual(recipe['neoforge:conditions'], [{type: 'basesteam:recipe_mode', mode: 'APOCALYPTIC'}]);
+  }
+}
+assert.equal(crushing, 9);
+const compat = read(`${java}/compat/BaseMetalsCompat.java`);
+assert.match(compat, /return CrushingRecipes\.find\(world, input\);/);
+assert.doesNotMatch(compat, /getVanillaCrusherOutput|ModList|CrushingRecipe\.TYPE|addCrusherRecipe/);
 const testCount = tests.reduce((sum, name) => sum + (read(name).match(/@Test\b/g) || []).length, 0);
-console.log(`BASESTEAM_NATIVE1211_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} testMethods=${testCount}`);
+console.log(`BASESTEAM_NEO1211_SOURCE_PASS json=${json.size} java=${source.length} factories=${ids.length} harvest=${pickaxe.values.length} crushing=${crushing} testMethods=${testCount}`);
 console.log('Source checks only. Compilation, executed tests, packaged runtime and manual acceptance are separate.');
 require('./verify-enchantment-data');

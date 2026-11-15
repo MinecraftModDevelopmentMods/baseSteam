@@ -11,13 +11,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.ItemCost;
-import net.minecraftforge.event.village.VillagerTradesEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.village.VillagerTradesEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 
 /** Legacy smith careers map to their native 1.14 professions; prices and levels are unchanged. */
-@Mod.EventBusSubscriber(modid = SteamAdvantage.MODID)
+@EventBusSubscriber(modid = SteamAdvantage.MODID)
 public final class Villages {
     private Villages() {}
     public static void init() {}

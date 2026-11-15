@@ -9,10 +9,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import zone.moddev.mc.basepower.blocks.BlockPowerSwitch;
 import zone.moddev.mc.basepower.init.ItemGroups;
 import zone.moddev.mc.basesteam.SteamAdvantage;
@@ -33,7 +32,7 @@ import zone.moddev.mc.basesteam.machines.SteamPumpBlock;
 import zone.moddev.mc.basesteam.machines.SteamStillBlock;
 import zone.moddev.mc.basesteam.machines.SteamTankBlock;
 
-@Mod.EventBusSubscriber(modid = SteamAdvantage.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = SteamAdvantage.MODID, bus = EventBusSubscriber.Bus.MOD)
 public final class Blocks {
     private static final Map<String, Block> ALL_BLOCKS = new LinkedHashMap<>();
 
@@ -93,15 +92,15 @@ public final class Blocks {
 
     @SubscribeEvent
     public static void registerBlocks(RegisterEvent event) {
-        if (!ForgeRegistries.Keys.BLOCKS.equals(event.getRegistryKey())) return;
+        if (!net.minecraft.core.registries.Registries.BLOCK.equals(event.getRegistryKey())) return;
         init();
-        event.register(ForgeRegistries.Keys.BLOCKS, registry ->
+        event.register(net.minecraft.core.registries.Registries.BLOCK, registry ->
                 ALL_BLOCKS.forEach((id, block) -> registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), block)));
     }
 
     @SubscribeEvent
     public static void registerBlockItems(RegisterEvent event) {
-        event.register(ForgeRegistries.Keys.ITEMS, registry -> ALL_BLOCKS.forEach((id, block) -> {
+        event.register(net.minecraft.core.registries.Registries.ITEM, registry -> ALL_BLOCKS.forEach((id, block) -> {
             BlockItem item = new BlockItem(block, new Item.Properties());
             registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
             if (!"pump_pipe_steam".equals(id) && !"drillbit".equals(id)) ItemGroups.show(item);

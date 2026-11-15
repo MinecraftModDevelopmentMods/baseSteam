@@ -29,7 +29,7 @@ public class RecipeUnlockContractTest {
     private static final String MOD = "basesteam";
     private static final Path DATA = Paths.get("src/main/resources/data", MOD);
     private static final Set<String> IGNORED = new LinkedHashSet<>(java.util.Arrays.asList(
-            "item:minecraft:stick", "item:minecraft:string", "item:minecraft:feather", "tag:forge:rods/wooden"));
+            "item:minecraft:stick", "item:minecraft:string", "item:minecraft:feather", "tag:c:rods/wooden"));
 
     @BeforeClass public static void bootstrapNativeRegistries() {
         NativeTestBootstrap.start();

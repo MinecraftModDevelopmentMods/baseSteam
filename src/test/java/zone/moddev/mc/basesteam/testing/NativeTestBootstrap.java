@@ -1,28 +1,25 @@
 package zone.moddev.mc.basesteam.testing;
 
-import java.util.List;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.SharedConstants;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.GameData;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.registries.RegisterEvent;
 
+/** Detached fixtures run through ModDevGradle's native, transformed JUnit launch. */
 public final class NativeTestBootstrap {
     private NativeTestBootstrap() {}
 
     public static void start() {
         NativeRegistries.ensureStarted();
-        // Standalone fixtures construct blocks and items outside Forge's mod registration phase.
-        GameData.unfreezeData();
+        BuiltInRegistries.REGISTRY.forEach(registry -> ((MappedRegistry<?>) registry).unfreeze());
     }
 
     public static RegistryAccess.Frozen registries() {
@@ -31,40 +28,17 @@ public final class NativeTestBootstrap {
 
     public static synchronized void registerVanillaFluidTypes() throws ReflectiveOperationException {
         start();
-        if (ForgeMod.LAVA_TYPE.isPresent()) return;
-
-        // Plain JUnit has no mod loader to dispatch these two Forge registry phases.
-        if (ForgeRegistries.FLUID_TYPES.get() == null) {
-            var registries = ForgeRegistries.class.getDeclaredField("registries");
-            registries.setAccessible(true);
-            DeferredRegister<?> fluidTypes = ((List<?>) registries.get(null)).stream()
-                    .map(DeferredRegister.class::cast)
-                    .filter(registry -> ForgeRegistries.Keys.FLUID_TYPES.equals(registry.getRegistryKey()))
-                    .findFirst().orElseThrow();
-            var event = new NewRegistryEvent();
-            invokeRegistryPhase(fluidTypes, "createRegistry", event);
-            var fill = NewRegistryEvent.class.getDeclaredMethod("fill");
-            fill.setAccessible(true);
-            fill.invoke(event);
-        }
-
-        var vanillaTypes = ForgeMod.class.getDeclaredField("VANILLA_FLUID_TYPES");
-        vanillaTypes.setAccessible(true);
-        var event = RegisterEvent.class.getDeclaredConstructor(ResourceKey.class, ForgeRegistry.class, Registry.class);
-        event.setAccessible(true);
-        invokeRegistryPhase((DeferredRegister<?>) vanillaTypes.get(null), "handleEvent",
-                event.newInstance(ForgeRegistries.Keys.FLUID_TYPES, ForgeRegistries.FLUID_TYPES.get(), null));
-    }
-
-    private static void invokeRegistryPhase(DeferredRegister<?> register, String phase, Event event)
-            throws ReflectiveOperationException {
-        // The launch-only EventBus transform is not present in plain JUnit.
-        Class<?> dispatcher = Class.forName(DeferredRegister.class.getName() + "$EventDispatcher");
-        var constructor = dispatcher.getDeclaredConstructor(DeferredRegister.class);
+        if (NeoForgeRegistries.FLUID_TYPES.containsKey(ResourceLocation.parse("minecraft:lava"))) return;
+        ((MappedRegistry<?>) NeoForgeRegistries.FLUID_TYPES).unfreeze();
+        // Plain fixture tests do not dispatch the NeoForge mod's fluid-type registry event.
+        var field = NeoForgeMod.class.getDeclaredField("VANILLA_FLUID_TYPES");
+        field.setAccessible(true);
+        var constructor = RegisterEvent.class.getDeclaredConstructor(ResourceKey.class, Registry.class);
         constructor.setAccessible(true);
-        var method = dispatcher.getDeclaredMethod(phase, event.getClass());
-        method.setAccessible(true);
-        method.invoke(constructor.newInstance(register), event);
+        var register = DeferredRegister.class.getDeclaredMethod("addEntries", RegisterEvent.class);
+        register.setAccessible(true);
+        register.invoke(field.get(null), constructor.newInstance(
+                NeoForgeRegistries.Keys.FLUID_TYPES, NeoForgeRegistries.FLUID_TYPES));
     }
 
     private static final class NativeRegistries {
@@ -72,7 +46,6 @@ public final class NativeTestBootstrap {
             SharedConstants.tryDetectVersion();
             Bootstrap.bootStrap();
         }
-
         private static void ensureStarted() {}
     }
 }

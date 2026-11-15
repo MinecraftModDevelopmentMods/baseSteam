@@ -5,10 +5,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.blocks.DrillBitTileEntity;
 import zone.moddev.mc.basesteam.machines.BlastFurnaceTileEntity;
@@ -24,7 +23,7 @@ import zone.moddev.mc.basesteam.machines.SteamStillTileEntity;
 import zone.moddev.mc.basesteam.machines.SteamTankTileEntity;
 
 /** Stable tile entity registrations; registry names are unchanged from 1.12. */
-@Mod.EventBusSubscriber(modid = SteamAdvantage.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = SteamAdvantage.MODID, bus = EventBusSubscriber.Bus.MOD)
 public final class Entities {
     public static BlockEntityType<CoalBoilerTileEntity> STEAM_BOILER_COAL;
     public static BlockEntityType<ElectricBoilerTileEntity> STEAM_BOILER_ELECTRIC;
@@ -44,7 +43,7 @@ public final class Entities {
 
     @SubscribeEvent
     public static void register(RegisterEvent event) {
-        if (!ForgeRegistries.Keys.BLOCK_ENTITY_TYPES.equals(event.getRegistryKey())) return;
+        if (!net.minecraft.core.registries.Registries.BLOCK_ENTITY_TYPE.equals(event.getRegistryKey())) return;
         STEAM_BOILER_COAL = register(event, "steam_boiler_coal", CoalBoilerTileEntity::new, Blocks.steam_boiler_coal);
         STEAM_BOILER_ELECTRIC = register(event, "steam_boiler_electric", ElectricBoilerTileEntity::new, Blocks.steam_boiler_electric);
         STEAM_BOILER_GEOTHERMAL = register(event, "steam_boiler_geothermal", GeothermalBoilerTileEntity::new, Blocks.steam_boiler_geothermal);
@@ -62,7 +61,7 @@ public final class Entities {
     private static <T extends BlockEntity> BlockEntityType<T> register(
             RegisterEvent event, String id, BlockEntityType.BlockEntitySupplier<T> factory, Block block) {
         BlockEntityType<T> type = BlockEntityType.Builder.<T>of(factory, block).build(null);
-        event.register(ForgeRegistries.Keys.BLOCK_ENTITY_TYPES, ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), () -> type);
+        event.register(net.minecraft.core.registries.Registries.BLOCK_ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), () -> type);
         return type;
     }
 }

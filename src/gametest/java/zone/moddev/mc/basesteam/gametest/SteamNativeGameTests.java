@@ -26,8 +26,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestDontPrefix;
-import net.minecraftforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
 import zone.moddev.mc.basepower.migration.LegacyWorldDataHook;
 import zone.moddev.mc.basepower.util.ItemData;
 import zone.moddev.mc.basesteam.SteamAdvantage;
@@ -38,10 +38,40 @@ import zone.moddev.mc.basesteam.init.Items;
 import zone.moddev.mc.basesteam.init.Enchantments;
 import zone.moddev.mc.basesteam.items.MusketItem;
 
-@GameTestHolder(value = SteamAdvantage.MODID, namespace = SteamAdvantage.MODID)
-@GameTestDontPrefix
+@GameTestHolder(SteamAdvantage.MODID)
+@PrefixGameTestTemplate(false)
 public final class SteamNativeGameTests {
     private SteamNativeGameTests() {}
+
+    @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
+    public static void sharedCrushingReloadRemovalAndCopiesUseTheLiveRecipeManager(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var manager = level.getRecipeManager();
+        var previous = java.util.List.copyOf(manager.getRecipes());
+        var input = new ItemStack(net.minecraft.world.item.Items.STONE, 3);
+        var recipe = new zone.moddev.mc.lib.common.recipes.CrushingRecipe(
+                net.minecraft.world.item.crafting.Ingredient.of(net.minecraft.world.item.Items.STONE),
+                new ItemStack(net.minecraft.world.item.Items.GRAVEL, 2));
+        try {
+            manager.replaceRecipes(java.util.List.of(new net.minecraft.world.item.crafting.RecipeHolder<>(
+                    ResourceLocation.fromNamespaceAndPath("basesteam_tests", "reload_witness"), recipe)));
+            ItemStack first = zone.moddev.mc.basesteam.compat.BaseMetalsCompat.getCrusherRecipeOutput(level, input);
+            helper.assertTrue(first != null && first.is(net.minecraft.world.item.Items.GRAVEL) && first.getCount() == 2,
+                    "Shared lookup did not find the live recipe");
+            first.setCount(1);
+            ItemStack second = zone.moddev.mc.basesteam.compat.BaseMetalsCompat.getCrusherRecipeOutput(level,
+                    net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
+            helper.assertTrue(second != null && second.getCount() == 2 && input.getCount() == 3,
+                    "Shared lookup leaked a result or modified the input");
+            manager.replaceRecipes(java.util.List.of());
+            helper.assertTrue(!zone.moddev.mc.basesteam.compat.BaseMetalsCompat.hasCrusherRecipe(level, input),
+                    "Removed crushing recipe still matches an item");
+            helper.assertTrue(zone.moddev.mc.basesteam.compat.BaseMetalsCompat.getCrusherRecipeOutput(level,
+                    net.minecraft.world.level.block.Blocks.STONE.defaultBlockState()) == null,
+                    "Removed rock recipe was replaced by a hard-coded fallback");
+        } finally { manager.replaceRecipes(previous); }
+        helper.succeed();
+    }
 
     @GameTest(batch = SteamAdvantage.MODID, template = "basesteam_empty")
     public static void drillBitPacketPreservesTypePositionAndDirection(GameTestHelper helper) {
@@ -168,7 +198,7 @@ public final class SteamNativeGameTests {
         helper.assertTrue(loot.getLootTable(Blocks.steam_pipe.getLootTable()) != LootTable.EMPTY,
                 "Missing Steam pipe block loot");
         var pipe = level.getRecipeManager().byKey(id("steam_pipe"));
-        var brass = net.minecraft.tags.ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ingots/brass"));
+        var brass = net.minecraft.tags.ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "ingots/brass"));
         if (registries.lookupOrThrow(Registries.ITEM).get(brass).filter(tag -> tag.size() > 0).isPresent()) {
             var result = pipe.orElseThrow().value().getResultItem(registries);
             helper.assertTrue(result.is(Blocks.steam_pipe.asItem()) && result.getCount() == 6,
