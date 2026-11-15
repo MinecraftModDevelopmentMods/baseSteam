@@ -2,6 +2,10 @@
 
 **baseSteam 2.2.20.121012 for Minecraft 1.21.1 and NeoForge 21.1.265.**
 
+[CurseForge download](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9626794)
+and [GitHub release](https://github.com/MinecraftModDevelopmentMods/baseSteam/releases/tag/2.2.20.121012)
+are available. The same release jars are published to MMD Maven.
+
 baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
 and a blackpowder musket to basePower. Items and blocks share the basePower
 creative tab. The mod ID and resource namespace remain `basesteam`.

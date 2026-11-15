@@ -17,17 +17,22 @@ The native port preserves the existing machine balance and saved identities.
 
 ## Qualification
 
-The user accepted manual testing for the release campaign on 15 November 2026.
-That acceptance is recorded separately from automated qualification of the
-updated dependencies. Local requalification passed with the frozen inputs below:
+The native port passed manual testing. Automated requalification of the
+published dependency stack completed on 15 November 2026 with the frozen inputs below:
 231 JUnit cases (no failures or skips), all 10 required native GameTests, build,
 Javadoc, dependency and artifact audits, resources, Eclipse classpath/sync, and
 ECJ compilation of 60 production and 42 test sources with three isolation
 controls. A forced offline Gradle rerun reproduced all three release jars.
 The final public-pin suite used all four Maven jars downloaded by the strict
 network guard through the hosted-input hook; all 62 offline pin guards passed.
-These results do not establish hosted CI, shared packaged-world qualification
-or publication; the coordinating agent owns those gates.
+The subsequent hosted checks passed, and all three Linux-built archives match
+the local Windows builds. MMD PR #46 merged the port; the guarded publisher then
+released those exact CI artifacts after basePower became public.
+
+[CurseForge file 9626794](https://www.curseforge.com/minecraft/mc-mods/basesteam/files/9626794),
+[the GitHub release](https://github.com/MinecraftModDevelopmentMods/baseSteam/releases/tag/2.2.20.121012)
+and the MMD Maven jars were downloaded independently and matched the approved
+hashes. Raw test worlds, logs and dependency jars remain local, outside Git.
 
 The published basePower input is `basePower-2.4.19.121012.jar`, SHA-256
 `E9ED662E15C3510E2A48CE85448D3D39C6EF2667208F29EB281791200507F77E`.
@@ -109,5 +114,5 @@ Historical-world migration is qualified by the coordinated Power test rig on
 copies of protected fixtures. A source check or clean startup alone does not
 establish world-upgrade safety. Manual client acceptance covers rendering,
 machine interfaces, controls, elevators and musket effects; it is not inferred
-from automated test results. The coordinating agent owns shared Power harnesses,
-the native CI/deployment template, dependency-order merge and publication.
+from automated test results. The shared Power rig records the combined-stack
+migration, operating and endurance checks separately from these isolated tests.
