@@ -100,19 +100,20 @@ jobs:
         with:
           curseforge-id: '1781373'
           curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-          name: baseSteam ${{ inputs.version }} for Minecraft ${{ steps.preflight.outputs.minecraft }} (Forge)
+          name: baseSteam ${{ inputs.version }} for Minecraft ${{ steps.preflight.outputs.minecraft }} (${{ steps.preflight.outputs.loader_display }})
           version: ${{ inputs.version }}
           version-type: release
           changelog-file: ${{ env.RELEASE_WORK }}/release-notes.txt
           files: ${{ env.RELEASE_WORK }}/baseSteam-${{ inputs.version }}.jar
           game-versions: ${{ steps.preflight.outputs.minecraft }}
           game-version-filter: none
-          loaders: forge
+          loaders: ${{ steps.preflight.outputs.loader }}
           environment: client | server
           java: ${{ steps.preflight.outputs.java }}
           curseforge-dependencies: |
             1780140(required)
             240967(required)
+            ${{ steps.preflight.outputs.loader == 'neoforge' && '261744(required)' || '' }}
           fail-mode: fail
 
       - name: Verify the public CurseForge download
