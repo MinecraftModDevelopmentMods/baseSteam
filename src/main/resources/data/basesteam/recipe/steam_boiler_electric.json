@@ -7,44 +7,41 @@
   ],
   "key": {
     "X": {
-      "tag": "forge:wires"
+      "tag": "c:wires"
     },
     "Y": {
       "item": "minecraft:bucket"
     },
     "g": {
-      "tag": "forge:governors"
+      "tag": "c:governors"
     },
     "p": {
-      "tag": "forge:plates/iron"
+      "tag": "c:plates/iron"
     },
     "m": {
-      "tag": "forge:frames/steel"
+      "tag": "c:frames/steel"
     }
   },
   "result": {
     "id": "basesteam:steam_boiler_electric"
   },
   "group": "basesteam:steam_boiler_electric",
-  "forge:condition": {
-    "type": "forge:and",
-    "values": [
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:frames/steel"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:governors"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:plates/iron"
-      },
-      {
-        "type": "basepower:tag_not_empty",
-        "tag": "forge:wires"
-      }
-    ]
-  }
+  "neoforge:conditions": [
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "c:frames/steel"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "c:governors"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "c:plates/iron"
+    },
+    {
+      "type": "basepower:tag_not_empty",
+      "tag": "c:wires"
+    }
+  ]
 }

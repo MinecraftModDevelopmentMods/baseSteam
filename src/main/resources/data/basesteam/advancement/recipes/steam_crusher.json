@@ -18,7 +18,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:storage_blocks/steel"
+            "items": "#c:storage_blocks/steel"
           }
         ]
       }
@@ -28,7 +28,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:governors"
+            "items": "#c:governors"
           }
         ]
       }
@@ -38,7 +38,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:plates/iron"
+            "items": "#c:plates/iron"
           }
         ]
       }
@@ -48,7 +48,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#forge:frames/steel"
+            "items": "#c:frames/steel"
           }
         ]
       }

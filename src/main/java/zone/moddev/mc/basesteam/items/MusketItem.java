@@ -48,8 +48,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 
@@ -63,8 +63,8 @@ public class MusketItem extends net.minecraft.world.item.Item{
 	public static final double MAX_RANGE = 64;
 	private static final int maxUseTime = 7200;
 
-	private static final TagKey<Item> BLACKPOWDER_AMMO_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ammo/blackpowder"));
-	private static final TagKey<Item> STEEL_INGOT_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("forge", "ingots/steel"));
+	private static final TagKey<Item> BLACKPOWDER_AMMO_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "ammo/blackpowder"));
+	private static final TagKey<Item> STEEL_INGOT_TAG = ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", "ingots/steel"));
 
 	public MusketItem(Item.Properties properties){
 		super(properties.durability(250).attributes(ItemAttributeModifiers.builder()

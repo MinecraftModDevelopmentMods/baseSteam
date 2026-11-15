@@ -1,101 +1,66 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)][string]$ForgeInstall,
+    [Parameter(Mandatory)][string]$NeoForgeInstall,
     [Parameter(Mandatory)][ValidatePattern('^[a-zA-Z0-9_-]+$')][string]$RunId,
+    [Parameter(Mandatory)][string]$MmdLibJar,
     [string]$JavaExe = "$env:USERPROFILE/.jdks/temurin-21.0.7+6/bin/java.exe",
     [string]$PowerJar,
     [string]$BaseMetalsJar,
-    [string]$OreSpawnJar,
+    [string[]]$ExtraModJars = @(),
     [switch]$WithoutBaseMetals
 )
 
 $ErrorActionPreference = 'Stop'
 $project = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
-$forge = (Resolve-Path -LiteralPath $ForgeInstall).Path
+$install = (Resolve-Path -LiteralPath $NeoForgeInstall).Path
 $pins = Get-Content -Raw -LiteralPath (Join-Path $project 'gradle.properties') | ConvertFrom-StringData
-if ($pins.minecraft_version -ne '1.21.1' -or $pins.forge_version -ne '52.1.0' -or
-        $pins.poweradvantage_source_ref -cnotmatch '^[0-9a-f]{40}$') {
-    throw 'An exact Forge 52.1.0 candidate and committed Power source pin are required.'
+if ($pins.minecraft_version -ne '1.21.1' -or $pins.neo_version -ne '21.1.265') {
+    throw 'Use the coordinated Minecraft 1.21.1 / NeoForge 21.1.265 candidate.'
 }
+if (!$WithoutBaseMetals -and !$BaseMetalsJar) { throw 'Supply BaseMetalsJar, or select WithoutBaseMetals.' }
+if ($WithoutBaseMetals -and $BaseMetalsJar) { throw 'WithoutBaseMetals cannot also load BaseMetalsJar.' }
 $java = (Resolve-Path -LiteralPath $JavaExe).Path
 $javaVersion = (& $java -version 2>&1 | Out-String).Trim()
-if ($LASTEXITCODE -ne 0 -or $javaVersion -notmatch 'Temurin-21\.0\.7\+6') {
-    throw "Unexpected test JVM: $javaVersion"
-}
-
+if ($LASTEXITCODE -ne 0 -or $javaVersion -notmatch 'Temurin-21\.0\.7\+6') { throw "Unexpected JVM: $javaVersion" }
 $steamName = "baseSteam-$($pins.mod_version).jar"
-$checksums = Join-Path $project 'build/release/SHA256SUMS'
-$checksum = Get-Content -LiteralPath $checksums | Where-Object { $_.EndsWith("  $steamName") }
-if (@($checksum).Count -ne 1 -or $checksum -cnotmatch '^[A-F0-9]{64}  ') {
-    throw 'Run writeReleaseChecksums for the audited Steam candidate first.'
+$checksums = Get-Content -LiteralPath (Join-Path $project 'build/release/SHA256SUMS')
+$checksum = @($checksums | Where-Object { $_.EndsWith("  $steamName") })
+if ($checksum.Count -ne 1 -or $checksum[0] -cnotmatch '^[A-F0-9]{64}  ') { throw 'Run writeReleaseChecksums first.' }
+if (!$PowerJar) { $PowerJar = Join-Path $project "../../PowerAdvantage/build/libs/basePower-$($pins.poweradvantage_version).jar" }
+$inputs = @((Join-Path $project "build/libs/$steamName"), $PowerJar, $MmdLibJar)
+if (!$WithoutBaseMetals) { $inputs += $BaseMetalsJar }
+$inputs += $ExtraModJars
+$mods = [ordered]@{}
+foreach ($inputJar in $inputs) {
+    $resolved = (Resolve-Path -LiteralPath $inputJar).Path
+    $name = [IO.Path]::GetFileName($resolved)
+    if ($mods.Contains($name)) { throw "Duplicate mod filename: $name" }
+    $mods[$name] = @{ Path = $resolved; Sha256 = (Get-FileHash -LiteralPath $resolved).Hash }
 }
-$steamSha = $checksum.Substring(0, 64)
-if (!$PowerJar) {
-    $PowerJar = Join-Path $project "../../PowerAdvantage/build/libs/basePower-$($pins.poweradvantage_version).jar"
-}
-if (!$BaseMetalsJar) {
-    $BaseMetalsJar = Join-Path $project "../../../../BaseMetals/.verification-basemetals1211/Advantage shared hook/build/libs/BaseMetals-$($pins.basemetals_version).jar"
-}
-if (!$OreSpawnJar) {
-    $OreSpawnJar = Join-Path $project "../../../../MinecraftMineralogy/OS1211/OreSpawn/build/libs/OreSpawn-$($pins.orespawn_version).jar"
-}
-$mods = [ordered]@{
-    $steamName = @{ Path = (Join-Path $project "build/libs/$steamName"); Sha256 = $steamSha }
-    "basePower-$($pins.poweradvantage_version).jar" = @{ Path = $PowerJar; Sha256 = $pins.poweradvantage_player_sha256 }
-    "OreSpawn-$($pins.orespawn_version).jar" = @{ Path = $OreSpawnJar; Sha256 = $pins.orespawn_player_sha256 }
-}
-if (!$WithoutBaseMetals) {
-    $mods["BaseMetals-$($pins.basemetals_version).jar"] = @{ Path = $BaseMetalsJar; Sha256 = $pins.basemetals_player_sha256 }
-}
-$forgeVersion = "$($pins.minecraft_version)-$($pins.forge_version)"
-$shim = "forge-$forgeVersion-shim.jar"
-$forgeLib = "libraries/net/minecraftforge/forge/$forgeVersion"
-$forgeJars = [ordered]@{
-    $shim = $pins.forge_server_shim_sha256
-    "$forgeLib/forge-$forgeVersion-server.jar" = $pins.forge_server_sha256
-    "$forgeLib/forge-$forgeVersion-universal.jar" = $pins.forge_universal_sha256
-}
-foreach ($file in $forgeJars.Keys) {
-    if ($forgeJars[$file] -cnotmatch '^[A-F0-9]{64}$') {
-        throw "Supply the coordinated Forge 52.1.0 runtime hash in gradle.properties: $file"
-    }
-    if ((Get-FileHash -LiteralPath (Join-Path $forge $file)).Hash -cne $forgeJars[$file]) {
-        throw "Installed Forge runtime hash mismatch: $file"
-    }
-}
-foreach ($name in $mods.Keys) {
-    $inputJar = $mods[$name]
-    $inputJar.Path = (Resolve-Path -LiteralPath $inputJar.Path).Path
-    if ((Get-FileHash -LiteralPath $inputJar.Path).Hash -cne $inputJar.Sha256) {
-        throw "Pinned player hash mismatch: $name"
-    }
-}
-
+if ($mods[$steamName].Sha256 -cne $checksum[0].Substring(0, 64)) { throw 'Steam candidate checksum mismatch.' }
+$argumentPath = "libraries/net/neoforged/neoforge/$($pins.neo_version)/win_args.txt"
+$argumentsFile = (Resolve-Path -LiteralPath (Join-Path $install $argumentPath)).Path
 $run = Join-Path $project "evidence/packaged-server-$RunId"
-if (Test-Path -LiteralPath $run) { throw "Run directory already exists: $run" }
+if (Test-Path -LiteralPath $run) { throw "Preserve the existing run and choose another RunId: $run" }
 New-Item -ItemType Directory -Path (Join-Path $run 'mods') | Out-Null
 $receipt = [ordered]@{
     status = 'FAILED'
     steamCommit = (& git -C $project rev-parse HEAD)
     steamStatus = @(& git -C $project status --porcelain)
-    powerCommit = $pins.poweradvantage_source_ref
-    forge = $forgeVersion
-    forgeJars = $forgeJars
+    neoforge = $pins.neo_version
     java = $javaVersion
+    argumentsFile = @{ Path = $argumentsFile; Sha256 = (Get-FileHash -LiteralPath $argumentsFile).Hash }
     mods = $mods
-    world = (Join-Path $run 'steam-smoke')
+    withoutBaseMetals = [bool]$WithoutBaseMetals
     finishedUtc = $null
 }
 $process = $null
 try {
-    Copy-Item -LiteralPath (Join-Path $forge 'libraries') -Destination $run -Recurse
-    Copy-Item -LiteralPath (Join-Path $forge $shim) -Destination $run
+    Copy-Item -LiteralPath (Join-Path $install 'libraries') -Destination $run -Recurse
     foreach ($name in $mods.Keys) {
         $destination = Join-Path $run "mods/$name"
         Copy-Item -LiteralPath $mods[$name].Path -Destination $destination
-        if ((Get-FileHash -LiteralPath $destination).Hash -cne $mods[$name].Sha256) {
-            throw "Player jar changed while copying: $name"
-        }
+        if ((Get-FileHash -LiteralPath $destination).Hash -cne $mods[$name].Sha256) { throw "Jar changed during copy: $name" }
     }
     Set-Content -LiteralPath (Join-Path $run 'eula.txt') -Value 'eula=true' -Encoding ascii
     Set-Content -LiteralPath (Join-Path $run 'server.properties') -Encoding ascii -Value @(
@@ -103,35 +68,31 @@ try {
         'level-type=minecraft:flat', 'generate-structures=false', 'view-distance=2', 'simulation-distance=2',
         'generator-settings={"layers":[{"height":1,"block":"minecraft:bedrock"},{"height":2,"block":"minecraft:dirt"},{"height":1,"block":"minecraft:grass_block"}],"biome":"minecraft:plains"}'
     )
-    $start = [System.Diagnostics.ProcessStartInfo]::new($java)
+    $start = [Diagnostics.ProcessStartInfo]::new($java)
     $start.WorkingDirectory = $run
     $start.UseShellExecute = $false
     $start.CreateNoWindow = $true
     $start.RedirectStandardInput = $true
     $start.RedirectStandardOutput = $true
     $start.RedirectStandardError = $true
-    foreach ($argument in @('-Xms512m', '-Xmx3g', '-Djava.net.preferIPv6Addresses=system', '-jar', $shim, '--nogui')) {
-        $start.ArgumentList.Add($argument)
-    }
-    $process = [System.Diagnostics.Process]::Start($start)
+    foreach ($argument in @('-Xms512m', '-Xmx3g', "@$argumentPath", '--nogui')) { $start.ArgumentList.Add($argument) }
+    $process = [Diagnostics.Process]::Start($start)
     $stdout = $process.StandardOutput.ReadToEndAsync()
     $stderr = $process.StandardError.ReadToEndAsync()
     $latest = Join-Path $run 'logs/latest.log'
     $deadline = [DateTime]::UtcNow.AddMinutes(3)
     do {
-        if ($process.HasExited) { throw "Forge exited before ready: $($process.ExitCode)" }
+        if ($process.HasExited) { throw "NeoForge exited before ready: $($process.ExitCode)" }
         $log = if (Test-Path -LiteralPath $latest) { Get-Content -Raw -LiteralPath $latest }
         if ($log -match 'Done \([^)]+\)!') { break }
         Start-Sleep -Seconds 1
     } while ([DateTime]::UtcNow -lt $deadline)
-    if ($log -notmatch 'Done \([^)]+\)!') { throw 'Timed out waiting for a fresh Forge world.' }
+    if ($log -notmatch 'Done \([^)]+\)!') { throw 'Timed out waiting for a fresh NeoForge world.' }
     $process.StandardInput.WriteLine('stop')
-    if (!$process.WaitForExit(60000) -or $process.ExitCode -ne 0) { throw 'Forge did not stop cleanly.' }
+    if (!$process.WaitForExit(60000) -or $process.ExitCode -ne 0) { throw 'NeoForge did not stop cleanly.' }
     $log = Get-Content -Raw -LiteralPath $latest
     if ($log -notmatch "baseSteam $([regex]::Escape($pins.mod_version)) common setup complete" -or
-            $log -match '\[[^\]\r\n]*/(?:ERROR|FATAL)\]|NoClassDefFoundError') {
-        throw 'Missing Steam setup or a relevant loader/data error appeared in the server log.'
-    }
+            $log -match '\[[^\]\r\n]*/(?:ERROR|FATAL)\]|NoClassDefFoundError') { throw 'Missing Steam setup or server errors appeared.' }
     $receipt.status = 'PACKAGED_DEDICATED_SERVER_PASS'
     Write-Output "$($receipt.status): $run"
 } finally {
@@ -142,5 +103,5 @@ try {
         $process.Dispose()
     }
     $receipt.finishedUtc = [DateTime]::UtcNow.ToString('o')
-    $receipt | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $run 'receipt.json')
+    $receipt | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $run 'receipt.json')
 }

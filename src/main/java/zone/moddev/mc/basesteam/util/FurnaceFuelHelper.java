@@ -1,13 +1,12 @@
 package zone.moddev.mc.basesteam.util;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.ForgeHooks;
 
-/** Forge-aware access to the vanilla furnace fuel calculation. */
+/** Uses NeoForge's fuel data maps and item/event burn-time overrides. */
 public final class FurnaceFuelHelper {
     private FurnaceFuelHelper() {}
 
     public static int getBurnTime(ItemStack stack) {
-        return ForgeHooks.getBurnTime(stack, null);
+        return stack.getBurnTime(null);
     }
 }

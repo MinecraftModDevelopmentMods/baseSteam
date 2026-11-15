@@ -1,5 +1,5 @@
 {
-  "type": "basemetals:crushing",
+  "type": "mmdlib:crushing",
   "ingredient": {
     "item": "basesteam:steam_boiler_electric"
   },
@@ -7,17 +7,10 @@
     "id": "basesteam:steam_governor",
     "count": 2
   },
-  "forge:condition": {
-    "type": "forge:and",
-    "values": [
-      {
-        "type": "forge:mod_loaded",
-        "modid": "basemetals"
-      },
-      {
-        "type": "basesteam:recipe_mode",
-        "mode": "APOCALYPTIC"
-      }
-    ]
-  }
+  "neoforge:conditions": [
+    {
+      "type": "basesteam:recipe_mode",
+      "mode": "APOCALYPTIC"
+    }
+  ]
 }

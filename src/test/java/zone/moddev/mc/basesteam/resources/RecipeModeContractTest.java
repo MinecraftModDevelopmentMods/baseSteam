@@ -3,7 +3,7 @@ package zone.moddev.mc.basesteam.resources;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import org.junit.Test;
 import zone.moddev.mc.basepower.PowerAdvantage;
 import zone.moddev.mc.basepower.RecipeMode;
@@ -21,7 +21,7 @@ public class RecipeModeContractTest {
                 for (RecipeMode configured : RecipeMode.values()) {
                     PowerAdvantage.recipeMode = configured;
                     assertEquals(requested.name() + " / " + configured.name(), requested == configured,
-                            condition.test(ICondition.IContext.EMPTY, JsonOps.INSTANCE));
+                            condition.test(ICondition.IContext.EMPTY));
                 }
             }
             JsonObject invalid = new JsonObject();
@@ -39,7 +39,7 @@ public class RecipeModeContractTest {
                 PowerAdvantage.recipeMode = mode;
                 for (boolean enabled : new boolean[] {false, true}) {
                     SteamAdvantage.MUSKET_ENABLE = enabled;
-                    assertEquals(enabled, condition.test(ICondition.IContext.EMPTY, JsonOps.INSTANCE));
+                    assertEquals(enabled, condition.test(ICondition.IContext.EMPTY));
                     assertEquals(mode, PowerAdvantage.recipeMode);
                 }
             }

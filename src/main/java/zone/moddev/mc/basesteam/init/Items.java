@@ -6,15 +6,14 @@ import java.util.Set;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import zone.moddev.mc.basepower.init.ItemGroups;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import zone.moddev.mc.basesteam.items.MusketItem;
 
-@Mod.EventBusSubscriber(modid = SteamAdvantage.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = SteamAdvantage.MODID, bus = EventBusSubscriber.Bus.MOD)
 public final class Items {
     public static final Map<String, Item> allItems = new LinkedHashMap<>();
     public static Item steam_governor;
@@ -42,9 +41,9 @@ public final class Items {
 
     @SubscribeEvent
     public static void register(RegisterEvent event) {
-        if (!ForgeRegistries.Keys.ITEMS.equals(event.getRegistryKey())) return;
+        if (!net.minecraft.core.registries.Registries.ITEM.equals(event.getRegistryKey())) return;
         init();
-        event.register(ForgeRegistries.Keys.ITEMS, registry -> allItems.forEach((id, item) -> {
+        event.register(net.minecraft.core.registries.Registries.ITEM, registry -> allItems.forEach((id, item) -> {
             registry.register(ResourceLocation.fromNamespaceAndPath(SteamAdvantage.MODID, id), item);
             ItemGroups.show(item);
         }));

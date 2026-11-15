@@ -17,14 +17,14 @@ public class RecipeRegistrationThreadTest {
         assertEquals(1L, mod.methods.stream().filter(method -> method.name.equals("<init>"))
                 .flatMap(RecipeRegistrationThreadTest::calls)
                 .filter(call -> call.owner.equals(CONDITIONS) && call.name.equals("register")
-                        && call.desc.equals("(Lnet/minecraftforge/eventbus/api/IEventBus;)V"))
+                        && call.desc.equals("(Lnet/neoforged/bus/api/IEventBus;)V"))
                 .count());
         assertFalse(mod.methods.stream().filter(method -> method.name.equals("commonSetup"))
                 .flatMap(RecipeRegistrationThreadTest::calls).anyMatch(call -> call.owner.equals(CONDITIONS)));
         ClassNode conditions = read(CONDITIONS);
         assertTrue(conditions.methods.stream().filter(method -> method.name.equals("register"))
                 .flatMap(RecipeRegistrationThreadTest::calls)
-                .anyMatch(call -> call.owner.equals("net/minecraftforge/registries/DeferredRegister")
+                .anyMatch(call -> call.owner.equals("net/neoforged/neoforge/registries/DeferredRegister")
                         && call.name.equals("register")));
     }
 

@@ -24,11 +24,11 @@ public class NativeRegistrationLifecycleTest {
         assertTrue(calls("init/Blocks", "registerBlocks").stream().anyMatch(call -> initializes(call, "Blocks")));
         assertTrue(calls("init/Items", "register").stream().anyMatch(call -> initializes(call, "Items")));
         assertFalse(calls("init/Enchantments", "<clinit>").stream()
-                .anyMatch(call -> call.owner.startsWith("net/minecraftforge/registries/")));
+                .anyMatch(call -> call.owner.startsWith("net/neoforged/neoforge/registries/")));
         assertFalse(calls("init/Blocks", "registerBlockItems").stream().anyMatch(call -> initializes(call, "Blocks")));
         assertFalse(calls("init/Items", "init").stream().anyMatch(call -> initializes(call, "Blocks")));
-        assertFalse(calls("init/Recipes", "init").stream()
-                .anyMatch(call -> initializes(call, "Blocks") || initializes(call, "Items")));
+        assertFalse(calls("SteamAdvantage", "commonSetup").stream()
+                .anyMatch(call -> call.owner.equals(INIT + "Recipes")));
     }
 
     @Test public void commonSetupQueuesGuiDefinitions() throws Exception {

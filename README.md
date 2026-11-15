@@ -1,63 +1,83 @@
 # baseSteam
 
-**Minecraft 1.21.1 (Forge), version 2.2.15.121011.**
+**baseSteam 2.2.20.121012 for Minecraft 1.21.1 and NeoForge 21.1.265.**
 
 baseSteam adds boilers, steam-powered machines, pumps, storage, elevators
 and a blackpowder musket to basePower. Items and blocks share the basePower
 creative tab. The mod ID and resource namespace remain `basesteam`.
 
+## Dependencies
+
+Use Java 21, basePower 2.4.19.121012 and MMDLib 2.0.2.121012+Neo.
+Steam's direct Base Metals integration is optional, but the coordinated basePower
+stack requires Base Metals 4.0.1.121012+Neo and OreSpawn 4.1.1.121012.
+Keep each mod in its own jar and use the NeoForge versions throughout.
+This port uses the existing Advantage machine implementation, not MMDLib's
+machine framework. Machine speeds, quantities and saved identities are unchanged.
+
+The crusher and drill use basePower's shared MMDLib crushing lookup. The nine
+Steam recycling recipe IDs and their APOCALYPTIC mode restrictions are retained.
+Shared rock-processing recipes belong to basePower. Removing a recipe through a
+datapack removes its behavior; there is no hard-coded recipe fallback.
+
 ## Build
 
-Target: Forge 52.1.0, official Minecraft 1.21.1 mappings and MCP
-20240808.132146. ForgeGradle 7.0.34 and the checksum-pinned Gradle 9.6.1
-wrapper use Temurin 21.0.7+6. Mavenizer uses Java 25; the launcher helper
-also needs Java 8. Minecraft itself runs on Java 21.
-
-The default dependency paths use the coordinated 1.21.1 checkouts. This
-version needs the released basePower 2.4.14.121011, Base Metals 3.1.2.121011 and
-OreSpawn 4.1.0.121011 as separate native jars, not bundled copies.
-Exact source, public file, jar and test-bootstrap pins are in `gradle.properties`.
-They are checked before compilation and tests. CurseForge, Maven and GitHub
-releases use the same checked player jar.
-
-The Mavenizer fixture comes from OreSpawn's OS1211 checkout. Another layout
-can use `-Pforge52MavenizerJar=<path>`. The `*DeobfJar` and `*PlayerJar`
-properties select separate development and packaged inputs; both must
-satisfy the committed checksums.
-
-With the pinned local dependencies available:
+The checksum-pinned Gradle 9.8.0 wrapper uses ModDevGradle 2.0.148 and official
+Minecraft mappings. Select the published Power jar with
+`-PpowerAdvantageJar=<path>`; the build checks its version, loader, API and hash.
+The default local development layout uses the checksum-identical jar from a
+sibling `../../PowerAdvantage` checkout. Release qualification uses the public
+Maven files downloaded by `.github/verify-native-dependencies.ps1` and bound by
+`.github/pinned-native-inputs.gradle`.
+MMDLib, Base Metals and OreSpawn resolve from MMD Maven. The build verifies the
+SHA-256 pins in `gradle.properties`; Base Metals defaults to the published jar.
 
 ```powershell
 $env:JAVA_HOME = "$env:USERPROFILE/.jdks/temurin-21.0.7+6"
-$jdk8 = "$env:USERPROFILE/.jdks/temurin-8.0.502+7/jdk8u502-b07"
-$jdks = "$env:JAVA_HOME,$env:USERPROFILE/.jdks/jdk-25.0.3+9,$jdk8"
-$toolchains = @("-Porg.gradle.java.installations.paths=$jdks",
-  '-Porg.gradle.java.installations.auto-detect=false',
-  '-Porg.gradle.java.installations.auto-download=false')
-./gradlew.bat @toolchains check build deobfJar verifyReleaseArtifacts writeReleaseChecksums
-./gradlew.bat @toolchains verifyEclipseProductionClasspath
-./gradlew.bat @toolchains -PsteamGameTestRunId=candidate verifyPlayerDependencies runGameTestServer
-./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_1211_SERVER_INSTALL -RunId candidate-with-metals
-./tools/run-packaged-server-smoke.ps1 -ForgeInstall $env:FORGE_1211_SERVER_INSTALL -RunId candidate-without-metals -WithoutBaseMetals
+$env:GRADLE_USER_HOME = 'D:/PowerAdvantage/.gradle-steam1211neo'
+./gradlew.bat check build verifyReleaseArtifacts writeReleaseChecksums
+./gradlew.bat verifyEclipseProductionClasspath verifyEclipseEcj
+./gradlew.bat -PsteamGameTestRunId=release-01 runGameTestServer
 ```
 
-Independent source checks: `node tools/verify-native-port.js` and
-`node tools/generate-recipe-unlocks.js --check`.
-Hosted CI and CodeQL require merged sources and checksum-matching public
-downloads before compiling. Pending local pins cannot pass that gate.
+Only run one build at a time against that cache. Use a fresh GameTest run ID
+for each attempt so earlier logs are preserved. An explicit `-PbaseMetalsJar=<path>`
+override must still match the published filename and checksum. The Power jar
+must match its frozen checksum as well. Removing Base Metals
+from this Power stack must be rejected by the loader, not treated as a supported
+runtime. Independent source checks are:
+
+```powershell
+node tools/verify-native-port.js
+node tools/generate-recipe-unlocks.js --check
+```
+
+Import the checkout as an existing Gradle project in Eclipse/Buildship using
+the wrapper and Java 21. `eclipse` prepares processed resources and separate
+production/test outputs; ModDevGradle generates the native run configurations.
+Use the Gradle `runClient` task to launch the development client.
+`verifyEclipseEcj` also compiles the generated project with Eclipse's compiler.
+For all three mods together, use Power's `runClientAllAdvantage` task and follow
+the sibling Power checkout's `docs/1.21.1-neoforge/TEST-RESULTS.md`.
+
+Local qualification and publication are separate. See the
+[NeoForge release notes](docs/PORT1211NEO.md) for the current qualification status.
+Hosted CI and CodeQL use only Java 21 and verified public native jars. Power's
+merged source, release tag and public Maven hash are recorded; the guards reject
+source/tag drift, unpublished inputs and changed bytes. GameTests and ECJ remain
+local checks. Hosted input readiness is not Steam publication. The Gradle wrapper
+jar and distribution are checksum-pinned.
 
 ## Old Worlds
 
-Back up worlds and upgrade disposable copies. Do not install both Steam
-Advantage and baseSteam or reopen an upgraded world on an older Minecraft
-version. Existing `basesteam-common.toml` settings take precedence.
+Back up worlds and upgrade disposable copies only. Do not install both Steam
+Advantage and baseSteam, mix Forge and NeoForge jars, or reopen an upgraded
+world on an older version. Existing `basesteam-common.toml` settings take
+precedence. Registry IDs, saved machine fields, drill directions, musket wear
+and loading, and all four musket enchantments are retained.
 
-Steam retains machine IDs and saved fields, drill directions, musket wear
-and loading, and all four musket enchantments. The singular datapack folders
-do not change logical recipe or advancement identities.
-
-Use basePower's migration rig for whole-world checks. Before accepting the
-port, check machines, restarts, redstone, all drill directions, elevators,
-GUI captions, whole fluid gauges, track transparency and musket effects
-in-game. Automated, packaged and manual acceptance are separate gates.
-See the [1.21.1 notes](docs/PORT1211-STATUS.md).
+Use basePower's migration rig for whole-world qualification. Automated tests,
+packaged server startup, historical-world migration and manual client acceptance
+are separate gates. In-game checks cover restarts, redstone, all drill
+directions, elevators, GUI captions, whole fluid gauges, track transparency
+and musket effects. See [the NeoForge notes](docs/PORT1211NEO.md).

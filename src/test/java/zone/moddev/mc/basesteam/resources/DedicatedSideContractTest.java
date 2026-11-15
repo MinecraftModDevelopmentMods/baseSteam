@@ -10,7 +10,7 @@ import static org.junit.Assert.*;
 
 public class DedicatedSideContractTest {
     private static final String ROOT = "/zone/moddev/mc/basesteam/";
-    private static final String ONLY_IN = "Lnet/minecraftforge/api/distmarker/OnlyIn;";
+    private static final String ONLY_IN = "Lnet/neoforged/api/distmarker/OnlyIn;";
 
     @Test public void machineMenusStayCommonAndDecorationMethodsStayClientOnly() throws Exception {
         for (String name : List.of("BlastFurnace", "CoalBoiler", "ElectricBoiler", "GeothermalBoiler",

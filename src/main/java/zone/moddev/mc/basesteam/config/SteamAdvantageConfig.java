@@ -1,21 +1,21 @@
 package zone.moddev.mc.basesteam.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 
 /** Common configuration retaining the legacy gameplay defaults. */
 public final class SteamAdvantageConfig {
-    public static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.DoubleValue MUSKET_DAMAGE;
-    public static final ForgeConfigSpec.IntValue MUSKET_RELOAD;
-    public static final ForgeConfigSpec.BooleanValue MUSKET_ALLOWED;
-    public static final ForgeConfigSpec.ConfigValue<String> FLUID_FUEL_VALUES;
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.DoubleValue MUSKET_DAMAGE;
+    public static final ModConfigSpec.IntValue MUSKET_RELOAD;
+    public static final ModConfigSpec.BooleanValue MUSKET_ALLOWED;
+    public static final ModConfigSpec.ConfigValue<String> FLUID_FUEL_VALUES;
 
     private static boolean loaded;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
         builder.push("options");
         MUSKET_DAMAGE = builder.defineInRange("musketDamage", 20.0D, 0.0D, 100.0D);
         MUSKET_RELOAD = builder.defineInRange("musketReloadTime", 100, 20, 300);

@@ -8,31 +8,31 @@ import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLPaths;
 import cyano.poweradvantage.api.migration.LegacyConfigMigration;
 import cyano.poweradvantage.api.migration.LegacyConfigMigration.Mapping;
 import cyano.poweradvantage.api.migration.LegacyConfigMigration.ValueType;
 import zone.moddev.mc.basesteam.config.SteamAdvantageConfig;
 import zone.moddev.mc.basesteam.init.GUI;
-import zone.moddev.mc.basesteam.init.Recipes;
 import zone.moddev.mc.basesteam.init.TreasureChests;
 import zone.moddev.mc.basesteam.init.Villages;
 import zone.moddev.mc.basesteam.migration.SteamLegacyMigrations;
 import zone.moddev.mc.basesteam.migration.SteamConfigMigration;
 import zone.moddev.mc.basesteam.recipe.RecipeConditions;
 
-/** Forge 1.21.1 entry point for baseSteam. */
+/** NeoForge 1.21.1 entry point for baseSteam. */
 @Mod(SteamAdvantage.MODID)
 public final class SteamAdvantage {
     public static final String MODID = "basesteam";
     public static final String NAME = "baseSteam";
-    public static final String VERSION = "2.2.15.121011";
+    public static final String VERSION = "2.2.20.121012";
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
     public static float MUSKET_DAMAGE = 20.0F;
@@ -40,18 +40,18 @@ public final class SteamAdvantage {
     public static boolean MUSKET_ENABLE = true;
     public static final Map<String, Float> fluidBurnValues = new HashMap<>();
 
-    public SteamAdvantage(FMLJavaModLoadingContext context) {
+    public SteamAdvantage(IEventBus modBus, ModContainer context) {
         SteamLegacyMigrations.register();
 
         migrateLegacyConfiguration();
         context.registerConfig(ModConfig.Type.COMMON, SteamAdvantageConfig.SPEC);
-        var modBus = context.getModEventBus();
         modBus.addListener(SteamAdvantageConfig::onConfigLoading);
         modBus.addListener(this::commonSetup);
         RecipeConditions.register(modBus);
 
-        DistExecutor.runWhenOn(Dist.CLIENT,
-                () -> () -> zone.moddev.mc.basesteam.graphics.ClientRegistration.register(modBus));
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            zone.moddev.mc.basesteam.graphics.ClientRegistration.register(modBus);
+        }
     }
 
     private static void migrateLegacyConfiguration() {
@@ -78,7 +78,6 @@ public final class SteamAdvantage {
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(GUI::init);
         SteamAdvantageConfig.apply();
-        Recipes.init();
         TreasureChests.init(FMLPaths.CONFIGDIR.get());
         Villages.init();
         LOGGER.info("baseSteam {} common setup complete", VERSION);

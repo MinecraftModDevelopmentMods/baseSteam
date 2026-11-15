@@ -2,21 +2,20 @@ package zone.moddev.mc.basesteam.recipe;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import zone.moddev.mc.basepower.PowerAdvantage;
 import zone.moddev.mc.basepower.RecipeMode;
 import zone.moddev.mc.basesteam.SteamAdvantage;
 import java.util.Locale;
 
-/** Registers the Forge data-pack conditions used by Steam recipes. */
+/** Registers the NeoForge data-pack conditions used by Steam recipes. */
 public final class RecipeConditions {
     private static final DeferredRegister<MapCodec<? extends ICondition>> SERIALIZERS =
-            DeferredRegister.create(ForgeRegistries.Keys.CONDITION_SERIALIZERS, SteamAdvantage.MODID);
+            DeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, SteamAdvantage.MODID);
 
     static {
         SERIALIZERS.register("recipe_mode", () -> ModeCondition.CODEC);
@@ -43,7 +42,7 @@ public final class RecipeConditions {
         }
 
         @Override public MapCodec<ModeCondition> codec() { return CODEC; }
-        @Override public boolean test(IContext context, DynamicOps<?> ops) {
+        @Override public boolean test(IContext context) {
             return PowerAdvantage.recipeMode == mode;
         }
     }
@@ -52,7 +51,7 @@ public final class RecipeConditions {
         private static final MapCodec<MusketCondition> CODEC = MapCodec.unit(new MusketCondition());
 
         @Override public MapCodec<MusketCondition> codec() { return CODEC; }
-        @Override public boolean test(IContext context, DynamicOps<?> ops) {
+        @Override public boolean test(IContext context) {
             return SteamAdvantage.MUSKET_ENABLE;
         }
     }

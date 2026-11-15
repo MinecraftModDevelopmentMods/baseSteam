@@ -1,3 +1,13 @@
+baseSteam 2.2.20.121012 (Minecraft 1.21.1 / NeoForge)
+
+- Port Steam machines, registration, configuration and rendering to NeoForge 21.1.265 and Java 21.
+- Use released basePower 2.4.19.121012, MMDLib 2.0.2.121012+Neo and Base Metals 4.0.1.121012+Neo.
+- Use MMDLib's shared crushing recipes, including all nine Steam recycling recipes.
+- Keep machine speeds, yields, registry IDs, saved fields and musket behavior unchanged.
+- Use NeoForge recipe conditions and common c material tags. Datapack removal also removes crushing behavior.
+- Fix musket cartridge and steel repair lookups to use the common tags; cover native reload interactions.
+- Build with ModDevGradle 2.0.148 and checksum-pinned Gradle 9.8.0.
+
 baseSteam 2.2.15.121011 (Minecraft 1.21.1 / Forge)
 
 - Target Forge 52.1.0 and Java 21 with basePower 2.4.14.121011.
@@ -151,3 +161,4 @@ Steam Advantage 2.2.1.112021
 - Preserve drill facing, energy, inventory, and movement state across save reloads and track movement.
 - Restore steam pump fluid and geothermal boiler temperature from their saved NBT values.
 - Preserve Steam Advantage registry, tile entity, asset, configuration, and saved-world identities.
+- Use the common blackpowder ammunition tag so muskets can still reload on NeoForge.
